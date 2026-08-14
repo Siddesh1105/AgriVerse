@@ -20,41 +20,33 @@ import javafx.stage.Stage;
 
 public class SelectionScreen {
 
-private Scene SelectionScreenScene;
+        private Scene SelectionScreenScene;
 
-Scene getSelectionScreenScene(Consumer<String> onRoleSelected) {
+        Scene getSelectionScreenScene(Consumer<String> onRoleSelected) {
 
-Text title = new Text("Select Your Role");
-title.setStyle("-fx-font-size: 32px;" +"-fx-font-weight: bold;");
+                Text title = new Text("Select Your Role");
+                title.setStyle("-fx-font-size: 32px;" + "-fx-font-weight: bold;");
 
-Text subtitle = new Text("Choose the role that best describes you");
-subtitle.setStyle("-fx-font-size: 15px;" + "-fx-fill: #777777;");
+                Text subtitle = new Text("Choose the role that best describes you");
+                subtitle.setStyle("-fx-font-size: 15px;" + "-fx-fill: #777777;");
 
-VBox headerBox = new VBox(8,title,subtitle);
-headerBox.setAlignment(Pos.CENTER);
+                VBox headerBox = new VBox(8, title, subtitle);
+                headerBox.setAlignment(Pos.CENTER);
 
-ToggleGroup roleGroup = new ToggleGroup();
+                ToggleGroup roleGroup = new ToggleGroup();
 
-VBox farmerCard = createRoleCard("assets/icons/farmer.png", "Farmer","Sell products, rent equipment and\nmanage your farm business",roleGroup);
+                VBox farmerCard = createRoleCard("assets/icons/farmer.png", "Farmer",
+                                "Sell products, rent equipment and\nmanage your farm business", roleGroup);
 
-VBox buyerCard = createRoleCard( "assets/icons/buyer.png","Buyer",
-                                "Buy products, connect with\nfarmers and get best deals",
-                                roleGroup);
+                VBox buyerCard = createRoleCard("assets/icons/buyer.png", "Buyer",
+                                "Buy products, connect with\nfarmers and get best deals", roleGroup);
 
-                VBox adminCard = createRoleCard(
-                                "assets/icons/admin.png",
-                                "Admin",
-                                "Manage users, products\nand platform activities",
-                                roleGroup);
+                VBox adminCard = createRoleCard("assets/icons/admin.png", "Admin",
+                                "Manage users, products\nand platform activities", roleGroup);
 
-                HBox cardRow = new HBox(
-                                20,
-                                farmerCard,
-                                buyerCard,
-                                adminCard);
+                HBox cardRow = new HBox(20, farmerCard, buyerCard, adminCard);
 
-                cardRow.setAlignment(
-                                Pos.CENTER);
+                cardRow.setAlignment(Pos.CENTER);
 
                 HBox.setHgrow(
                                 farmerCard,
