@@ -2,10 +2,10 @@ package com.mainproject.view;
 
 import com.mainproject.controller.AuthController;
 import com.mainproject.dao.UserDAO;
+import com.mainproject.model.User;
 
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -21,62 +21,81 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class LoginScreen extends Application {
-
-    Rectangle2D screenSize =
-            Screen.getPrimary().getVisualBounds();
 
     public static Stage Homestage;
 
     private Scene HomePageScene;
 
-    // =====================================================
-    // FIREBASE AUTHENTICATION
-    // =====================================================
-
-    private AuthController authController =
-            new AuthController();
+    private AuthController authController;
+    private UserDAO userDAO;
 
     // =====================================================
-    // FIRESTORE
+    // START
     // =====================================================
-
-    private UserDAO userDAO =
-            new UserDAO();
 
     @Override
     public void start(Stage myStage) {
 
-        Homestage = myStage;
+        Homestage =
+                myStage;
 
-        // =====================================================
-        // LEFT SIDE IMAGE
-        // =====================================================
+        authController =
+                new AuthController();
 
-        ImageView loginImage = new ImageView(
-                "file:src/main/resources/assets/icons/loginimage.png"
+        userDAO =
+                new UserDAO();
+
+        // =================================================
+        // LEFT IMAGE
+        // =================================================
+
+        ImageView loginImage =
+                new ImageView(
+                        "file:src/main/resources/assets/icons/loginimage.png"
+                );
+
+        loginImage.setFitWidth(
+                800
         );
 
-        loginImage.setFitWidth(800);
-        loginImage.setFitHeight(1100);
-        loginImage.setPreserveRatio(true);
+        loginImage.setFitHeight(
+                1100
+        );
 
-        VBox vb1 = new VBox(40);
+        loginImage.setPreserveRatio(
+                true
+        );
 
-        vb1.setAlignment(Pos.CENTER);
-        vb1.setPrefSize(700, 1000);
+        VBox leftPanel =
+                new VBox(
+                        40
+                );
 
-        vb1.getChildren().addAll(loginImage);
+        leftPanel.setAlignment(
+                Pos.CENTER
+        );
 
-        // =====================================================
-        // WELCOME TEXT
-        // =====================================================
+        leftPanel.setPrefSize(
+                700,
+                1000
+        );
+
+        leftPanel.getChildren()
+                .add(
+                        loginImage
+                );
+
+        // =================================================
+        // TITLE
+        // =================================================
 
         Text text1 =
-                new Text("Welcome Back!");
+                new Text(
+                        "Welcome Back!"
+                );
 
         text1.setStyle(
                 "-fx-font-size: 40px;" +
@@ -84,14 +103,18 @@ public class LoginScreen extends Application {
         );
 
         HBox hb1 =
-                new HBox(text1);
+                new HBox(
+                        text1
+                );
 
-        // =====================================================
+        // =================================================
         // SUBTITLE
-        // =====================================================
+        // =================================================
 
         Text text2 =
-                new Text("Login to continue");
+                new Text(
+                        "Login to continue"
+                );
 
         text2.setStyle(
                 "-fx-fill: #777777;" +
@@ -100,14 +123,18 @@ public class LoginScreen extends Application {
         );
 
         HBox hb2 =
-                new HBox(text2);
+                new HBox(
+                        text2
+                );
 
-        // =====================================================
+        // =================================================
         // EMAIL
-        // =====================================================
+        // =================================================
 
         Label emailLabel =
-                new Label("Email");
+                new Label(
+                        "Email"
+                );
 
         emailLabel.setStyle(
                 "-fx-font-weight: bold;"
@@ -120,14 +147,18 @@ public class LoginScreen extends Application {
                 "Enter your email"
         );
 
-        emailField.setPrefHeight(40);
+        emailField.setPrefHeight(
+                40
+        );
 
-        // =====================================================
+        // =================================================
         // PASSWORD
-        // =====================================================
+        // =================================================
 
         Label passLabel =
-                new Label("Password");
+                new Label(
+                        "Password"
+                );
 
         passLabel.setStyle(
                 "-fx-font-weight: bold;"
@@ -140,14 +171,18 @@ public class LoginScreen extends Application {
                 "Enter your password"
         );
 
-        passField.setPrefHeight(40);
+        passField.setPrefHeight(
+                40
+        );
 
-        // =====================================================
+        // =================================================
         // FORGOT PASSWORD
-        // =====================================================
+        // =================================================
 
         Hyperlink forgotPassLink =
-                new Hyperlink("Forgot Password?");
+                new Hyperlink(
+                        "Forgot Password?"
+                );
 
         forgotPassLink.setStyle(
                 "-fx-font-size: 13px;" +
@@ -156,65 +191,70 @@ public class LoginScreen extends Application {
         );
 
         HBox hbForgot =
-                new HBox(forgotPassLink);
+                new HBox(
+                        forgotPassLink
+                );
 
         hbForgot.setAlignment(
                 Pos.CENTER_RIGHT
         );
 
-        forgotPassLink.setOnAction(event -> {
+        forgotPassLink.setOnAction(
+                event -> {
 
-            String email = emailField.getText().trim();
+                    String email =
+                            emailField
+                                    .getText()
+                                    .trim();
 
-            if (email.isEmpty()) {
+                    if (email.isEmpty()) {
 
-                showAlert(
-                        AlertType.WARNING,
-                        "Email Required",
-                        "Please enter your email address first."
-                );
+                        showAlert(
+                                AlertType.WARNING,
+                                "Email Required",
+                                "Please enter your email first."
+                        );
 
-                emailField.requestFocus();
+                        return;
+                    }
 
-                return;
-            }
+                    boolean sent =
+                            authController
+                                    .resetPassword(
+                                            email
+                                    );
 
-            System.out.println(
-                    "Sending password reset email to: "
-                            + email
-            );
+                    if (sent) {
 
-            boolean resetSuccess =
-                    authController.resetPassword(email);
+                        showAlert(
+                                AlertType.INFORMATION,
+                                "Password Reset",
+                                "Password reset email has been sent."
+                        );
 
-            if (resetSuccess) {
+                    } else {
 
-                showAlert(
-                        AlertType.INFORMATION,
-                        "Password Reset",
-                        "A password reset link has been sent to "
-                                + email
-                                + ". Please check your email."
-                );
+                        showAlert(
+                                AlertType.ERROR,
+                                "Reset Failed",
+                                "Unable to send password reset email."
+                        );
+                    }
+                }
+        );
 
-            } else {
-
-                showAlert(
-                        AlertType.ERROR,
-                        "Password Reset Failed",
-                        "Unable to send the password reset email."
-                );
-            }
-        });
-
-        // =====================================================
+        // =================================================
         // LOGIN BUTTON
-        // =====================================================
+        // =================================================
 
         Button loginBtn =
-                new Button("Login");
+                new Button(
+                        "Login"
+                );
 
-        loginBtn.setPrefHeight(45);
+        loginBtn.setPrefHeight(
+                45
+        );
 
         loginBtn.setMaxWidth(
                 Double.MAX_VALUE
@@ -228,189 +268,201 @@ public class LoginScreen extends Application {
                 "-fx-background-radius: 8px;"
         );
 
-        // =====================================================
-        // LOGIN BUTTON ACTION
-        // =====================================================
+        // =================================================
+        // LOGIN ACTION
+        // =================================================
 
-        loginBtn.setOnAction(event -> {
+        loginBtn.setOnAction(
+                event -> {
 
-            String email = emailField.getText().trim();
+                    String email =
+                            emailField
+                                    .getText()
+                                    .trim();
 
-            String password = passField.getText();
+                    String password =
+                            passField.getText();
 
-            // -------------------------------------------------
-            // CHECK EMPTY FIELDS
-            // -------------------------------------------------
+                    // =====================================
+                    // VALIDATION
+                    // =====================================
 
-            if (email.isEmpty()
-                    || password.isEmpty()) {
+                    if (
+                            email.isEmpty()
+                            ||
+                            password.isEmpty()
+                    ) {
 
-                showAlert(
-                        AlertType.WARNING,
-                        "Missing Information",
-                        "Please enter both your email and password."
-                );
+                        showAlert(
+                                AlertType.WARNING,
+                                "Missing Information",
+                                "Please enter both email and password."
+                        );
 
-                return;
-            }
-
-            System.out.println(
-                    "Login attempt for: "
-                            + email
-            );
-
-            // =================================================
-            // FIREBASE LOGIN
-            // =================================================
-
-            String uid =
-                    authController.signIn(email, password);
-
-            // =================================================
-            // LOGIN SUCCESS
-            // =================================================
-
-            if (uid != null) {
-
-                System.out.println(
-                        "Firebase Login Successful!"
-                );
-
-                System.out.println(
-                        "Firebase UID: "
-                                + uid
-                );
-
-                // =================================================
-                // GET ROLE FROM FIRESTORE
-                // =================================================
-
-                String role =
-                        userDAO.getRole(email);
-
-                System.out.println(
-                        "User Role: " + role
-                );
-
-                if (role == null) {
-
-                    showAlert(
-                            AlertType.ERROR,
-                            "Role Error",
-                            "User role was not found in Firestore."
-                    );
-
-                    return;
-                }
-
-                // =================================================
-                // FARMER LOGIN
-                // =================================================
-
-                if (role.equals("Farmer")) {
+                        return;
+                    }
 
                     System.out.println(
-                            "Farmer Login"
+                            "Login attempt for: "
+                                    + email
                     );
 
-                    FarmerDashboard farmerDashboard =
-                            new FarmerDashboard();
+                    // =====================================
+                    // FIREBASE LOGIN
+                    // =====================================
 
-                    Runnable callbackAction =
-                            new Runnable() {
-
-                                @Override
-                                public void run() {
-
-                                    System.out.println(
-                                            "Opening Farmer Dashboard..."
+                    boolean loginSuccess =
+                            authController
+                                    .signIn(
+                                            email,
+                                            password
                                     );
 
-                                    Homestage.setScene(
-                                            farmerDashboard
-                                                    .getFarmerDashboardScene()
-                                    );
-                                }
-                            };
+                    if (!loginSuccess) {
 
-                    callbackAction.run();
-                }
+                        System.out.println(
+                                "Firebase Login Failed!"
+                        );
 
-                // =================================================
-                // BUYER LOGIN
-                // =================================================
+                        showAlert(
+                                AlertType.ERROR,
+                                "Login Failed",
+                                "Invalid email or password."
+                        );
 
-                else if (role.equals("Buyer")) {
+                        return;
+                    }
 
                     System.out.println(
-                            "Buyer Login"
+                            "Firebase Login Successful!"
                     );
 
-                    BuyerDashboard buyerDashboard =
-                            new BuyerDashboard();
+                    // =====================================
+                    // GET USER FROM FIRESTORE
+                    // =====================================
 
-                    Runnable callbackAction =
-                            new Runnable() {
+                    User user =
+                            userDAO.getUserByEmail(
+                                    email
+                            );
 
-                                @Override
-                                public void run() {
+                    if (user == null) {
 
-                                    System.out.println(
-                                            "Opening Buyer Dashboard..."
-                                    );
+                        showAlert(
+                                AlertType.ERROR,
+                                "User Error",
+                                "User information was not found in Firestore."
+                        );
 
-                                    Homestage.setScene(
-                                            buyerDashboard
-                                                    .getBuyerDashboardScene()
-                                    );
-                                }
-                            };
+                        return;
+                    }
 
-                    callbackAction.run();
-                }
+                    // =====================================
+                    // GET ROLE
+                    // =====================================
 
-                // =================================================
-                // INVALID ROLE
-                // =================================================
+                    String role =
+                            user.getRole();
 
-                else {
-
-                    showAlert(
-                            AlertType.ERROR,
-                            "Invalid Role",
-                            "The user's role is not recognized."
+                    System.out.println(
+                            "User Name: "
+                                    + user.getFullName()
                     );
 
                     System.out.println(
-                            "Invalid role: "
+                            "User Email: "
+                                    + user.getEmail()
+                    );
+
+                    System.out.println(
+                            "User Role: "
                                     + role
                     );
+
+                    // =====================================
+                    // ROLE CHECK
+                    // =====================================
+
+                    if (role == null
+                            || role.trim().isEmpty()) {
+
+                        showAlert(
+                                AlertType.ERROR,
+                                "Role Error",
+                                "User role was not found in Firestore."
+                        );
+
+                        return;
+                    }
+
+                    // =====================================
+                    // FARMER
+                    // =====================================
+
+                    if (
+                            role.equalsIgnoreCase(
+                                    "Farmer"
+                            )
+                    ) {
+
+                        System.out.println(
+                                "Opening Farmer Dashboard..."
+                        );
+
+                        FarmerDashboard dashboard =
+                                new FarmerDashboard(
+                                        user
+                                );
+
+                        switchScene(
+                                dashboard.getScene()
+                        );
+
+                    }
+
+                    // =====================================
+                    // BUYER
+                    // =====================================
+
+                    else if (
+                            role.equalsIgnoreCase(
+                                    "Buyer"
+                            )
+                    ) {
+
+                        System.out.println(
+                                "Opening Buyer Dashboard..."
+                        );
+
+                        BuyerDashboard dashboard =
+                                new BuyerDashboard(
+                                        user
+                                );
+
+                        switchScene(
+                                dashboard.getScene()
+                        );
+                    }
+
+                    // =====================================
+                    // UNKNOWN ROLE
+                    // =====================================
+
+                    else {
+
+                        showAlert(
+                                AlertType.ERROR,
+                                "Invalid Role",
+                                "Unknown user role: "
+                                        + role
+                        );
+                    }
                 }
+        );
 
-            }
-
-            // =================================================
-            // LOGIN FAILED
-            // =================================================
-
-            else {
-
-                System.out.println(
-                        "Firebase Login Failed!"
-                );
-
-                showAlert(
-                        AlertType.ERROR,
-                        "Login Failed",
-                        "Invalid email or password."
-                );
-            }
-
-        });
-
-        // =====================================================
-        // REGISTER TEXT
-        // =====================================================
+        // =================================================
+        // REGISTER LINK
+        // =================================================
 
         Text noAccountText =
                 new Text(
@@ -433,51 +485,36 @@ public class LoginScreen extends Application {
                 "-fx-font-weight: bold;"
         );
 
-        // =====================================================
-        // REGISTER LINK ACTION
-        // =====================================================
+        registerLink.setOnAction(
+                event -> {
 
-        registerLink.setOnAction(event -> {
+                    RegisterScreen registerScreen =
+                            new RegisterScreen();
 
-            RegisterScreen registerScreen =
-                    new RegisterScreen();
+                    Runnable callbackAction =
+                            new Runnable() {
 
-            // =================================================
-            // RUNNABLE CALLBACK
-            // =================================================
+                                @Override
+                                public void run() {
 
-            Runnable callBackAction =
-                    new Runnable() {
+                                    Homestage.setScene(
+                                            HomePageScene
+                                    );
 
-                        @Override
-                        public void run() {
+                                    System.out.println(
+                                            "Returning to Login Screen..."
+                                    );
+                                }
+                            };
 
-                            System.out.println(
-                                    "Returning to Login Screen..."
-                            );
-
-                            Homestage.setScene(
-                                    HomePageScene
-                            );
-                        }
-                    };
-
-            // =================================================
-            // OPEN REGISTER SCREEN
-            // =================================================
-
-            Homestage.setScene(
-                    registerScreen
-                            .getRegisterScreenScene(
-                                    callBackAction
-                            )
-            );
-
-        });
-
-        // =====================================================
-        // REGISTER HBOX
-        // =====================================================
+                    Homestage.setScene(
+                            registerScreen
+                                    .getRegisterScreenScene(
+                                            callbackAction
+                                    )
+                    );
+                }
+        );
 
         HBox hbRegister =
                 new HBox(
@@ -489,12 +526,14 @@ public class LoginScreen extends Application {
                 Pos.CENTER
         );
 
-        // =====================================================
-        // RIGHT LOGIN PANEL
-        // =====================================================
+        // =================================================
+        // FORM CARD
+        // =================================================
 
         VBox vb2 =
-                new VBox(20);
+                new VBox(
+                        20
+                );
 
         vb2.setStyle(
                 "-fx-background-color: white;" +
@@ -518,33 +557,40 @@ public class LoginScreen extends Application {
         vb2.getChildren().addAll(
                 hb1,
                 hb2,
+
                 emailLabel,
                 emailField,
+
                 passLabel,
                 passField,
+
                 hbForgot,
+
                 loginBtn,
+
                 hbRegister
         );
 
-        // =====================================================
+        // =================================================
         // RIGHT PANEL
-        // =====================================================
+        // =================================================
 
         StackPane rightPanel =
-                new StackPane(vb2);
+                new StackPane(
+                        vb2
+                );
 
         rightPanel.setStyle(
                 "-fx-background-color: #f1efef;"
         );
 
-        // =====================================================
-        // MAIN HBOX
-        // =====================================================
+        // =================================================
+        // MAIN
+        // =================================================
 
-        HBox HBMain =
+        HBox main =
                 new HBox(
-                        vb1,
+                        leftPanel,
                         rightPanel
                 );
 
@@ -553,20 +599,19 @@ public class LoginScreen extends Application {
                 Priority.ALWAYS
         );
 
-        rightPanel.prefWidthProperty().bind(
-                HBMain.widthProperty()
-                        .multiply(0.8)
-        );
+        rightPanel.prefWidthProperty()
+                .bind(
+                        main.widthProperty()
+                                .multiply(0.8)
+                );
 
-        // =====================================================
+        // =================================================
         // SCENE
-        // =====================================================
+        // =================================================
 
         HomePageScene =
                 new Scene(
-                        HBMain,
-                        screenSize.getWidth(),
-                        screenSize.getHeight()
+                        main
                 );
 
         HomePageScene.setFill(
@@ -577,62 +622,90 @@ public class LoginScreen extends Application {
                 HomePageScene
         );
 
-        switchScene(
-                HomePageScene
+        Homestage.setFullScreen(
+                true
+        );
+
+        Homestage.setFullScreenExitHint(
+                ""
         );
 
         Homestage.show();
     }
 
-    // =========================================================
+    // =====================================================
     // SWITCH SCENE
-    // =========================================================
+    // =====================================================
 
-    static void switchScene(Scene scene) {
+    public static void switchScene(
+            Scene scene) {
 
         if (Homestage != null) {
 
-            Homestage.setScene(scene);
+            Homestage.setScene(
+                    scene
+            );
         }
     }
 
-    // =========================================================
+    // =====================================================
     // LOGOUT
-    // =========================================================
+    // =====================================================
 
-    static void logoutToLogin() {
+    public static void logoutToLogin() {
 
         if (Homestage != null) {
 
             new LoginScreen()
-                    .start(Homestage);
+                    .start(
+                            Homestage
+                    );
         }
     }
 
-    // =========================================================
-    // ALERT
-    // =========================================================
+    // =====================================================
+    // BACK TO LOGIN
+    // =====================================================
 
-    static void showAlert(
+    public void backtoLoginScreen() {
+
+        Homestage.setScene(
+                HomePageScene
+        );
+    }
+
+    // =====================================================
+    // ALERT
+    // =====================================================
+
+    public static void showAlert(
             AlertType type,
             String title,
             String message) {
 
         Alert alert =
-                new Alert(type);
+                new Alert(
+                        type
+                );
 
-        alert.setTitle(title);
+        alert.setTitle(
+                title
+        );
 
-        alert.setHeaderText(null);
+        alert.setHeaderText(
+                null
+        );
 
-        alert.setContentText(message);
+        alert.setContentText(
+                message
+        );
 
         alert.showAndWait();
     }
 
-    // =========================================================
+    // =====================================================
     // GET LOGIN SCENE
-    // =========================================================
+    // =====================================================
 
     public Scene getHomePageScene() {
 
