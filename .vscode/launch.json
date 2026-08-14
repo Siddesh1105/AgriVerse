@@ -9,6 +9,13 @@
             "name": "Main",
             "request": "launch",
             "mainClass": "com.mainproject.Main",
+            "projectName": "AgriLink"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "com.mainproject.Main",
             "projectName": "agrilink",
             "vmArgs": "--module-path /Users/durgesh/java26/javafx-sdk-21.0.12/lib --add-modules javafx.controls,javafx.fxml"
         }
