@@ -27,37 +27,17 @@ public class RegisterScreen {
 
         private Scene RegisterScreenScene;
 
-        // =========================================================
-        // FIREBASE AUTHENTICATION
-        // =========================================================
-
         private AuthController authController = new AuthController();
-
-        // =========================================================
-        // FIRESTORE
-        // =========================================================
 
         private UserDAO userDAO = new UserDAO();
 
-        // =========================================================
-        // REGISTER SCREEN
-        // =========================================================
-
         public Scene getRegisterScreenScene(Runnable callbackaction) {
-
-                // =====================================================
-                // LEFT IMAGE
-                // =====================================================
 
                 ImageView farmerImage = new ImageView(
                                 "file:src/main/resources/assets/icons/registerscreen.png");
 
-                // ORIGINAL RESOLUTION
                 farmerImage.setFitWidth(800);
                 farmerImage.setFitHeight(1000);
-
-                // Keep original setting
-                // farmerImage.setPreserveRatio(true);
 
                 VBox leftPanel = new VBox(farmerImage);
 
@@ -66,10 +46,6 @@ public class RegisterScreen {
 
                 leftPanel.setAlignment(
                                 Pos.CENTER);
-
-                // =====================================================
-                // HEADER
-                // =====================================================
 
                 Text title = new Text("Create Your Account");
 
@@ -88,10 +64,6 @@ public class RegisterScreen {
                                 title,
                                 subtitle);
 
-                // =====================================================
-                // FULL NAME
-                // =====================================================
-
                 Label fullNameLabel = new Label("Full Name");
 
                 fullNameLabel.setStyle(
@@ -103,10 +75,6 @@ public class RegisterScreen {
                                 "Enter your full name");
 
                 fullNameField.setPrefHeight(42);
-
-                // =====================================================
-                // EMAIL
-                // =====================================================
 
                 Label emailLabel = new Label("Email");
 
@@ -120,10 +88,6 @@ public class RegisterScreen {
 
                 emailField.setPrefHeight(42);
 
-                // =====================================================
-                // PASSWORD
-                // =====================================================
-
                 Label passLabel = new Label("Password");
 
                 passLabel.setStyle(
@@ -136,10 +100,6 @@ public class RegisterScreen {
 
                 passField.setPrefHeight(42);
 
-                // =====================================================
-                // CONFIRM PASSWORD
-                // =====================================================
-
                 Label confirmPassLabel = new Label("Confirm Password");
 
                 confirmPassLabel.setStyle(
@@ -151,10 +111,6 @@ public class RegisterScreen {
                                 "Confirm your password");
 
                 confirmPassField.setPrefHeight(42);
-
-                // =====================================================
-                // ROLE
-                // =====================================================
 
                 Label roleLabel = new Label("Select Role");
 
@@ -175,7 +131,6 @@ public class RegisterScreen {
                                 "Admin",
                                 roleGroup);
 
-                // Farmer selected by default
                 farmerBtn.setSelected(true);
 
                 HBox roleBox = new HBox(
@@ -205,10 +160,6 @@ public class RegisterScreen {
                 adminBtn.setMaxWidth(
                                 Double.MAX_VALUE);
 
-                // =====================================================
-                // REGISTER BUTTON
-                // =====================================================
-
                 Button registerBtn = new Button("Register");
 
                 registerBtn.setPrefHeight(48);
@@ -223,10 +174,6 @@ public class RegisterScreen {
                                                 "-fx-font-weight: bold;" +
                                                 "-fx-background-radius: 8px;");
 
-                // =====================================================
-                // REGISTER BUTTON ACTION
-                // =====================================================
-
                 registerBtn.setOnAction(event -> {
 
                         String fullName = fullNameField.getText().trim();
@@ -236,10 +183,6 @@ public class RegisterScreen {
                         String password = passField.getText();
 
                         String confirmPassword = confirmPassField.getText();
-
-                        // =================================================
-                        // CHECK EMPTY FIELDS
-                        // =================================================
 
                         if (fullName.isEmpty()
                                         || email.isEmpty()
@@ -254,10 +197,6 @@ public class RegisterScreen {
                                 return;
                         }
 
-                        // =================================================
-                        // CHECK PASSWORD
-                        // =================================================
-
                         if (!password.equals(confirmPassword)) {
 
                                 LoginScreen.showAlert(
@@ -267,10 +206,6 @@ public class RegisterScreen {
 
                                 return;
                         }
-
-                        // =================================================
-                        // GET ROLE
-                        // =================================================
 
                         Toggle selected = roleGroup.getSelectedToggle();
 
@@ -286,17 +221,9 @@ public class RegisterScreen {
                                                         + ") as "
                                                         + role);
 
-                        // =================================================
-                        // FIREBASE AUTHENTICATION
-                        // =================================================
-
                         String uid = authController.signUpAndGetUid(
                                         email,
                                         password);
-
-                        // =================================================
-                        // ACCOUNT CREATED
-                        // =================================================
 
                         if (uid != null) {
 
@@ -306,19 +233,11 @@ public class RegisterScreen {
                                 System.out.println(
                                                 "Firebase UID: " + uid);
 
-                                // =================================================
-                                // SAVE USER IN FIRESTORE
-                                // =================================================
-
                                 boolean saved = userDAO.saveUser(
                                                 uid,
                                                 fullName,
                                                 email,
                                                 role);
-
-                                // =================================================
-                                // FIRESTORE SUCCESS
-                                // =================================================
 
                                 if (saved) {
 
@@ -330,13 +249,8 @@ public class RegisterScreen {
                                                         "Registration Successful",
                                                         "Your account has been created. Please log in.");
 
-                                        // Return to Login Screen
                                         callbackaction.run();
                                 }
-
-                                // =================================================
-                                // FIRESTORE FAILED
-                                // =================================================
 
                                 else {
 
@@ -346,10 +260,6 @@ public class RegisterScreen {
                                                         "Account was created, but user information could not be saved.");
                                 }
                         }
-
-                        // =================================================
-                        // FIREBASE AUTHENTICATION FAILED
-                        // =================================================
 
                         else {
 
@@ -365,10 +275,6 @@ public class RegisterScreen {
 
                 });
 
-                // =====================================================
-                // ALREADY HAVE ACCOUNT
-                // =====================================================
-
                 Text alreadytext = new Text(
                                 "Already have an account?");
 
@@ -380,10 +286,6 @@ public class RegisterScreen {
                 backtoLoginScreen.setStyle(
                                 "-fx-text-fill: #2E7D32;" +
                                                 "-fx-font-weight: bold;");
-
-                // =====================================================
-                // LOGIN LINK ACTION
-                // =====================================================
 
                 backtoLoginScreen.setOnAction(event -> {
 
@@ -400,10 +302,6 @@ public class RegisterScreen {
 
                 loginBox.setAlignment(
                                 Pos.CENTER);
-
-                // =====================================================
-                // FORM CARD
-                // =====================================================
 
                 VBox formCard = new VBox(
                                 18,
@@ -439,30 +337,19 @@ public class RegisterScreen {
                                                 "-fx-border-radius: 15px;" +
                                                 "-fx-border-width: 1px;");
 
-                // ORIGINAL SIZE
                 formCard.setMaxWidth(560);
-
-                // =====================================================
-                // RIGHT PANEL
-                // =====================================================
 
                 StackPane rightPanel = new StackPane(formCard);
 
                 rightPanel.setStyle(
                                 "-fx-background-color: #f1efef;");
 
-                // ORIGINAL PADDING
                 rightPanel.setPadding(
                                 new Insets(40));
 
-                // ORIGINAL FORM WIDTH
                 formCard.prefWidthProperty().bind(
                                 rightPanel.widthProperty()
                                                 .multiply(0.75));
-
-                // =====================================================
-                // MAIN HBOX
-                // =====================================================
 
                 HBox hbmain = new HBox(
                                 leftPanel,
@@ -472,12 +359,10 @@ public class RegisterScreen {
                                 rightPanel,
                                 Priority.ALWAYS);
 
-                // ORIGINAL RIGHT PANEL = 55%
                 rightPanel.prefWidthProperty().bind(
                                 hbmain.widthProperty()
                                                 .multiply(0.55));
 
-                // ORIGINAL LEFT PANEL = 45%
                 leftPanel.prefWidthProperty().bind(
                                 hbmain.widthProperty()
                                                 .multiply(0.45));
@@ -485,21 +370,13 @@ public class RegisterScreen {
                 hbmain.setStyle(
                                 "-fx-background-color: #9e9d98;");
 
-                // =====================================================
-                // SCENE
-                // =====================================================
-
-                RegisterScreenScene = new Scene(hbmain,1400,1000);
+                RegisterScreenScene = new Scene(hbmain, 1400, 1000);
 
                 RegisterScreenScene.setFill(
                                 Color.WHITESMOKE);
 
                 return RegisterScreenScene;
         }
-
-        // =========================================================
-        // CREATE ROLE BUTTON
-        // =========================================================
 
         private ToggleButton createRoleButton(
                         String text,
@@ -519,10 +396,6 @@ public class RegisterScreen {
                                                 "-fx-border-radius: 10px;" +
                                                 "-fx-background-radius: 10px;" +
                                                 "-fx-font-weight: bold;");
-
-                // =====================================================
-                // ROLE BUTTON STYLE CHANGE
-                // =====================================================
 
                 btn.selectedProperty().addListener(
                                 (obs, wasSelected, isSelected) -> {

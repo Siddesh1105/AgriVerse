@@ -20,73 +20,32 @@ import javafx.stage.Stage;
 
 public class SelectionScreen {
 
-        private Scene SelectionScreenScene;
+private Scene SelectionScreenScene;
 
-        Scene getSelectionScreenScene(Consumer<String> onRoleSelected) {
+Scene getSelectionScreenScene(Consumer<String> onRoleSelected) {
 
-                // =====================================================
-                // HEADER
-                // =====================================================
+Text title = new Text("Select Your Role");
+title.setStyle("-fx-font-size: 32px;" +"-fx-font-weight: bold;");
 
-                Text title = new Text("Select Your Role");
+Text subtitle = new Text("Choose the role that best describes you");
+subtitle.setStyle("-fx-font-size: 15px;" + "-fx-fill: #777777;");
 
-                title.setStyle(
-                                "-fx-font-size: 32px;" +
-                                                "-fx-font-weight: bold;");
+VBox headerBox = new VBox(8,title,subtitle);
+headerBox.setAlignment(Pos.CENTER);
 
-                Text subtitle = new Text("Choose the role that best describes you");
+ToggleGroup roleGroup = new ToggleGroup();
 
-                subtitle.setStyle(
-                                "-fx-font-size: 15px;" +
-                                                "-fx-fill: #777777;");
+VBox farmerCard = createRoleCard("assets/icons/farmer.png", "Farmer","Sell products, rent equipment and\nmanage your farm business",roleGroup);
 
-                VBox headerBox = new VBox(
-                                8,
-                                title,
-                                subtitle);
-
-                headerBox.setAlignment(
-                                Pos.CENTER);
-
-                // =====================================================
-                // ROLE GROUP
-                // =====================================================
-
-                ToggleGroup roleGroup = new ToggleGroup();
-
-                // =====================================================
-                // FARMER CARD
-                // =====================================================
-
-                VBox farmerCard = createRoleCard(
-                                "assets/icons/farmer.png",
-                                "Farmer",
-                                "Sell products, rent equipment and\nmanage your farm business",
-                                roleGroup);
-
-                // =====================================================
-                // BUYER CARD
-                // =====================================================
-
-                VBox buyerCard = createRoleCard(
-                                "assets/icons/buyer.png",
-                                "Buyer",
+VBox buyerCard = createRoleCard( "assets/icons/buyer.png","Buyer",
                                 "Buy products, connect with\nfarmers and get best deals",
                                 roleGroup);
-
-                // =====================================================
-                // ADMIN CARD
-                // =====================================================
 
                 VBox adminCard = createRoleCard(
                                 "assets/icons/admin.png",
                                 "Admin",
                                 "Manage users, products\nand platform activities",
                                 roleGroup);
-
-                // =====================================================
-                // CARD ROW
-                // =====================================================
 
                 HBox cardRow = new HBox(
                                 20,
@@ -109,10 +68,6 @@ public class SelectionScreen {
                                 adminCard,
                                 Priority.ALWAYS);
 
-                // =====================================================
-                // CONTINUE BUTTON
-                // =====================================================
-
                 Button continueBtn = new Button("Continue");
 
                 continueBtn.setPrefHeight(48);
@@ -126,15 +81,10 @@ public class SelectionScreen {
                                                 "-fx-font-weight: bold;" +
                                                 "-fx-background-radius: 8px;");
 
-                // =====================================================
-                // CONTINUE ACTION
-                // =====================================================
-
                 continueBtn.setOnAction(event -> {
 
                         ToggleButton selectedButton = (ToggleButton) roleGroup.getSelectedToggle();
 
-                        // No role selected
                         if (selectedButton == null) {
 
                                 System.out.println(
@@ -145,13 +95,8 @@ public class SelectionScreen {
 
                         String role = (String) selectedButton.getUserData();
 
-                        // Get current stage
                         Stage stage = (Stage) SelectionScreenScene
                                         .getWindow();
-
-                        // =================================================
-                        // FARMER
-                        // =================================================
 
                         switch (role) {
 
@@ -167,10 +112,6 @@ public class SelectionScreen {
 
                                         break;
 
-                                // =================================================
-                                // BUYER
-                                // =================================================
-
                                 case "Buyer":
 
                                         BuyerDashboard buyerDashboard = new BuyerDashboard();
@@ -182,10 +123,6 @@ public class SelectionScreen {
                                                         buyerScene);
 
                                         break;
-
-                                // =================================================
-                                // ADMIN
-                                // =================================================
 
                                 case "Admin":
 
@@ -202,19 +139,11 @@ public class SelectionScreen {
 
                 });
 
-                // =====================================================
-                // CONTINUE BOX
-                // =====================================================
-
                 HBox continueBox = new HBox(
                                 continueBtn);
 
                 continueBox.setAlignment(
                                 Pos.CENTER);
-
-                // =====================================================
-                // CONTENT BOX
-                // =====================================================
 
                 VBox contentBox = new VBox(
                                 40,
@@ -225,17 +154,11 @@ public class SelectionScreen {
                 contentBox.setAlignment(
                                 Pos.CENTER);
 
-                // ORIGINAL PADDING
                 contentBox.setPadding(
                                 new Insets(60));
 
-                // ORIGINAL MAX WIDTH
                 contentBox.setMaxWidth(
                                 1100);
-
-                // =====================================================
-                // INNER ROOT
-                // =====================================================
 
                 StackPane root = new StackPane(
                                 contentBox);
@@ -250,10 +173,6 @@ public class SelectionScreen {
                 root.setPadding(
                                 new Insets(20));
 
-                // =====================================================
-                // OUTER CONTAINER
-                // =====================================================
-
                 StackPane outer = new StackPane(
                                 root);
 
@@ -262,10 +181,6 @@ public class SelectionScreen {
 
                 outer.setPadding(
                                 new Insets(40));
-
-                // =====================================================
-                // ORIGINAL RESOLUTION
-                // =====================================================
 
                 SelectionScreenScene = new Scene(
                                 outer,
@@ -278,25 +193,16 @@ public class SelectionScreen {
                 return SelectionScreenScene;
         }
 
-        // =========================================================
-        // CREATE ROLE CARD
-        // =========================================================
-
         VBox createRoleCard(
                         String iconPath,
                         String roleName,
                         String description,
                         ToggleGroup group) {
 
-                // =====================================================
-                // ICON
-                // =====================================================
-
                 ImageView icon = new ImageView(
                                 "file:src/main/resources/"
                                                 + iconPath);
 
-                // ORIGINAL ICON SIZE
                 icon.setFitWidth(90);
 
                 icon.setFitHeight(90);
@@ -311,20 +217,12 @@ public class SelectionScreen {
                                 100,
                                 100);
 
-                // =====================================================
-                // ROLE NAME
-                // =====================================================
-
                 Text nameText = new Text(
                                 roleName);
 
                 nameText.setStyle(
                                 "-fx-font-size: 20px;" +
                                                 "-fx-font-weight: bold;");
-
-                // =====================================================
-                // DESCRIPTION
-                // =====================================================
 
                 Text descText = new Text(
                                 description);
@@ -336,10 +234,6 @@ public class SelectionScreen {
                 descText.setTextAlignment(
                                 TextAlignment.CENTER);
 
-                // =====================================================
-                // TEXT BOX
-                // =====================================================
-
                 VBox textBox = new VBox(
                                 6,
                                 nameText,
@@ -347,10 +241,6 @@ public class SelectionScreen {
 
                 textBox.setAlignment(
                                 Pos.CENTER);
-
-                // =====================================================
-                // CARD CONTENT
-                // =====================================================
 
                 VBox cardContent = new VBox(
                                 15,
@@ -360,17 +250,12 @@ public class SelectionScreen {
                 cardContent.setAlignment(
                                 Pos.CENTER);
 
-                // ORIGINAL CARD PADDING
                 cardContent.setPadding(
                                 new Insets(
                                                 30,
                                                 20,
                                                 30,
                                                 20));
-
-                // =====================================================
-                // TOGGLE BUTTON
-                // =====================================================
 
                 ToggleButton card = new ToggleButton();
 
@@ -383,7 +268,6 @@ public class SelectionScreen {
                 card.setUserData(
                                 roleName);
 
-                // ORIGINAL CARD SIZE
                 card.setPrefSize(
                                 260,
                                 260);
@@ -391,19 +275,11 @@ public class SelectionScreen {
                 card.setMaxWidth(
                                 Double.MAX_VALUE);
 
-                // =====================================================
-                // NORMAL STYLE
-                // =====================================================
-
                 card.setStyle(
                                 "-fx-background-color: white;" +
                                                 "-fx-border-color: #dcdcdc;" +
                                                 "-fx-border-radius: 15px;" +
                                                 "-fx-background-radius: 15px;");
-
-                // =====================================================
-                // SELECTED STYLE
-                // =====================================================
 
                 card.selectedProperty().addListener(
                                 (obs, wasSelected, isSelected) -> {
@@ -426,10 +302,6 @@ public class SelectionScreen {
                                                                                 "-fx-background-radius: 15px;");
                                         }
                                 });
-
-                // =====================================================
-                // WRAPPER
-                // =====================================================
 
                 VBox wrapper = new VBox(
                                 card);

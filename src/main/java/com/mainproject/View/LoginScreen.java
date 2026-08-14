@@ -26,7 +26,6 @@ public class LoginScreen extends Application {
         public static Stage Homestage;
         private Scene HomePageScene;
 
-        // Firebase Authentication Controller
         private AuthController authController = new AuthController();
 
         @Override
@@ -34,14 +33,9 @@ public class LoginScreen extends Application {
 
                 Homestage = myStage;
 
-                // =====================================================
-                // LEFT SIDE IMAGE
-                // =====================================================
-
                 ImageView loginImage = new ImageView(
                                 "file:src/main/resources/assets/icons/loginimage.png");
 
-                // OLD RESOLUTION
                 loginImage.setFitWidth(800);
                 loginImage.setFitHeight(1100);
                 loginImage.setPreserveRatio(true);
@@ -50,14 +44,9 @@ public class LoginScreen extends Application {
 
                 vb1.setAlignment(Pos.CENTER);
 
-                // OLD SIZE
                 vb1.setPrefSize(700, 1000);
 
                 vb1.getChildren().addAll(loginImage);
-
-                // =====================================================
-                // WELCOME TEXT
-                // =====================================================
 
                 Text text1 = new Text("Welcome Back!");
 
@@ -67,10 +56,6 @@ public class LoginScreen extends Application {
 
                 HBox hb1 = new HBox(text1);
 
-                // =====================================================
-                // SUBTITLE
-                // =====================================================
-
                 Text text2 = new Text("Login to continue");
 
                 text2.setStyle(
@@ -79,10 +64,6 @@ public class LoginScreen extends Application {
                                                 "-fx-font-weight: bold;");
 
                 HBox hb2 = new HBox(text2);
-
-                // =====================================================
-                // EMAIL
-                // =====================================================
 
                 Label emailLabel = new Label("Email");
 
@@ -96,10 +77,6 @@ public class LoginScreen extends Application {
 
                 emailField.setPrefHeight(40);
 
-                // =====================================================
-                // PASSWORD
-                // =====================================================
-
                 Label passLabel = new Label("Password");
 
                 passLabel.setStyle(
@@ -111,10 +88,6 @@ public class LoginScreen extends Application {
                                 "Enter your password");
 
                 passField.setPrefHeight(40);
-
-                // =====================================================
-                // FORGOT PASSWORD
-                // =====================================================
 
                 Hyperlink forgotPassLink = new Hyperlink("Forgot Password?");
 
@@ -128,15 +101,10 @@ public class LoginScreen extends Application {
                 hbForgot.setAlignment(
                                 Pos.CENTER_RIGHT);
 
-                // =====================================================
-                // FORGOT PASSWORD ACTION
-                // =====================================================
-
                 forgotPassLink.setOnAction(event -> {
 
                         String email = emailField.getText().trim();
 
-                        // Check email
                         if (email.isEmpty()) {
 
                                 showAlert(
@@ -152,10 +120,8 @@ public class LoginScreen extends Application {
                         System.out.println(
                                         "Sending password reset email to: " + email);
 
-                        // Firebase password reset
                         boolean resetSuccess = authController.resetPassword(email);
 
-                        // Password reset successful
                         if (resetSuccess) {
 
                                 showAlert(
@@ -167,7 +133,6 @@ public class LoginScreen extends Application {
 
                         }
 
-                        // Password reset failed
                         else {
 
                                 showAlert(
@@ -176,10 +141,6 @@ public class LoginScreen extends Application {
                                                 "Unable to send the password reset email.");
                         }
                 });
-
-                // =====================================================
-                // LOGIN BUTTON
-                // =====================================================
 
                 Button loginBtn = new Button("Login");
 
@@ -195,19 +156,11 @@ public class LoginScreen extends Application {
                                                 "-fx-font-weight: bold;" +
                                                 "-fx-background-radius: 8px;");
 
-                // =====================================================
-                // LOGIN BUTTON ACTION
-                // =====================================================
-
                 loginBtn.setOnAction(event -> {
 
                         String email = emailField.getText().trim();
 
                         String password = passField.getText();
-
-                        // -------------------------------------------------
-                        // CHECK EMPTY FIELDS
-                        // -------------------------------------------------
 
                         if (email.isEmpty() || password.isEmpty()) {
 
@@ -222,27 +175,17 @@ public class LoginScreen extends Application {
                         System.out.println(
                                         "Login attempt for: " + email);
 
-                        // -------------------------------------------------
-                        // FIREBASE LOGIN
-                        // -------------------------------------------------
-
                         boolean loginSuccess = authController.signIn(
                                         email,
                                         password);
-
-                        // -------------------------------------------------
-                        // LOGIN SUCCESS
-                        // -------------------------------------------------
 
                         if (loginSuccess) {
 
                                 System.out.println(
                                                 "Firebase Login Successful!");
 
-                                // Create SelectionScreen
                                 SelectionScreen selectionScreen = new SelectionScreen();
 
-                                // Runnable callback
                                 Runnable callBackAction = new Runnable() {
 
                                         @Override
@@ -264,14 +207,9 @@ public class LoginScreen extends Application {
                                         }
                                 };
 
-                                // Execute callback
                                 callBackAction.run();
 
                         }
-
-                        // -------------------------------------------------
-                        // LOGIN FAILED
-                        // -------------------------------------------------
 
                         else {
 
@@ -286,10 +224,6 @@ public class LoginScreen extends Application {
 
                 });
 
-                // =====================================================
-                // REGISTER TEXT
-                // =====================================================
-
                 Text noAccountText = new Text("Don't have an account? ");
 
                 noAccountText.setStyle(
@@ -302,10 +236,6 @@ public class LoginScreen extends Application {
                                 "-fx-font-size: 13px;" +
                                                 "-fx-text-fill: #2E7D32;" +
                                                 "-fx-font-weight: bold;");
-
-                // =====================================================
-                // REGISTER BUTTON ACTION
-                // =====================================================
 
                 registerLink.setOnAction(event -> {
 
@@ -324,7 +254,6 @@ public class LoginScreen extends Application {
                                 }
                         };
 
-                        // Open Register Screen
                         Homestage.setScene(
                                         registerScreen
                                                         .getRegisterScreenScene(
@@ -332,20 +261,12 @@ public class LoginScreen extends Application {
 
                 });
 
-                // =====================================================
-                // REGISTER HBOX
-                // =====================================================
-
                 HBox hbRegister = new HBox(
                                 noAccountText,
                                 registerLink);
 
                 hbRegister.setAlignment(
                                 Pos.CENTER);
-
-                // =====================================================
-                // RIGHT LOGIN PANEL
-                // =====================================================
 
                 VBox vb2 = new VBox(20);
 
@@ -357,12 +278,10 @@ public class LoginScreen extends Application {
                                                 "-fx-background-radius: 15px;" +
                                                 "-fx-padding: 30px;");
 
-                // OLD SIZE
                 vb2.setPrefSize(
                                 300,
                                 500);
 
-                // OLD MAX SIZE
                 vb2.setMaxSize(
                                 500,
                                 700);
@@ -378,18 +297,10 @@ public class LoginScreen extends Application {
                                 loginBtn,
                                 hbRegister);
 
-                // =====================================================
-                // RIGHT PANEL
-                // =====================================================
-
                 StackPane rightPanel = new StackPane(vb2);
 
                 rightPanel.setStyle(
                                 "-fx-background-color: #f1efef;");
-
-                // =====================================================
-                // MAIN HBOX
-                // =====================================================
 
                 HBox HBMain = new HBox(
                                 vb1,
@@ -402,10 +313,6 @@ public class LoginScreen extends Application {
                 rightPanel.prefWidthProperty().bind(
                                 HBMain.widthProperty()
                                                 .multiply(0.8));
-
-                // =====================================================
-                // SCENE
-                // =====================================================
 
                 HomePageScene = new Scene(HBMain, 1400, 1000);
 
@@ -421,10 +328,6 @@ public class LoginScreen extends Application {
                 Homestage.show();
         }
 
-        // =========================================================
-        // SWITCH SCENE
-        // =========================================================
-
         static void switchScene(Scene scene) {
 
                 if (Homestage != null) {
@@ -432,10 +335,6 @@ public class LoginScreen extends Application {
                         Homestage.setScene(scene);
                 }
         }
-
-        // =========================================================
-        // LOGOUT
-        // =========================================================
 
         static void logoutToLogin() {
 
@@ -445,10 +344,6 @@ public class LoginScreen extends Application {
                                         .start(Homestage);
                 }
         }
-
-        // =========================================================
-        // ALERT
-        // =========================================================
 
         static void showAlert(
                         AlertType type,
@@ -465,10 +360,6 @@ public class LoginScreen extends Application {
 
                 alert.showAndWait();
         }
-
-        // =========================================================
-        // GET LOGIN SCENE
-        // =========================================================
 
         public Scene getHomePageScene() {
 

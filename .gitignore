@@ -1,16 +1,1 @@
-# Maven
-target/
-
-# VS Code
-.vscode/
-
-# Secrets
-.env
-*.env
-agrilink.json
-**/agrilink.json
-
-# Firebase / Google credentials
-serviceAccountKey.json
-firebase-adminsdk-*.json
-credentials.json
+**/*.json
