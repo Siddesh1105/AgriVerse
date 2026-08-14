@@ -1,17 +1,16 @@
 package com.mainproject.dao;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.mainproject.config.FirebaseConfig;
+import com.mainproject.model.User;
 
 public class UserDAO {
 
     private Firestore db;
 
     public UserDAO() {
+
         db = FirebaseConfig.getFirestore();
     }
 
@@ -19,28 +18,29 @@ public class UserDAO {
     // SAVE USER
     // =====================================================
 
-    public boolean saveUser(
-            String uid,
-            String fullName,
-            String email,
-            String role) {
+    public boolean saveUser(User user) {
 
         try {
 
-            Map<String, Object> userData =new HashMap<>();
-
-            userData.put("fullName",fullName);
-
-            userData.put( "email",email);
-
-            userData.put("role",role);
             db.collection("users")
-                    .document(email)
-                    .set(userData)
+                    .document(user.getEmail())
+                    .set(user)
                     .get();
 
             System.out.println(
                     "User saved successfully in Firestore"
+            );
+
+            System.out.println(
+                    "User Email: " + user.getEmail()
+            );
+
+            System.out.println(
+                    "User Role: " + user.getRole()
+            );
+
+            System.out.println(
+                    "Firebase UID: " + user.getUid()
             );
 
             return true;
@@ -53,7 +53,12 @@ public class UserDAO {
         }
     }
 
-    public String getRole(String email) {
+    // =====================================================
+    // GET USER BY EMAIL
+    // =====================================================
+
+    public User getUserByEmail(String email) {
+
         try {
 
             DocumentSnapshot document =
@@ -64,14 +69,61 @@ public class UserDAO {
 
             if (document.exists()) {
 
-                String role =document.getString("role");
-                System.out.println("Role found: " + role);
-                return role;
+                User user =
+                        document.toObject(
+                                User.class
+                        );
+
+                System.out.println(
+                        "User found: " + email
+                );
+
+                if (user != null) {
+
+                    System.out.println(
+                            "User Role: "
+                                    + user.getRole()
+                    );
+                }
+
+                return user;
             }
-            System.out.println("User not found: " + email);
+
+            System.out.println(
+                    "User not found: " + email
+            );
+
+            return null;
+
         } catch (Exception e) {
+
             e.printStackTrace();
+
+            return null;
         }
-        return null;
+    }
+
+    // =====================================================
+    // CHECK USER EXISTS
+    // =====================================================
+
+    public boolean userExists(String email) {
+
+        try {
+
+            DocumentSnapshot document =
+                    db.collection("users")
+                            .document(email)
+                            .get()
+                            .get();
+
+            return document.exists();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return false;
+        }
     }
 }

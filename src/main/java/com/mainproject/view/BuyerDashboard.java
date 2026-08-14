@@ -1,5 +1,7 @@
 package com.mainproject.view;
 
+import com.mainproject.model.User;
+
 import javafx.scene.Scene;
 
 import javafx.scene.layout.BorderPane;
@@ -11,6 +13,10 @@ public class BuyerDashboard {
 
     private Scene buyerDashboardScene;
 
+    public BuyerDashboard(User user) {
+        //TODO Auto-generated constructor stub
+    }
+
     Scene getBuyerDashboardScene() {
 
         Text text = new Text("Buyer Dashboard");
@@ -20,6 +26,11 @@ public class BuyerDashboard {
         buyerDashboardScene = new Scene(root, 1400, 1000);
         buyerDashboardScene.setFill(Color.WHITE);
         return buyerDashboardScene;
+    }
+
+    public Scene getScene() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getScene'");
     }
 
 }
