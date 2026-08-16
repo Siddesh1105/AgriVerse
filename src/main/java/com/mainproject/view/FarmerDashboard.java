@@ -781,8 +781,7 @@ public class FarmerDashboard {
     // NAVIGATION
     // =====================================================
 
-    public void navigateTo(
-            String page) {
+    public void navigateTo(String page) {
 
         // =================================================
         // UPDATE SELECTED SIDEBAR BUTTON
@@ -895,7 +894,7 @@ public class FarmerDashboard {
             case "Crop Prices":
 
                 viewNode =
-                        new CropPrices()
+                        new CropPrices(this)
                                 .getView();
 
                 break;
@@ -931,7 +930,7 @@ public class FarmerDashboard {
             case "Notifications":
 
                 viewNode =
-                        new Notifications()
+                        new Notifications(this)
                                 .getView();
 
                 break;
