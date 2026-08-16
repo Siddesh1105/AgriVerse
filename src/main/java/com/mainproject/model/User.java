@@ -5,6 +5,8 @@ public class User {
     private String uid;
     private String fullName;
     private String email;
+    private String mobileNumber;
+    private String gender;
     private String role;
 
     // Required by Firestore
@@ -16,11 +18,15 @@ public class User {
             String uid,
             String fullName,
             String email,
+            String mobileNumber,
+            String gender,
             String role) {
 
         this.uid = uid;
         this.fullName = fullName;
         this.email = email;
+        this.mobileNumber = mobileNumber;
+        this.gender = gender;
         this.role = role;
     }
 
@@ -61,6 +67,30 @@ public class User {
     }
 
     // =========================
+    // MOBILE NUMBER
+    // =========================
+
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
+
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+    }
+
+    // =========================
+    // GENDER
+    // =========================
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    // =========================
     // ROLE
     // =========================
 
@@ -79,6 +109,8 @@ public class User {
                 "uid='" + uid + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", email='" + email + '\'' +
+                ", mobileNumber='" + mobileNumber + '\'' +
+                ", gender='" + gender + '\'' +
                 ", role='" + role + '\'' +
                 '}';
     }
