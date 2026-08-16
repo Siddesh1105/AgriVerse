@@ -57,14 +57,9 @@ public class Products {
     // CONSTRUCTOR
     // =====================================================
 
-    public Products(
-            FarmerDashboard navigator,
-            String farmerEmail) {
-
+    public Products(FarmerDashboard navigator,String farmerEmail) {
         this.navigator = navigator;
-
         this.farmerEmail = farmerEmail;
-
         this.productDAO = new ProductDAO();
     }
 
@@ -85,14 +80,9 @@ public class Products {
 
         HBox topBar = new HBox();
 
-        topBar.setAlignment(
-                Pos.CENTER_LEFT);
-
+        topBar.setAlignment(Pos.CENTER_LEFT);
         VBox titles = new VBox(3);
-
-        Label title = new Label(
-                "Products Management");
-
+        Label title = new Label("Products Management");
         title.setStyle(
                 "-fx-font-size: 22px;" +
                         "-fx-font-weight: 800;" +
