@@ -115,9 +115,6 @@ public class FarmerDashboard {
 
     public Scene getFarmerDashboardScene() {
 
-        Rectangle2D screen =
-                Screen.getPrimary()
-                        .getVisualBounds();
 
         BorderPane root =
                 new BorderPane();
@@ -178,9 +175,7 @@ public class FarmerDashboard {
 
         scene =
                 new Scene(
-                        root,
-                        screen.getWidth(),
-                        screen.getHeight()
+                        root,1200,1000
                 );
 
         return scene;

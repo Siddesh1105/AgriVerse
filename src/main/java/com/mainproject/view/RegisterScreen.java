@@ -578,11 +578,11 @@ public class RegisterScreen {
                 // SCENE
                 // =================================================
 
-                registerScreenScene = new Scene(
-                                main);
 
-                Rectangle2D screen = Screen.getPrimary()
-                                .getVisualBounds();
+
+                registerScreenScene = new Scene(
+                                main,1200,1000);
+
                 registerScreenScene.setFill(
                                 Color.WHITESMOKE);
 
