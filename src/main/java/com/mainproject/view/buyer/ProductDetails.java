@@ -32,7 +32,6 @@ public class ProductDetails {
         lblImg.setStyle("-fx-font-size: 16px; -fx-text-alignment: center; -fx-text-fill: #64748B;");
         imageMock.getChildren().add(lblImg);
 
-        // Product Info Details
         VBox info = new VBox(12);
         Label title = new Label("Fresh Organic Tomato");
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
