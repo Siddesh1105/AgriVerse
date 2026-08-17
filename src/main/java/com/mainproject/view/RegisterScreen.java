@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -128,6 +129,50 @@ public class RegisterScreen {
                                 42);
 
                 // =================================================
+                // MOBILE NUMBER
+                // =================================================
+
+                Label mobileLabel = new Label(
+                                "Mobile Number");
+
+                mobileLabel.setStyle(
+                                "-fx-font-weight: bold;");
+
+                TextField mobileField = new TextField();
+
+                mobileField.setPromptText(
+                                "Enter your mobile number");
+
+                mobileField.setPrefHeight(
+                                42);
+
+                // =================================================
+                // GENDER
+                // =================================================
+
+                Label genderLabel = new Label(
+                                "Gender");
+
+                genderLabel.setStyle(
+                                "-fx-font-weight: bold;");
+
+                ComboBox<String> genderBox = new ComboBox<>();
+
+                genderBox.getItems().addAll(
+                                "Male",
+                                "Female",
+                                "Other");
+
+                genderBox.setPromptText(
+                                "Select your gender");
+
+                genderBox.setPrefHeight(
+                                42);
+
+                genderBox.setMaxWidth(
+                                Double.MAX_VALUE);
+
+                // =================================================
                 // PASSWORD
                 // =================================================
 
@@ -241,6 +286,13 @@ public class RegisterScreen {
                                                         .getText()
                                                         .trim();
 
+                                        String mobileNumber = mobileField
+                                                        .getText()
+                                                        .trim();
+
+                                        String gender = genderBox
+                                                        .getValue();
+
                                         String password = passField.getText();
 
                                         String confirmPassword = confirmPassField
@@ -253,6 +305,10 @@ public class RegisterScreen {
                                         if (fullName.isEmpty()
                                                         ||
                                                         email.isEmpty()
+                                                        ||
+                                                        mobileNumber.isEmpty()
+                                                        ||
+                                                        gender == null
                                                         ||
                                                         password.isEmpty()
                                                         ||
@@ -311,6 +367,12 @@ public class RegisterScreen {
                                                         "Email: " + email);
 
                                         System.out.println(
+                                                        "Mobile: " + mobileNumber);
+
+                                        System.out.println(
+                                                        "Gender: " + gender);
+
+                                        System.out.println(
                                                         "Role: " + role);
 
                                         // =====================================
@@ -340,10 +402,14 @@ public class RegisterScreen {
                                         // CREATE USER MODEL
                                         // =====================================
 
+                                        // Note: Ensure your User model constructor is updated to accept mobileNumber
+                                        // and gender
                                         User user = new User(
                                                         uid,
                                                         fullName,
                                                         email,
+                                                        mobileNumber,
+                                                        gender,
                                                         role);
 
                                         // =====================================
@@ -435,6 +501,12 @@ public class RegisterScreen {
 
                                 emailLabel,
                                 emailField,
+
+                                mobileLabel,
+                                mobileField,
+
+                                genderLabel,
+                                genderBox,
 
                                 passLabel,
                                 passField,
