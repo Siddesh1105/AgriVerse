@@ -40,12 +40,9 @@ public class ProductDAO {
                       .document();
 
             // Generate Firestore document ID
-            String productId =
-                    document.getId();
+            String productId =document.getId();
 
-            product.setProductId(
-                    productId
-            );
+            product.setProductId(productId);
 
             // Save complete Product object
             document.set(product).get();
@@ -54,10 +51,7 @@ public class ProductDAO {
                     "Product saved successfully!"
             );
 
-            System.out.println(
-                    "Product ID: "
-                            + productId
-            );
+            System.out.println("Product ID: "+ productId);
 
             return true;
 
@@ -73,20 +67,12 @@ public class ProductDAO {
     // GET SINGLE PRODUCT
     // =====================================================
 
-    public Product getProductById(
-            String productId) {
+    public Product getProductById(String productId) {
 
         try {
-
-            if (
-                    productId == null
-                            ||
-                    productId.trim().isEmpty()
-            ) {
-
+            if (productId == null||productId.trim().isEmpty()) {
                 return null;
             }
-
             DocumentSnapshot document =
                     db.collection("products")
                       .document(productId)
@@ -94,26 +80,14 @@ public class ProductDAO {
                       .get();
 
             if (!document.exists()) {
-
-                System.out.println(
-                        "Product not found: "
-                                + productId
-                );
-
+                System.out.println("Product not found: "+ productId);
                 return null;
             }
 
-            Product product =
-                    document.toObject(
-                            Product.class
-                    );
-
+            Product product =document.toObject(Product.class);
             return product;
-
         } catch (Exception e) {
-
             e.printStackTrace();
-
             return null;
         }
     }
@@ -226,30 +200,15 @@ public class ProductDAO {
 
                 if (product != null) {
 
-                    if (
-                            product.getProductId()
-                                    == null
-                                    ||
-                            product.getProductId()
-                                    .isEmpty()
-                    ) {
-
-                        product.setProductId(
-                                document.getId()
-                        );
+                    if (product.getProductId()== null||product.getProductId().isEmpty()){
+                        product.setProductId(document.getId());
                     }
-
-                    products.add(
-                            product
-                    );
+                    products.add(product);
                 }
             }
-
         } catch (Exception e) {
-
             e.printStackTrace();
         }
-
         return products;
     }
 
@@ -274,16 +233,8 @@ public class ProductDAO {
             String productId =
                     product.getProductId();
 
-            if (
-                    productId == null
-                            ||
-                    productId.trim().isEmpty()
-            ) {
-
-                System.out.println(
-                        "Product ID is missing."
-                );
-
+            if (productId == null||productId.trim().isEmpty()) {
+                System.out.println("Product ID is missing.");
                 return false;
             }
 
@@ -292,15 +243,8 @@ public class ProductDAO {
               .set(product)
               .get();
 
-            System.out.println(
-                    "Product updated successfully!"
-            );
-
-            System.out.println(
-                    "Product ID: "
-                            + productId
-            );
-
+            System.out.println("Product updated successfully!");
+            System.out.println("Product ID: "+ productId);
             return true;
 
         } catch (Exception e) {
@@ -310,10 +254,6 @@ public class ProductDAO {
             return false;
         }
     }
-
-    // =====================================================
-    // UPDATE ONLY IMAGE URL
-    // =====================================================
 
     public boolean updateProductImage(
             String productId,
@@ -351,11 +291,6 @@ public class ProductDAO {
             return false;
         }
     }
-
-    // =====================================================
-    // UPDATE PRODUCT STATUS
-    // =====================================================
-
     public boolean updateProductStatus(
             String productId,
             String status) {
@@ -378,14 +313,8 @@ public class ProductDAO {
                       status
               )
               .get();
-
-            System.out.println(
-                    "Product status updated: "
-                            + status
-            );
-
+            System.out.println("Product status updated: "+ status);
             return true;
-
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -393,11 +322,6 @@ public class ProductDAO {
             return false;
         }
     }
-
-    // =====================================================
-    // UPDATE STOCK
-    // =====================================================
-
     public boolean updateStock(
             String productId,
             double stock) {
@@ -435,10 +359,6 @@ public class ProductDAO {
             return false;
         }
     }
-
-    // =====================================================
-    // DELETE PRODUCT
-    // =====================================================
 
     public boolean deleteProduct(
             String productId) {

@@ -1,4 +1,5 @@
 package com.mainproject.view;
+
 import com.mainproject.view.buyer.BuyerDashboard;
 import com.mainproject.view.farmer.FarmerDashboard;
 import com.mainproject.controller.AuthController;
@@ -7,6 +8,7 @@ import com.mainproject.model.User;
 
 import javafx.application.Application;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -22,6 +24,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class LoginScreen extends Application {
@@ -32,10 +35,6 @@ public class LoginScreen extends Application {
 
         private AuthController authController;
         private UserDAO userDAO;
-
-        // =====================================================
-        // START
-        // =====================================================
 
         @Override
         public void start(Stage myStage) {
@@ -495,18 +494,14 @@ public class LoginScreen extends Application {
 
                 HomePageScene = new Scene(
                                 main);
+                Rectangle2D screen = Screen.getPrimary()
+                                .getVisualBounds();
 
                 HomePageScene.setFill(
                                 Color.WHITE);
 
                 Homestage.setScene(
                                 HomePageScene);
-
-                Homestage.setFullScreen(
-                                true);
-
-                Homestage.setFullScreenExitHint(
-                                "");
 
                 Homestage.show();
         }

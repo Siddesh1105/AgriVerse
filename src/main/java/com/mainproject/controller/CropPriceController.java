@@ -36,7 +36,7 @@ public class CropPriceController {
                          * Use a reasonable limit.
                          * You can increase it up to the API's allowed limit.
                          */
-                        url.append("&limit=10000");
+                        url.append("&limit=20000");
 
                         // =================================================
                         // STATE FILTER
