@@ -39,9 +39,7 @@ public class UserDAO {
                     "User Role: " + user.getRole()
             );
 
-            System.out.println(
-                    "Firebase UID: " + user.getUid()
-            );
+            System.out.println("Firebase UID: " + user.getUid());
 
             return true;
 
