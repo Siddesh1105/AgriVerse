@@ -5,10 +5,8 @@ import com.mainproject.view.farmer.FarmerDashboard;
 import com.mainproject.controller.AuthController;
 import com.mainproject.dao.UserDAO;
 import com.mainproject.model.User;
-
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -24,7 +22,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class LoginScreen extends Application {
@@ -482,7 +479,7 @@ public class LoginScreen extends Application {
 
                 rightPanel.prefWidthProperty().bind(main.widthProperty().multiply(0.8));
 
-                HomePageScene = new Scene(main,1200,1000);
+                HomePageScene = new Scene(main,1400,1000);
 
                 HomePageScene.setFill(Color.WHITE);
                 Homestage.setScene(HomePageScene);

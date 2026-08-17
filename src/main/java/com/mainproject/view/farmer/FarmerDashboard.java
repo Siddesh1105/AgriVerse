@@ -165,17 +165,12 @@ public class FarmerDashboard {
         // DEFAULT PAGE
         // =================================================
 
-        navigateTo(
-                "Dashboard"
-        );
+        navigateTo("Dashboard" );
 
-        // =================================================
-        // SCENE
-        // =================================================
 
         scene =
                 new Scene(
-                        root,1200,1000
+                        root,1400,1000
                 );
 
         return scene;

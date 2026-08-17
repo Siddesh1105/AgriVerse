@@ -69,7 +69,7 @@ public class BuyerDashboard {
             // Default initial view: Screen 1 (Dashboard Overview)
             setView(new DashboardOverview(this).getView());
 
-            scene = new Scene(mainLayout, 1200, 1000);
+            scene = new Scene(mainLayout, 1400, 1000);
         }
         return scene;
     }
