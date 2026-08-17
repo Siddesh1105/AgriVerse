@@ -272,10 +272,6 @@ public class CropPrices {
                                                 "-fx-border-color: #A2D9CE;" +
                                                 "-fx-border-radius: 12px;");
 
-                // =====================================================
-                // STATE SELECTION
-                // =====================================================
-
                 stateBox.setOnAction(e -> {
 
                         String state = stateBox.getValue();
