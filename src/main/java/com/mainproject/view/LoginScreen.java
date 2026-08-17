@@ -471,9 +471,6 @@ public class LoginScreen extends Application {
                 rightPanel.setStyle(
                                 "-fx-background-color: #f1efef;");
 
-                // =================================================
-                // MAIN
-                // =================================================
 
                 HBox main = new HBox(
                                 leftPanel,
@@ -483,46 +480,24 @@ public class LoginScreen extends Application {
                                 rightPanel,
                                 Priority.ALWAYS);
 
-                rightPanel.prefWidthProperty()
-                                .bind(
-                                                main.widthProperty()
-                                                                .multiply(0.8));
+                rightPanel.prefWidthProperty().bind(main.widthProperty().multiply(0.8));
 
-                // =================================================
-                // SCENE
-                // =================================================
+                HomePageScene = new Scene(main,1200,1000);
 
-                HomePageScene = new Scene(
-                                main);
-                Rectangle2D screen = Screen.getPrimary()
-                                .getVisualBounds();
-
-                HomePageScene.setFill(
-                                Color.WHITE);
-
-                Homestage.setScene(
-                                HomePageScene);
-
+                HomePageScene.setFill(Color.WHITE);
+                Homestage.setScene(HomePageScene);
                 Homestage.show();
         }
 
-        // =====================================================
-        // SWITCH SCENE
-        // =====================================================
 
-        public static void switchScene(
-                        Scene scene) {
+        public static void switchScene(Scene scene) {
 
                 if (Homestage != null) {
-
-                        Homestage.setScene(
-                                        scene);
+                        Homestage.setScene(scene);
                 }
         }
 
-        // =====================================================
-        // LOGOUT
-        // =====================================================
+       
 
         public static void logoutToLogin() {
 
@@ -534,10 +509,7 @@ public class LoginScreen extends Application {
                 }
         }
 
-        // =====================================================
-        // BACK TO LOGIN
-        // =====================================================
-
+       
         public void backtoLoginScreen() {
 
                 Homestage.setScene(
