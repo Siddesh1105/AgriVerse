@@ -29,26 +29,35 @@
             <version>2.3.2</version>
             <scope>compile</scope>
         </dependency>
+
+
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+
+
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20250517</version>
         </dependency>
+
+
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+
+
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+
 
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -76,6 +85,7 @@
             <artifactId>google-auth-library-oauth2-http</artifactId>
             <version>1.30.0</version>
         </dependency>
+        
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -83,6 +93,11 @@
             <version>2.13.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.genai</groupId>
+            <artifactId>google-genai</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
     </dependencies>
 

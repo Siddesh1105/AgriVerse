@@ -491,11 +491,11 @@ public class LoginScreen extends Application {
                 // =================================================
                 // SCENE
                 // =================================================
+                
+                Rectangle2D screenSize= Screen.getPrimary().getVisualBounds();
 
-                HomePageScene = new Scene(
-                                main);
-                Rectangle2D screen = Screen.getPrimary()
-                                .getVisualBounds();
+                HomePageScene = new Scene(main,screenSize.getHeight(),screenSize.getWidth());
+                
 
                 HomePageScene.setFill(
                                 Color.WHITE);
