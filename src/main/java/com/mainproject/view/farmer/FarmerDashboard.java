@@ -1,15 +1,12 @@
 package com.mainproject.view.farmer;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
 import com.mainproject.model.Product;
 import com.mainproject.model.User;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -25,1085 +22,385 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.stage.Screen;
 
 public class FarmerDashboard {
 
-    // =====================================================
-    // VARIABLES
-    // =====================================================
-
     private Scene scene;
-
     private StackPane contentArea;
-
-    private final Map<String, ToggleButton> navMap =
-            new HashMap<>();
-
+    private final Map<String, ToggleButton> navMap = new HashMap<>();
     private ToggleGroup navGroup;
-
     private final User user;
 
-    // =====================================================
-    // COLORS
-    // =====================================================
-
-    private static final String MAIN_BG =
-            "#E9F7EF";
-
-    private static final String PANEL_BG =
-            "#D4EFDF";
-
-    private static final String PRIMARY_GREEN =
-            "#117864";
-
-    private static final String PRIMARY_TEXT =
-            "#1B2631";
-
-    private static final String BORDER_COLOR =
-            "#A2D9CE";
-
-    private static final String ACCENT_YELLOW =
-            "#F1C40F";
-
-    // =====================================================
-    // CONSTRUCTOR
-    // =====================================================
+    private static final String MAIN_BG = "#E9F7EF";
+    private static final String PANEL_BG = "#D4EFDF";
+    private static final String PRIMARY_GREEN = "#117864";
+    private static final String PRIMARY_TEXT = "#1B2631";
+    private static final String BORDER_COLOR = "#A2D9CE";
+    private static final String ACCENT_YELLOW = "#F1C40F";
 
     public FarmerDashboard(User user) {
-
         this.user = user;
-
-        System.out.println(
-                "Opening Farmer Dashboard..."
-        );
-
-        System.out.println(
-                "Farmer Dashboard opened for: "
-                        + user.getEmail()
-        );
-
-        System.out.println(
-                "Farmer Name: "
-                        + user.getFullName()
-        );
-
-        System.out.println(
-                "Farmer Role: "
-                        + user.getRole()
-        );
+        System.out.println("Opening Farmer Dashboard...");
+        System.out.println("Farmer Dashboard opened for: " + user.getEmail());
+        System.out.println("Farmer Name: " + user.getFullName());
+        System.out.println("Farmer Role: " + user.getRole());
     }
-
-    // =====================================================
-    // GET SCENE
-    // =====================================================
 
     public Scene getScene() {
-
-        if (scene == null) {
-
-            scene =
-                    getFarmerDashboardScene();
-        }
-
+        if (scene == null)
+            scene = getFarmerDashboardScene();
         return scene;
     }
-
-    // =====================================================
-    // CREATE DASHBOARD SCENE
-    // =====================================================
 
     public Scene getFarmerDashboardScene() {
+        BorderPane root = new BorderPane();
+        root.setStyle("-fx-background-color: " + MAIN_BG + ";");
+        root.setTop(createTopBar());
+        root.setLeft(createSidebar());
 
+        contentArea = new StackPane();
+        contentArea.setPadding(new Insets(18, 22, 20, 22));
+        root.setCenter(contentArea);
 
-        BorderPane root =
-                new BorderPane();
-
-        root.setStyle(
-                "-fx-background-color: "
-                        + MAIN_BG
-                        + ";"
-        );
-
-        // =================================================
-        // TOP BAR
-        // =================================================
-
-        root.setTop(
-                createTopBar()
-        );
-
-        // =================================================
-        // SIDEBAR
-        // =================================================
-
-        root.setLeft(
-                createSidebar()
-        );
-
-        // =================================================
-        // CONTENT AREA
-        // =================================================
-
-        contentArea =
-                new StackPane();
-
-        contentArea.setPadding(
-                new Insets(
-                        18,
-                        22,
-                        20,
-                        22
-                )
-        );
-
-        root.setCenter(
-                contentArea
-        );
-
-        // =================================================
-        // DEFAULT PAGE
-        // =================================================
-
-        navigateTo("Dashboard" );
-
-
-        scene =
-                new Scene(
-                        root,1400,1000
-                );
-
+        navigateTo("Dashboard");
+        scene = new Scene(root, 1400, 1000);
         return scene;
     }
 
-    // =====================================================
-    // TOP BAR
-    // =====================================================
 
-    private HBox createTopBar() {
-
-        HBox topBar =
-                new HBox(15);
-
-        topBar.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        topBar.setPadding(
-                new Insets(
-                        10,
-                        25,
-                        10,
-                        20
-                )
-        );
-
-        topBar.setPrefHeight(
-                80
-        );
-
-        topBar.setStyle(
-                "-fx-background-color: #FFFFFF;"
-                        + "-fx-border-color: "
-                        + BORDER_COLOR
-                        + ";"
-                        + "-fx-border-width: 0 0 1.5px 0;"
-        );
-
-        // =================================================
-        // LOGO
-        // =================================================
-
-        ImageView logo =
-                new ImageView();
-
+    private Node loadIcon(String resourcePath, double size) {
         try {
-
-            Image image =
-                    new Image(
-                            getClass()
-                                    .getResourceAsStream(
-                                            "/assets/icons/AgriLinklogo.png"
-                                    )
-                    );
-
-            logo.setImage(
-                    image
-            );
-
-            logo.setFitWidth(
-                    260
-            );
-
-            logo.setFitHeight(
-                    65
-            );
-
-            logo.setPreserveRatio(
-                    true
-            );
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Logo not found."
-            );
+            var stream = getClass().getResourceAsStream(resourcePath);
+            if (stream != null) {
+                Image img = new Image(stream);
+                ImageView iv = new ImageView(img);
+                iv.setFitWidth(size);
+                iv.setFitHeight(size);
+                iv.setPreserveRatio(true);
+                iv.setSmooth(true);
+                return iv;
+            }
+        } catch (Exception ignored) {
         }
 
-        // =================================================
-        // SPACER
-        // =================================================
+        Label fallback = new Label("?");
+        fallback.setPrefSize(size, size);
+        fallback.setAlignment(Pos.CENTER);
+        fallback.setStyle(
+                "-fx-font-size: " + (size * 0.55) + "px;" +
+                        "-fx-text-fill: " + PRIMARY_TEXT + ";" +
+                        "-fx-background-color: " + PANEL_BG + ";" +
+                        "-fx-background-radius: 4px;");
+        System.out.println("[FarmerDashboard] Icon not found: " + resourcePath);
+        return fallback;
+    }
 
-        Region spacer =
-                new Region();
+    private HBox createTopBar() {
+        HBox topBar = new HBox(15);
+        topBar.setAlignment(Pos.CENTER_LEFT);
+        topBar.setPadding(new Insets(10, 25, 10, 20));
+        topBar.setPrefHeight(80);
+        topBar.setStyle(
+                "-fx-background-color: #FFFFFF;" +
+                        "-fx-border-color: " + BORDER_COLOR + ";" +
+                        "-fx-border-width: 0 0 1.5px 0;");
 
-        HBox.setHgrow(
-                spacer,
-                Priority.ALWAYS
-        );
+        ImageView logo = new ImageView();
+        try {
+            Image image = new Image(
+                    getClass().getResourceAsStream("/assets/icons/AgriLinklogo.png"));
+            logo.setImage(image);
+            logo.setFitWidth(260);
+            logo.setFitHeight(65);
+            logo.setPreserveRatio(true);
+        } catch (Exception e) {
+            System.out.println("Logo not found.");
+        }
 
-        // =================================================
-        // NOTIFICATION
-        // =================================================
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        StackPane notification =
-                new StackPane();
+        Node bellIcon = loadIcon("/assets/icons/notification2.png", 24);
 
-        notification.setPrefSize(
-                40,
-                40
-        );
+        Circle notificationDot = new Circle(5, Color.web(ACCENT_YELLOW));
+        notificationDot.setTranslateX(8);
+        notificationDot.setTranslateY(-8);
 
-        notification.setStyle(
-                "-fx-cursor: hand;"
-        );
+        StackPane notification = new StackPane(bellIcon, notificationDot);
+        notification.setPrefSize(40, 40);
+        notification.setStyle("-fx-cursor: hand;");
+        notification.setOnMouseClicked(e -> navigateTo("Notifications"));
 
-        Label bell =
-                new Label(
-                        "🔔"
-                );
+        HBox userBox = new HBox(10);
+        userBox.setAlignment(Pos.CENTER);
+        userBox.setStyle("-fx-cursor: hand;");
 
-        bell.setStyle(
-                "-fx-font-size: 20px;"
-        );
+        Circle avatarCircle = new Circle(20, Color.web(PANEL_BG));
+        Node farmerAvatarIcon = loadIcon("/assets/icons/farmer_avatar.png", 28);
 
-        Circle notificationDot =
-                new Circle(
-                        5,
-                        Color.web(
-                                ACCENT_YELLOW
-                        )
-                );
+        StackPane avatar = new StackPane(avatarCircle, farmerAvatarIcon);
+        avatar.setPrefSize(40, 40);
 
-        notificationDot.setTranslateX(
-                8
-        );
-
-        notificationDot.setTranslateY(
-                -8
-        );
-
-        notification.getChildren().addAll(
-                bell,
-                notificationDot
-        );
-
-        notification.setOnMouseClicked(
-                e -> navigateTo(
-                        "Notifications"
-                )
-        );
-
-        // =================================================
-        // USER PROFILE
-        // =================================================
-
-        HBox userBox =
-                new HBox(10);
-
-        userBox.setAlignment(
-                Pos.CENTER
-        );
-
-        userBox.setStyle(
-                "-fx-cursor: hand;"
-        );
-
-        Circle avatarCircle =
-                new Circle(
-                        20,
-                        Color.web(
-                                PANEL_BG
-                        )
-                );
-
-        Label farmerIcon =
-                new Label(
-                        "👨‍🌾"
-                );
-
-        StackPane avatar =
-                new StackPane(
-                        avatarCircle,
-                        farmerIcon
-                );
-
-        Label farmerName =
-                new Label(
-                        user.getFullName()
-                                + " ▼"
-                );
-
+        Label farmerName = new Label(user.getFullName() + " ▼");
         farmerName.setStyle(
-                "-fx-font-size: 14px;"
-                        + "-fx-font-weight: bold;"
-                        + "-fx-text-fill: "
-                        + PRIMARY_TEXT
-                        + ";"
-        );
+                "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + PRIMARY_TEXT + ";");
 
-        userBox.getChildren().addAll(
-                avatar,
-                farmerName
-        );
+        userBox.getChildren().addAll(avatar, farmerName);
+        userBox.setOnMouseClicked(e -> navigateTo("Profile"));
 
-        userBox.setOnMouseClicked(
-                e -> navigateTo(
-                        "Profile"
-                )
-        );
-
-        topBar.getChildren().addAll(
-                logo,
-                spacer,
-                notification,
-                userBox
-        );
-
+        topBar.getChildren().addAll(logo, spacer, notification, userBox);
         return topBar;
     }
 
-    // =====================================================
-    // SIDEBAR
-    // =====================================================
-
     private VBox createSidebar() {
-
-        VBox sidebar =
-                new VBox(5);
-
-        sidebar.setPrefWidth(
-                235
-        );
-
-        sidebar.setPadding(
-                new Insets(
-                        15,
-                        10,
-                        15,
-                        10
-                )
-        );
-
+        VBox sidebar = new VBox(5);
+        sidebar.setPrefWidth(235);
+        sidebar.setPadding(new Insets(15, 10, 15, 10));
         sidebar.setStyle(
-                "-fx-background-color: #FFFFFF;"
-                        + "-fx-border-color: "
-                        + BORDER_COLOR
-                        + ";"
-                        + "-fx-border-width: 0 1.5px 0 0;"
-        );
+                "-fx-background-color: #FFFFFF;" +
+                        "-fx-border-color: " + BORDER_COLOR + ";" +
+                        "-fx-border-width: 0 1.5px 0 0;");
 
-        // =================================================
-        // FARMER INFORMATION
-        // =================================================
+        HBox farmerInfo = new HBox(10);
+        farmerInfo.setAlignment(Pos.CENTER_LEFT);
+        farmerInfo.setPadding(new Insets(5, 10, 18, 10));
 
-        HBox farmerInfo =
-                new HBox(10);
+        Circle farmerCircle = new Circle(22, Color.web(PANEL_BG));
+        Node sidebarAvatarIcon = loadIcon("/assets/icons/avatar.png", 32);
+        StackPane farmerAvatar = new StackPane(farmerCircle, sidebarAvatarIcon);
+        farmerAvatar.setPrefSize(44, 44);
 
-        farmerInfo.setAlignment(
-                Pos.CENTER_LEFT
-        );
+        VBox farmerDetails = new VBox(2);
 
-        farmerInfo.setPadding(
-                new Insets(
-                        5,
-                        10,
-                        18,
-                        10
-                )
-        );
-
-        Circle farmerCircle =
-                new Circle(
-                        22,
-                        Color.web(
-                                PANEL_BG
-                        )
-                );
-
-        Label farmerEmoji =
-                new Label(
-                        "👨‍🌾"
-                );
-
-        StackPane farmerAvatar =
-                new StackPane(
-                        farmerCircle,
-                        farmerEmoji
-                );
-
-        VBox farmerDetails =
-                new VBox(2);
-
-        Label name =
-                new Label(
-                        user.getFullName()
-                );
-
+        Label name = new Label(user.getFullName());
         name.setStyle(
-                "-fx-font-size: 14px;"
-                        + "-fx-font-weight: bold;"
-                        + "-fx-text-fill: "
-                        + PRIMARY_TEXT
-                        + ";"
-        );
+                "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + PRIMARY_TEXT + ";");
 
-        Label role =
-                new Label(
-                        user.getRole()
-                );
+        Label role = new Label(user.getRole());
+        role.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748B;");
 
-        role.setStyle(
-                "-fx-font-size: 12px;"
-                        + "-fx-text-fill: #64748B;"
-        );
+        farmerDetails.getChildren().addAll(name, role);
+        farmerInfo.getChildren().addAll(farmerAvatar, farmerDetails);
+        sidebar.getChildren().add(farmerInfo);
 
-        farmerDetails.getChildren().addAll(
-                name,
-                role
-        );
+        navGroup = new ToggleGroup();
 
-        farmerInfo.getChildren().addAll(
-                farmerAvatar,
-                farmerDetails
-        );
+        addNavigation(sidebar, "Dashboard", "/assets/icons/homeicon2.png");
 
-        sidebar.getChildren().add(
-                farmerInfo
-        );
+        addNavigation(sidebar, "Products", "/assets/icons/producticon.png");
 
-        // =================================================
-        // NAVIGATION
-        // =================================================
+        addNavigation(sidebar, "Orders", "/assets/icons/ordericon.png");
 
-        navGroup =
-                new ToggleGroup();
+        addNavigation(sidebar, "Marketplace", "/assets/icons/marketplaceicon2.png");
 
-        addNavigation(
-                sidebar,
-                "Dashboard",
-                "🏠"
-        );
+        addNavigation(sidebar, "Equipment Rental", "/assets/icons/rentalicon.png");
 
-        addNavigation(
-                sidebar,
-                "Products",
-                "🎁"
-        );
+        addNavigation(sidebar, "Crop Prices", "/assets/icons/cropicon.png");
 
-        addNavigation(
-                sidebar,
-                "Orders",
-                "📦"
-        );
+        addNavigation(sidebar, "Weather", "/assets/icons/weathericon.png");
 
-        addNavigation(
-                sidebar,
-                "Marketplace",
-                "🏪"
-        );
+        addNavigation(sidebar, "AI Recommendations", "/assets/icons/aifeatureicon.png");
 
-        addNavigation(
-                sidebar,
-                "Equipment Rental",
-                "🚜"
-        );
+        addNavigation(sidebar, "Notifications", "/assets/icons/notificationicon.png");
 
-        addNavigation(
-                sidebar,
-                "Crop Prices",
-                "📈"
-        );
+        addNavigation(sidebar, "Profile", "/assets/icons/profileicon.png");
 
-        addNavigation(
-                sidebar,
-                "Weather",
-                "🌤"
-        );
+        addNavigation(sidebar, "Settings", "/assets/icons/settingicon.png");
 
-        addNavigation(
-                sidebar,
-                "AI Recommendations",
-                "✨"
-        );
-
-        addNavigation(
-                sidebar,
-                "Notifications",
-                "🔔"
-        );
-
-        addNavigation(
-                sidebar,
-                "Profile",
-                "👤"
-        );
-
-        addNavigation(
-                sidebar,
-                "Settings",
-                "⚙"
-        );
-
-        addNavigation(
-                sidebar,
-                "Logout",
-                "🚪"
-        );
+        addNavigation(sidebar, "Logout", "/assets/icons/logouticon.png");
 
         return sidebar;
     }
 
-    // =====================================================
-    // ADD NAVIGATION BUTTON
-    // =====================================================
-
-    private void addNavigation(
-            VBox sidebar,
-            String title,
-            String emoji) {
-
-        ToggleButton button =
-                createNavigationButton(
-                        title,
-                        emoji
-                );
-
-        navMap.put(
-                title,
-                button
-        );
-
-        sidebar.getChildren().add(
-                button
-        );
+    private void addNavigation(VBox sidebar, String title, String iconPath) {
+        ToggleButton button = createNavigationButton(title, iconPath);
+        navMap.put(title, button);
+        sidebar.getChildren().add(button);
     }
 
-    // =====================================================
-    // CREATE NAVIGATION BUTTON
-    // =====================================================
+    private ToggleButton createNavigationButton(String title, String iconPath) {
 
-    private ToggleButton createNavigationButton(
-            String title,
-            String emoji) {
+        Node icon = loadIcon(iconPath, 20);
 
-        Label icon =
-                new Label(
-                        emoji
-                );
+        Label text = new Label(title);
+        text.setStyle("-fx-font-size: 13px; -fx-text-fill: " + PRIMARY_TEXT + ";");
 
-        icon.setStyle(
-                "-fx-font-size: 18px;"
-        );
+        HBox content = new HBox(12, icon, text);
+        content.setAlignment(Pos.CENTER_LEFT);
 
-        Label text =
-                new Label(
-                        title
-                );
+        ToggleButton button = new ToggleButton();
+        button.setGraphic(content);
+        button.setToggleGroup(navGroup);
+        button.setMaxWidth(Double.MAX_VALUE);
+        button.setPrefHeight(42);
+        button.setPadding(new Insets(0, 10, 0, 14));
+        button.setFocusTraversable(false);
 
-        text.setStyle(
-                "-fx-font-size: 13px;"
-                        + "-fx-text-fill: "
-                        + PRIMARY_TEXT
-                        + ";"
-        );
+        Runnable updateStyle = () -> {
+            if (button.isSelected()) {
+                button.setStyle(
+                        "-fx-background-color: " + PRIMARY_GREEN + ";" +
+                                "-fx-background-radius: 9px;" +
+                                "-fx-cursor: hand;");
+                text.setStyle(
+                        "-fx-font-size: 13px;" +
+                                "-fx-font-weight: bold;" +
+                                "-fx-text-fill: white;");
 
-        HBox content =
-                new HBox(
-                        12,
-                        icon,
-                        text
-                );
+                if (icon instanceof ImageView iv) {
+                    javafx.scene.effect.ColorAdjust whiten = new javafx.scene.effect.ColorAdjust();
+                    whiten.setBrightness(1.0);
+                    iv.setEffect(whiten);
+                }
+            } else {
+                button.setStyle(
+                        "-fx-background-color: transparent;" +
+                                "-fx-background-radius: 9px;" +
+                                "-fx-cursor: hand;");
+                text.setStyle(
+                        "-fx-font-size: 13px;" +
+                                "-fx-text-fill: " + PRIMARY_TEXT + ";");
 
-        content.setAlignment(
-                Pos.CENTER_LEFT
-        );
+                if (icon instanceof ImageView iv) {
+                    iv.setEffect(null);
+                }
+            }
+        };
 
-        ToggleButton button =
-                new ToggleButton();
-
-        button.setGraphic(
-                content
-        );
-
-        button.setToggleGroup(
-                navGroup
-        );
-
-        button.setMaxWidth(
-                Double.MAX_VALUE
-        );
-
-        button.setPrefHeight(
-                42
-        );
-
-        button.setPadding(
-                new Insets(
-                        0,
-                        10,
-                        0,
-                        14
-                )
-        );
-
-        button.setFocusTraversable(
-                false
-        );
-
-        // =================================================
-        // STYLE UPDATE
-        // =================================================
-
-        Runnable updateStyle =
-                () -> {
-
-                    if (
-                            button.isSelected()
-                    ) {
-
-                        button.setStyle(
-                                "-fx-background-color: "
-                                        + PRIMARY_GREEN
-                                        + ";"
-                                        + "-fx-background-radius: 9px;"
-                                        + "-fx-cursor: hand;"
-                        );
-
-                        text.setStyle(
-                                "-fx-font-size: 13px;"
-                                        + "-fx-font-weight: bold;"
-                                        + "-fx-text-fill: white;"
-                        );
-
-                    } else {
-
-                        button.setStyle(
-                                "-fx-background-color: transparent;"
-                                        + "-fx-background-radius: 9px;"
-                                        + "-fx-cursor: hand;"
-                        );
-
-                        text.setStyle(
-                                "-fx-font-size: 13px;"
-                                        + "-fx-text-fill: "
-                                        + PRIMARY_TEXT
-                                        + ";"
-                        );
-                    }
-                };
-
-        button.selectedProperty()
-                .addListener(
-                        (obs, oldValue, newValue) ->
-                                updateStyle.run()
-                );
-
+        button.selectedProperty().addListener((obs, oldVal, newVal) -> updateStyle.run());
         updateStyle.run();
 
-        // =================================================
-        // HOVER
-        // =================================================
+        button.setOnMouseEntered(e -> {
+            if (!button.isSelected()) {
+                button.setStyle(
+                        "-fx-background-color: " + PANEL_BG + ";" +
+                                "-fx-background-radius: 9px;" +
+                                "-fx-cursor: hand;");
+            }
+        });
 
-        button.setOnMouseEntered(
-                e -> {
+        button.setOnMouseExited(e -> {
+            if (!button.isSelected()) {
+                button.setStyle(
+                        "-fx-background-color: transparent;" +
+                                "-fx-background-radius: 9px;" +
+                                "-fx-cursor: hand;");
+            }
+        });
 
-                    if (
-                            !button.isSelected()
-                    ) {
-
-                        button.setStyle(
-                                "-fx-background-color: "
-                                        + PANEL_BG
-                                        + ";"
-                                        + "-fx-background-radius: 9px;"
-                                        + "-fx-cursor: hand;"
-                        );
-                    }
-                }
-        );
-
-        button.setOnMouseExited(
-                e -> {
-
-                    if (
-                            !button.isSelected()
-                    ) {
-
-                        button.setStyle(
-                                "-fx-background-color: transparent;"
-                                        + "-fx-background-radius: 9px;"
-                                        + "-fx-cursor: hand;"
-                        );
-                    }
-                }
-        );
-
-        button.setOnAction(
-                e -> navigateTo(
-                        title
-                )
-        );
-
+        button.setOnAction(e -> navigateTo(title));
         return button;
     }
 
-    // =====================================================
-    // NAVIGATION
-    // =====================================================
-
     public void navigateTo(String page) {
-
-        // =================================================
-        // UPDATE SELECTED SIDEBAR BUTTON
-        // =================================================
-
-        if (
-                navMap.containsKey(page)
-        ) {
-
-            navMap.get(page)
-                    .setSelected(
-                            true
-                    );
-        }
-
-        // =================================================
-        // PAGE NODE
-        // =================================================
+        if (navMap.containsKey(page))
+            navMap.get(page).setSelected(true);
 
         Node viewNode;
 
-        // =================================================
-        // SWITCH
-        // =================================================
-
         switch (page) {
 
-            // =============================================
-            // DASHBOARD
-            // =============================================
-
             case "Dashboard":
-
-                viewNode =
-                        new DashboardOverview(
-                                this
-                        ).getView();
-
+                viewNode = new DashboardOverview(this).getView();
                 break;
-
-            // =============================================
-            // PRODUCTS
-            // =============================================
 
             case "Products":
-
-                viewNode =
-                        new Products(
-                                this,
-                                user.getEmail()
-                        ).getView();
-
+                viewNode = new Products(this, user.getEmail()).getView();
                 break;
-
-            // =============================================
-            // ADD PRODUCT
-            // =============================================
 
             case "AddProduct":
-
-                viewNode =
-                        new AddProduct(
-                                this,
-                                user.getEmail()
-                        ).getView();
-
+                viewNode = new AddProduct(this, user.getEmail()).getView();
                 break;
-
-            // =============================================
-            // ORDERS
-            // =============================================
 
             case "Orders":
-
-                viewNode =
-                        new Orders()
-                                .getView();
-
+                viewNode = new Orders().getView();
                 break;
-
-            // =============================================
-            // MARKETPLACE
-            // =============================================
 
             case "Marketplace":
-
-                viewNode =
-                        new MarketPlace(
-                                this
-                        ).getView();
-
+                viewNode = new MarketPlace(this).getView();
                 break;
-
-            // =============================================
-            // EQUIPMENT RENTAL
-            // =============================================
 
             case "Equipment Rental":
-
-                viewNode =
-                        new EquipmentRental()
-                                .getView();
-
+                viewNode = new EquipmentRental().getView();
                 break;
-
-            // =============================================
-            // CROP PRICES
-            // =============================================
 
             case "Crop Prices":
-
-                viewNode =
-                        new CropPrices(this)
-                                .getView();
-
+                viewNode = new CropPrices(this).getView();
                 break;
-
-            // =============================================
-            // WEATHER
-            // =============================================
 
             case "Weather":
-
-                viewNode =
-                        new Weather()
-                                .getView();
-
+                viewNode = new Weather().getView();
                 break;
-
-            // =============================================
-            // AI RECOMMENDATIONS
-            // =============================================
 
             case "AI Recommendations":
-
-                viewNode =
-                        new AiRecommendations()
-                                .getView();
-
+                viewNode = new AiRecommendations().getView();
                 break;
-
-            // =============================================
-            // NOTIFICATIONS
-            // =============================================
 
             case "Notifications":
-
-                viewNode =
-                        new Notifications(this)
-                                .getView();
-
+                viewNode = new Notifications(this).getView();
                 break;
-
-            // =============================================
-            // PROFILE
-            // =============================================
 
             case "Profile":
-
-                viewNode =
-                        new Profile()
-                                .getView();
-
+                viewNode = new Profile().getView();
                 break;
-
-            // =============================================
-            // SETTINGS
-            // =============================================
 
             case "Settings":
-
-                viewNode =
-                        new Settings()
-                                .getView();
-
+                viewNode = new Settings().getView();
                 break;
-
-            // =============================================
-            // LOGOUT
-            // =============================================
 
             case "Logout":
-
                 handleLogout();
-
                 return;
 
-            // =============================================
-            // DEFAULT
-            // =============================================
-
             default:
-
-                viewNode =
-                        new DashboardOverview(
-                                this
-                        ).getView();
-
+                viewNode = new DashboardOverview(this).getView();
                 break;
         }
 
-        // =================================================
-        // DISPLAY VIEW
-        // =================================================
-
-        if (
-                contentArea != null
-        ) {
-
-            contentArea
-                    .getChildren()
-                    .setAll(
-                            viewNode
-                    );
-        }
+        if (contentArea != null)
+            contentArea.getChildren().setAll(viewNode);
     }
 
-    // =====================================================
-    // EDIT PRODUCT NAVIGATION
-    // =====================================================
-
-    public void navigateToEditProduct(
-            Product product) {
-
-        if (
-                product == null
-        ) {
-
-            System.out.println(
-                    "Cannot edit product."
-            );
-
+    public void navigateToEditProduct(Product product) {
+        if (product == null) {
+            System.out.println("Cannot edit product.");
             return;
         }
+        System.out.println("Opening Edit Product...");
+        System.out.println("Product ID: " + product.getProductId());
+        System.out.println("Product Name: " + product.getName());
 
-        System.out.println(
-                "Opening Edit Product..."
-        );
-
-        System.out.println(
-                "Product ID: "
-                        + product.getProductId()
-        );
-
-        System.out.println(
-                "Product Name: "
-                        + product.getName()
-        );
-
-        EditProduct editProduct =new EditProduct( this,product);
-
-        Node editView =editProduct.getView();
-
-        contentArea
-                .getChildren()
-                .setAll(
-                        editView
-                );
+        EditProduct editProduct = new EditProduct(this, product);
+        contentArea.getChildren().setAll(editProduct.getView());
     }
-
-    // =====================================================
-    // LOGOUT
-    // =====================================================
 
     private void handleLogout() {
-
-        System.out.println(
-                "Farmer logged out: "
-                        + user.getEmail()
-        );
-
-        /*
-         * If you already have a LoginScreen instance,
-         * put your login navigation code here.
-         *
-         * For now, this closes the dashboard window.
-         */
-
-        if (
-                scene != null
-                        &&
-                scene.getWindow() != null
-        ) {
-
-            scene.getWindow()
-                    .hide();
-        }
+        System.out.println("Farmer logged out: " + user.getEmail());
+        if (scene != null && scene.getWindow() != null)
+            scene.getWindow().hide();
     }
 
-    // =====================================================
-    // GET USER
-    // =====================================================
-
     public User getUser() {
-
         return user;
     }
 
-    // =====================================================
-    // GET FARMER EMAIL
-    // =====================================================
-
     public String getFarmerEmail() {
-
         return user.getEmail();
     }
 
-    // =====================================================
-    // GET FARMER NAME
-    // =====================================================
-
     public String getFarmerName() {
-
         return user.getFullName();
     }
 
-    // =====================================================
-    // GET FARMER ROLE
-    // =====================================================
-
     public String getFarmerRole() {
-
         return user.getRole();
     }
 
-    // =====================================================
-    // GET CONTENT AREA
-    // =====================================================
-
     public StackPane getContentArea() {
-
         return contentArea;
     }
 }
