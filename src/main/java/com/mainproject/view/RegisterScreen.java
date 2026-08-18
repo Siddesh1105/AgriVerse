@@ -49,8 +49,8 @@ public class RegisterScreen {
         // GET REGISTER SCREEN
         // =====================================================
 
-        public Scene getRegisterScreenScene(
-                        Runnable callbackAction) {
+        public Scene getRegisterScreenScene(Runnable callbackAction) {
+                Rectangle2D screen = Screen.getPrimary().getVisualBounds();
 
                 // =================================================
                 // LEFT IMAGE
@@ -495,7 +495,7 @@ public class RegisterScreen {
                 // =================================================
 
                 VBox formCard = new VBox(
-                                18,
+                                10,
                                 headerBox,
 
                                 fullNameLabel,
@@ -524,7 +524,7 @@ public class RegisterScreen {
                                 loginBox);
 
                 formCard.setPadding(
-                                new Insets(40));
+                                new Insets(20));
 
                 formCard.setStyle(
                                 "-fx-background-color: #ffffff;" +
@@ -533,44 +533,26 @@ public class RegisterScreen {
                                                 "-fx-border-radius: 15px;" +
                                                 "-fx-border-width: 1px;");
 
-                formCard.setMaxWidth(
-                                560);
+                formCard.setMaxWidth(560);
 
                 // =================================================
                 // RIGHT PANEL
                 // =================================================
 
-                StackPane rightPanel = new StackPane(
-                                formCard);
+                StackPane rightPanel = new StackPane(formCard);
+                rightPanel.setStyle("-fx-background-color: #f1efef;");
 
-                rightPanel.setStyle(
-                                "-fx-background-color: #f1efef;");
-
-                rightPanel.setPadding(
-                                new Insets(40));
+                rightPanel.setPadding(new Insets(30));
 
                 // =================================================
                 // MAIN
                 // =================================================
 
-                HBox main = new HBox(
-                                leftPanel,
-                                rightPanel);
+                HBox main = new HBox(leftPanel, rightPanel);
 
-                HBox.setHgrow(
-                                rightPanel,
-                                Priority.ALWAYS);
-
-                rightPanel.prefWidthProperty()
-                                .bind(
-                                                main.widthProperty()
-                                                                .multiply(0.55));
-
-                leftPanel.prefWidthProperty()
-                                .bind(
-                                                main.widthProperty()
-                                                                .multiply(0.45));
-
+                HBox.setHgrow(rightPanel, Priority.ALWAYS);
+                rightPanel.prefWidthProperty().bind(main.widthProperty().multiply(0.55));
+                leftPanel.prefWidthProperty().bind(main.widthProperty().multiply(0.45));
                 main.setStyle(
                                 "-fx-background-color: #9e9d98;");
 
@@ -578,11 +560,8 @@ public class RegisterScreen {
                 // SCENE
                 // =================================================
 
-                registerScreenScene = new Scene(
-                                main);
+                registerScreenScene = new Scene(main, 1400, 1000);
 
-                Rectangle2D screen = Screen.getPrimary()
-                                .getVisualBounds();
                 registerScreenScene.setFill(
                                 Color.WHITESMOKE);
 
@@ -614,14 +593,8 @@ public class RegisterScreen {
                                                 "-fx-font-weight: bold;");
 
                 btn.selectedProperty()
-                                .addListener(
-                                                (
-                                                                obs,
-                                                                wasSelected,
-                                                                isSelected) -> {
-
+                                .addListener((obs,wasSelected,isSelected) -> {
                                                         if (isSelected) {
-
                                                                 btn.setStyle(
                                                                                 "-fx-background-color: #eaf4ea;" +
                                                                                                 "-fx-border-color: #2E7D32;"
