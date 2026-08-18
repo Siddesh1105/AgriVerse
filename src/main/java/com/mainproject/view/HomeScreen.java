@@ -21,14 +21,13 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
-
 public class HomeScreen extends Application {
 
-    private static final String DARK_GREEN  = "#1B5E20";
-    private static final String MID_GREEN    = "#2E7D32";
-    private static final String LIGHT_GREEN  = "#66BB6A";
-    private static final String BG_MINT      = "#EAF6EA";
-    private static final String TEXT_GRAY    = "#666666";
+    private static final String DARK_GREEN = "#1B5E20";
+    private static final String MID_GREEN = "#2E7D32";
+    private static final String LIGHT_GREEN = "#66BB6A";
+    private static final String BG_MINT = "#EAF6EA";
+    private static final String TEXT_GRAY = "#666666";
 
     @Override
     public void start(Stage myStage) {
@@ -63,7 +62,7 @@ public class HomeScreen extends Application {
     }
 
     // =====================================================
-    // HEADER  (nav links now navigate to other screens)
+    // HEADER (nav links now navigate to other screens)
     // =====================================================
     private HBox buildHeader(Stage stage) {
 
@@ -84,9 +83,9 @@ public class HomeScreen extends Application {
         logoBox.setAlignment(Pos.CENTER_LEFT);
 
         HBox nav = new HBox(30,
-                navLink("Home",       stage, "home"),
-                navLink("About Us",   stage, "about"),
-                navLink("Features",   stage, "features"),
+                navLink("Home", stage, "home"),
+                navLink("About Us", stage, "about"),
+                navLink("Features", stage, "features"),
                 navLink("Contact Us", stage, "contact"));
         nav.setAlignment(Pos.CENTER);
 
@@ -123,10 +122,20 @@ public class HomeScreen extends Application {
 
     private void navigate(Stage stage, String target) {
         switch (target) {
-            case "home"     -> { /* already on home */ }
-            case "about"    -> { AboutUsScreen as = new AboutUsScreen(); as.start(stage); }
-            case "features" -> { FeaturesScreen fs = new FeaturesScreen(); fs.start(stage); }
-            case "contact"  -> { ContactUsScreen cs = new ContactUsScreen(); cs.start(stage); }
+            case "home" -> {
+                /* already on home */ }
+            case "about" -> {
+                AboutUsScreen as = new AboutUsScreen();
+                as.start(stage);
+            }
+            case "features" -> {
+                FeaturesScreen fs = new FeaturesScreen();
+                fs.start(stage);
+            }
+            case "contact" -> {
+                ContactUsScreen cs = new ContactUsScreen();
+                cs.start(stage);
+            }
         }
     }
 
@@ -148,8 +157,8 @@ public class HomeScreen extends Application {
 
         Text subtitle = new Text(
                 "AgriLink is your one-stop platform for buying and selling " +
-                "agricultural products, exploring market prices, renting " +
-                "equipment, and getting smart farming insights.");
+                        "agricultural products, exploring market prices, renting " +
+                        "equipment, and getting smart farming insights.");
         subtitle.setStyle("-fx-font-size: 14px; -fx-fill: " + TEXT_GRAY + "; -fx-line-spacing: 4px;");
         subtitle.setWrappingWidth(480);
 
@@ -157,11 +166,11 @@ public class HomeScreen extends Application {
         Button getStartedBtn = new Button("Get Started   \u2192");
         getStartedBtn.setStyle(
                 "-fx-background-color: " + MID_GREEN + ";" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-background-radius: 25px;" +
-                "-fx-padding: 12 28 12 28;");
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 25px;" +
+                        "-fx-padding: 12 28 12 28;");
         getStartedBtn.setOnAction(e -> {
             LoginScreen loginScreen = new LoginScreen();
             loginScreen.start(LoginScreen.Homestage);
@@ -170,13 +179,13 @@ public class HomeScreen extends Application {
         Button learnMoreBtn = new Button("Learn More");
         learnMoreBtn.setStyle(
                 "-fx-background-color: transparent;" +
-                "-fx-text-fill: " + MID_GREEN + ";" +
-                "-fx-font-size: 14px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-border-color: " + MID_GREEN + ";" +
-                "-fx-border-radius: 25px;" +
-                "-fx-border-width: 1.5px;" +
-                "-fx-padding: 11 28 11 28;");
+                        "-fx-text-fill: " + MID_GREEN + ";" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-border-color: " + MID_GREEN + ";" +
+                        "-fx-border-radius: 25px;" +
+                        "-fx-border-width: 1.5px;" +
+                        "-fx-padding: 11 28 11 28;");
         // "Learn More" scrolls to features or navigates to FeaturesScreen
         learnMoreBtn.setOnAction(e -> navigate(stage, "features"));
 
@@ -208,10 +217,10 @@ public class HomeScreen extends Application {
             avatar.setPrefSize(34, 34);
             avatar.setStyle(
                     "-fx-background-color: " + c + ";" +
-                    "-fx-background-radius: 50%;" +
-                    "-fx-border-color: white;" +
-                    "-fx-border-width: 2px;" +
-                    "-fx-border-radius: 50%;");
+                            "-fx-background-radius: 50%;" +
+                            "-fx-border-color: white;" +
+                            "-fx-border-width: 2px;" +
+                            "-fx-border-radius: 50%;");
             avatarStack.getChildren().add(avatar);
         }
 
@@ -228,7 +237,7 @@ public class HomeScreen extends Application {
 
     private StackPane buildHeroImageWithOverlay() {
 
-        ImageView farmerImage = new ImageView("file:src/main/resources/assets/icons/homepage_farmer.jpg");
+        ImageView farmerImage = new ImageView("file:src/main/resources/assets/icons/farmerhomepage.png");
         farmerImage.setFitWidth(560);
         farmerImage.setFitHeight(480);
         farmerImage.setPreserveRatio(false);
@@ -238,15 +247,7 @@ public class HomeScreen extends Application {
         clip.setArcHeight(80);
         farmerImage.setClip(clip);
 
-        VBox overlayCard = new VBox(18,
-                overlayRow("\uD83D\uDED2", "Buy & Sell", "Farm fresh produce directly"),
-                overlayRow("\uD83D\uDCE1", "Live Market", "Watch farmers live and buy in real-time"),
-                overlayRow("\uD83D\uDE9C", "Equipment Rental", "Rent agricultural equipment easily"),
-                overlayRow("\uD83E\uDD16", "AI Insights", "Smart recommendations for better farming"));
-
-        overlayCard.setPadding(new Insets(24));
-        overlayCard.setMaxWidth(230);
-        overlayCard.setStyle("-fx-background-color: white; -fx-background-radius: 18px;");
+        VBox overlayCard = new VBox(18);
 
         DropShadow shadow = new DropShadow();
         shadow.setRadius(20);
@@ -260,28 +261,6 @@ public class HomeScreen extends Application {
         return stack;
     }
 
-    private HBox overlayRow(String emoji, String title, String desc) {
-
-        Text icon = new Text(emoji);
-        icon.setStyle("-fx-font-size: 18px;");
-
-        Text titleText = new Text(title);
-        titleText.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-fill: #111111;");
-
-        Text descText = new Text(desc);
-        descText.setStyle("-fx-font-size: 11px; -fx-fill: " + TEXT_GRAY + ";");
-        descText.setWrappingWidth(160);
-
-        VBox textBlock = new VBox(2, titleText, descText);
-
-        HBox row = new HBox(10, icon, textBlock);
-        row.setAlignment(Pos.CENTER_LEFT);
-        return row;
-    }
-
-    // =====================================================
-    // WHY CHOOSE AGRILINK
-    // =====================================================
     private VBox buildWhyChooseSection() {
 
         Text title = new Text("\u2014  Why Choose AgriLink?  \u2014");
@@ -332,9 +311,6 @@ public class HomeScreen extends Application {
         return card;
     }
 
-    // =====================================================
-    // STATS BAR
-    // =====================================================
     private HBox buildStatsBar() {
 
         HBox statsRow = new HBox(0,

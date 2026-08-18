@@ -3,7 +3,6 @@ package com.mainproject.view;
 import com.mainproject.controller.AuthController;
 import com.mainproject.dao.UserDAO;
 import com.mainproject.model.User;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
