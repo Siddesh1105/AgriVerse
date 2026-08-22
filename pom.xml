@@ -30,13 +30,11 @@
             <scope>compile</scope>
         </dependency>
 
-
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.json</groupId>
@@ -44,13 +42,11 @@
             <version>20250517</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -58,13 +54,11 @@
             <version>${javafx.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
             <version>${javafx.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>com.google.firebase</groupId>
@@ -72,20 +66,18 @@
             <version>${firebase.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-firestore</artifactId>
             <version>3.30.1</version>
         </dependency>
 
-
         <dependency>
             <groupId>com.google.auth</groupId>
             <artifactId>google-auth-library-oauth2-http</artifactId>
             <version>1.30.0</version>
         </dependency>
-        
+    
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -106,8 +98,6 @@
 
         <plugins>
 
-
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -118,6 +108,7 @@
                     <target>17</target>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
