@@ -1,7 +1,10 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.dao.EquipmentDAO;
+import com.mainproject.util.LanguageManager;
+
+import com.mainproject.controller.EquipmentController;
 import com.mainproject.model.Equipment;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -35,7 +38,7 @@ public class MyEquipment {
     private static final String SECONDARY = "#566573";
     private static final String BG = "#F4FBF7";
 
-    private final EquipmentDAO equipmentDAO = new EquipmentDAO();
+    private final EquipmentController equipmentController = new EquipmentController();
 
     private final String farmerEmail;
     private final String farmerName;
@@ -350,6 +353,7 @@ public class MyEquipment {
                 filters,
                 scroll);
 
+        LanguageManager.apply(root);
         return root;
     }
 
@@ -372,7 +376,7 @@ public class MyEquipment {
                 return;
             }
 
-            List<Equipment> data = equipmentDAO.getEquipmentByOwner(
+            List<Equipment> data = equipmentController.getEquipmentByOwner(
                     farmerEmail);
 
             if (data != null) {
@@ -842,7 +846,7 @@ public class MyEquipment {
                                             availableBox
                                                     .isSelected());
 
-                                    boolean updated = equipmentDAO
+                                    boolean updated = equipmentController
                                             .updateEquipment(
                                                     equipment);
 
@@ -897,7 +901,7 @@ public class MyEquipment {
 
                             if (result == javafx.scene.control.ButtonType.OK) {
 
-                                boolean deleted = equipmentDAO
+                                boolean deleted = equipmentController
                                         .deleteEquipment(
                                                 equipment
                                                         .getEquipmentId());

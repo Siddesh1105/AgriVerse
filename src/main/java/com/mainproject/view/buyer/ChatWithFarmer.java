@@ -1,5 +1,7 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.util.LanguageManager;
+
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -43,6 +45,7 @@ public class ChatWithFarmer {
 
         root.setCenter(chatArea);
         root.setBottom(inputBar);
+        LanguageManager.apply(root);
         return root;
     }
 }

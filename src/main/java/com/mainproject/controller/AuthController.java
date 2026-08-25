@@ -166,6 +166,23 @@ public class AuthController {
             String email,
             String password) {
 
+        String idToken =
+                authenticateAndGetToken(
+                        email,
+                        password
+                );
+
+        return idToken != null;
+    }
+
+    // =====================================================
+    // AUTHENTICATE AND GET ID TOKEN
+    // =====================================================
+
+    private String authenticateAndGetToken(
+            String email,
+            String password) {
+
         JSONObject payload =
                 new JSONObject()
                         .put("email", email)
@@ -201,12 +218,12 @@ public class AuthController {
                     );
 
             System.out.println(
-                    "Login Status: "
+                    "Authentication Status: "
                             + response.statusCode()
             );
 
             System.out.println(
-                    "Login Response: "
+                    "Authentication Response: "
                             + response.body()
             );
 
@@ -221,19 +238,168 @@ public class AuthController {
 
                     System.out.println(
                             "Firebase UID: "
-                                    + json.getString("localId")
+                                    + json.getString(
+                                            "localId"
+                                    )
                     );
                 }
 
+                if (json.has("idToken")) {
+
+                    return json.getString(
+                            "idToken"
+                    );
+                }
+            }
+
+            return null;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return null;
+        }
+    }
+
+    // =====================================================
+    // CHANGE PASSWORD
+    // =====================================================
+    //
+    // 1. Verify current password
+    // 2. Get Firebase ID token
+    // 3. Update password using Firebase
+    //
+    // =====================================================
+
+    public boolean changePassword(
+            String email,
+            String currentPassword,
+            String newPassword) {
+
+        try {
+
+            // -------------------------------------------------
+            // VALIDATION
+            // -------------------------------------------------
+
+            if (email == null
+                    || email.trim().isEmpty()
+                    || currentPassword == null
+                    || currentPassword.isEmpty()
+                    || newPassword == null
+                    || newPassword.isEmpty()) {
+
                 System.out.println(
-                        "Firebase Login Successful!"
+                        "Change Password: Missing information."
+                );
+
+                return false;
+            }
+
+            // -------------------------------------------------
+            // VERIFY CURRENT PASSWORD
+            // -------------------------------------------------
+
+            System.out.println(
+                    "Verifying current password for: "
+                            + email
+            );
+
+            String idToken =
+                    authenticateAndGetToken(
+                            email.trim(),
+                            currentPassword
+                    );
+
+            // Current password is incorrect
+            if (idToken == null) {
+
+                System.out.println(
+                        "Change Password: Current password is incorrect."
+                );
+
+                return false;
+            }
+
+            System.out.println(
+                    "Current password verified successfully."
+            );
+
+            // -------------------------------------------------
+            // UPDATE PASSWORD IN FIREBASE
+            // -------------------------------------------------
+
+            JSONObject payload =
+                    new JSONObject()
+                            .put(
+                                    "idToken",
+                                    idToken
+                            )
+                            .put(
+                                    "password",
+                                    newPassword
+                            )
+                            .put(
+                                    "returnSecureToken",
+                                    true
+                            );
+
+            URI uri = URI.create(
+                    "https://identitytoolkit.googleapis.com/v1/accounts:update?key="
+                            + API_KEY
+            );
+
+            HttpRequest request =
+                    HttpRequest.newBuilder()
+                            .uri(uri)
+                            .header(
+                                    "Content-Type",
+                                    "application/json"
+                            )
+                            .POST(
+                                    HttpRequest.BodyPublishers
+                                            .ofString(
+                                                    payload.toString()
+                                            )
+                            )
+                            .build();
+
+            HttpResponse<String> response =
+                    client.send(
+                            request,
+                            HttpResponse.BodyHandlers.ofString()
+                    );
+
+            System.out.println(
+                    "Change Password Status: "
+                            + response.statusCode()
+            );
+
+            System.out.println(
+                    "Change Password Response: "
+                            + response.body()
+            );
+
+            // -------------------------------------------------
+            // SUCCESS
+            // -------------------------------------------------
+
+            if (response.statusCode() == 200) {
+
+                System.out.println(
+                        "Firebase password changed successfully!"
                 );
 
                 return true;
             }
 
+            // -------------------------------------------------
+            // FAILED
+            // -------------------------------------------------
+
             System.out.println(
-                    "Firebase Login Failed!"
+                    "Firebase password change failed."
             );
 
             return false;

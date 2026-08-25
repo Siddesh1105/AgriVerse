@@ -1,5 +1,7 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.util.LanguageManager;
+
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -60,6 +62,7 @@ public class ProductDetails {
 
         content.getChildren().addAll(imageMock, info);
         root.getChildren().addAll(btnBack, content);
+        LanguageManager.apply(root);
         return root;
     }
 }

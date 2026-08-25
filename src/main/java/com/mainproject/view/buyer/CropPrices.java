@@ -1,5 +1,7 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.util.LanguageManager;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -64,6 +66,7 @@ public class CropPrices{
         table.setItems(data);
 
         root.getChildren().addAll(title, table);
+        LanguageManager.apply(root);
         return root;
     }
 }

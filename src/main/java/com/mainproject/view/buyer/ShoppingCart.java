@@ -1,5 +1,7 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.util.LanguageManager;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -50,6 +52,7 @@ public class ShoppingCart {
         root.setCenter(itemsBox);
         root.setRight(summary);
         BorderPane.setMargin(summary, new Insets(0, 0, 0, 20));
+        LanguageManager.apply(root);
         return root;
     }
 

@@ -1,5 +1,7 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.util.LanguageManager;
+
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -59,6 +61,7 @@ public class Checkout {
 
         panels.getChildren().addAll(leftForm, rightConfirm);
         root.getChildren().addAll(title, panels);
+        LanguageManager.apply(root);
         return root;
     }
 }

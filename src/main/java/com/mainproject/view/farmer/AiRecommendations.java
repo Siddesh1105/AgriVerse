@@ -1,5 +1,7 @@
 package com.mainproject.view.farmer;
 
+import com.mainproject.util.LanguageManager;
+
 
 import javafx.geometry.Insets;
 import javafx.scene.Node;

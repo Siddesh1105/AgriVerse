@@ -1,5 +1,7 @@
 package com.mainproject.view.farmer;
 
+import com.mainproject.util.LanguageManager;
+
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -165,7 +167,8 @@ public class Weather {
                 scrollPane.setStyle(
                                 "-fx-background-color: transparent;");
 
-                return scrollPane;
+                LanguageManager.apply(scrollPane);
+        return scrollPane;
         }
 
         private Label createStat(

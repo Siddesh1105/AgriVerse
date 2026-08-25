@@ -1,5 +1,7 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.util.LanguageManager;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -34,6 +36,7 @@ public class MyOrders {
         ScrollPane sp = new ScrollPane(root);
         sp.setFitToWidth(true);
         sp.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        LanguageManager.apply(sp);
         return sp;
     }
 

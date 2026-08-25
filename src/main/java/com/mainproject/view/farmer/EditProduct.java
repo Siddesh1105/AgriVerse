@@ -1,5 +1,7 @@
 package com.mainproject.view.farmer;
 
+import com.mainproject.util.LanguageManager;
+
 
 import java.io.File;
 import java.util.Map;
@@ -8,7 +10,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
 import com.mainproject.config.CloudinaryConfig;
-import com.mainproject.dao.ProductDAO;
+import com.mainproject.controller.ProductController;
 import com.mainproject.model.Product;
 
 import javafx.geometry.Insets;
@@ -45,7 +47,7 @@ public class EditProduct {
 
     private final Product product;
 
-    private final ProductDAO productDAO;
+    private final ProductController productController;
 
     private final Cloudinary cloudinary =
             CloudinaryConfig.getCloudinary();
@@ -70,8 +72,8 @@ public class EditProduct {
         this.product =
                 product;
 
-        this.productDAO =
-                new ProductDAO();
+        this.productController =
+                new ProductController();
     }
 
     // =====================================================
@@ -1082,7 +1084,7 @@ public class EditProduct {
             );
 
             boolean updated =
-                    productDAO.updateProduct(
+                    productController.updateProduct(
                             product
                     );
 

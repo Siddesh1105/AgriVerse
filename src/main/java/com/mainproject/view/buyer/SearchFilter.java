@@ -1,5 +1,7 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.util.LanguageManager;
+
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -54,6 +56,7 @@ public class SearchFilter {
 
         root.setLeft(filters);
         root.setCenter(resultsBox);
+        LanguageManager.apply(root);
         return root;
     }
 

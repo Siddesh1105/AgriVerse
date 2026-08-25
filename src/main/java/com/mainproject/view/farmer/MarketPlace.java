@@ -1,10 +1,12 @@
 package com.mainproject.view.farmer;
 
+import com.mainproject.util.LanguageManager;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mainproject.dao.ProductDAO;
+import com.mainproject.controller.ProductController;
 import com.mainproject.model.Product;
 
 import javafx.geometry.Insets;
@@ -37,7 +39,7 @@ public class MarketPlace {
 
     private final FarmerDashboard navigator;
 
-    private final ProductDAO productDAO;
+    private final ProductController productController;
 
     private final VBox productList = new VBox(12);
 
@@ -61,7 +63,7 @@ public class MarketPlace {
 
         this.navigator = navigator;
 
-        this.productDAO = new ProductDAO();
+        this.productController = new ProductController();
     }
 
     // =====================================================
@@ -363,7 +365,7 @@ public class MarketPlace {
             System.out.println(
                     "Loading marketplace products...");
 
-            List<Product> products = productDAO.getAllProducts();
+            List<Product> products = productController.getAllProducts();
 
             if (products == null
                     ||

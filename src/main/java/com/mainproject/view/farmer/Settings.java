@@ -1,17 +1,25 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.dao.UserDAO;
+import com.mainproject.util.LanguageManager;
+
+import com.mainproject.controller.AuthController;
+import com.mainproject.controller.UserController;
 import com.mainproject.model.User;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
+
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -19,986 +27,1335 @@ import javafx.scene.layout.VBox;
 
 public class Settings {
 
-    private final String farmerEmail;
+        // =====================================================
+        // USER
+        // =====================================================
 
-    private User user;
+        private final String farmerEmail;
 
-    private final UserDAO userDAO =
-            new UserDAO();
+        private final Runnable languageChanged;
 
-    private static final String MAIN_BG = "#E9F7EF";
-    private static final String PRIMARY_GREEN = "#117864";
-    private static final String PRIMARY_TEXT = "#1B2631";
-    private static final String SECONDARY_TEXT = "#566573";
-    private static final String BORDER_COLOR = "#A2D9CE";
+        private User user;
 
-    private VBox contentPanel;
-    private Button activeButton;
+        private final UserController userController = new UserController();
 
-    // =====================================================
-    // CONSTRUCTOR
-    // =====================================================
+        // =====================================================
+        // AUTH CONTROLLER
+        // =====================================================
 
-    public Settings(String farmerEmail) {
+        private final AuthController authController = new AuthController();
 
-        this.farmerEmail = farmerEmail;
+        // =====================================================
+        // COLORS
+        // =====================================================
 
-        loadUser();
-    }
+        private static final String MAIN_BG = "#E9F7EF";
 
-    // =====================================================
-    // LOAD USER FROM FIRESTORE
-    // =====================================================
+        private static final String PRIMARY_GREEN = "#117864";
 
-    private void loadUser() {
+        private static final String PRIMARY_TEXT = "#1B2631";
 
-        if (farmerEmail == null
-                || farmerEmail.trim().isEmpty()) {
+        private static final String SECONDARY_TEXT = "#566573";
 
-            System.out.println(
-                    "Settings: Farmer email is empty.");
+        private static final String BORDER_COLOR = "#A2D9CE";
 
-            return;
-        }
-
-        try {
-
-            user =
-                    userDAO.getUserByEmail(
-                            farmerEmail);
-
-            if (user != null) {
-
-                System.out.println(
-                        "Settings user loaded successfully.");
-
-            } else {
-
-                System.out.println(
-                        "Settings user not found: "
-                                + farmerEmail);
-            }
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Error loading settings user:");
-
-            e.printStackTrace();
-        }
-    }
-
-    // =====================================================
-    // MAIN VIEW
-    // =====================================================
-
-    public Node getView() {
-
-        VBox root =
-                new VBox(18);
-
-        root.setPadding(
-                new Insets(
-                        10,
-                        10,
-                        20,
-                        10));
-
-        root.setStyle(
-                "-fx-background-color:"
-                        + MAIN_BG
-                        + ";");
-
-        // =================================================
-        // TITLE
-        // =================================================
-
-        VBox titles =
-                new VBox(4);
-
-        Label title =
-                new Label("Settings");
-
-        title.setStyle(
-                "-fx-font-size:30px;"
-                        + "-fx-font-weight:800;"
-                        + "-fx-text-fill:"
-                        + PRIMARY_TEXT
-                        + ";");
-
-        Label sub =
-                new Label(
-                        "Manage your account and preferences.");
-
-        sub.setStyle(
-                "-fx-font-size:15px;"
-                        + "-fx-text-fill:"
-                        + SECONDARY_TEXT
-                        + ";");
-
-        titles.getChildren()
-                .addAll(
-                        title,
-                        sub);
-
-        // =================================================
-        // MAIN SETTINGS LAYOUT
-        // =================================================
-
-        HBox layout =
-                new HBox(20);
-
-        // =================================================
-        // LEFT MENU
-        // =================================================
-
-        VBox menu =
-                new VBox(6);
-
-        menu.setPrefWidth(220);
-        menu.setMinWidth(200);
-        menu.setMaxWidth(230);
-
-        // ACCOUNT
-        Button accountButton =
-                createMenuItem(
-                        "Account",
-                        true);
-
-        // PASSWORD
-        Button passwordButton =
-                createMenuItem(
-                        "Password",
-                        false);
-
-        // NOTIFICATIONS
-        Button notificationButton =
-                createMenuItem(
-                        "Notifications",
-                        false);
-
-        // PAYMENT METHODS
-        Button paymentButton =
-                createMenuItem(
-                        "Payment Methods",
-                        false);
-
-        // PRIVACY
-        Button privacyButton =
-                createMenuItem(
-                        "Privacy",
-                        false);
-
-        // LANGUAGE
-        Button languageButton =
-                createMenuItem(
-                        "Language",
-                        false);
-
-        menu.getChildren()
-                .addAll(
-                        accountButton,
-                        passwordButton,
-                        notificationButton,
-                        paymentButton,
-                        privacyButton,
-                        languageButton);
-
-        // =================================================
+        // =====================================================
         // CONTENT PANEL
-        // =================================================
+        // =====================================================
 
-        contentPanel =
-                new VBox();
+        private VBox contentPanel;
 
-        contentPanel.setPadding(
-                new Insets(28));
+        private Button activeButton;
 
-        contentPanel.setMaxWidth(
-                Double.MAX_VALUE);
+        // =====================================================
+        // CONSTRUCTOR
+        // =====================================================
 
-        HBox.setHgrow(
-                contentPanel,
-                Priority.ALWAYS);
+        public Settings(String farmerEmail) {
 
-        contentPanel.setStyle(
-                "-fx-background-color:white;"
-                        + "-fx-background-radius:14px;"
-                        + "-fx-border-color:"
-                        + BORDER_COLOR
-                        + ";"
-                        + "-fx-border-radius:14px;");
+                this(farmerEmail, null);
+        }
 
-        // =================================================
-        // BUTTON ACTIONS
-        // =================================================
+        public Settings(
+                        String farmerEmail,
+                        Runnable languageChanged) {
 
-        accountButton.setOnAction(e -> {
+                this.farmerEmail = farmerEmail;
+                this.languageChanged = languageChanged;
 
-            setActiveButton(
-                    accountButton);
+                loadUser();
+        }
 
-            showAccount();
-        });
+        // =====================================================
+        // LOAD USER FROM FIRESTORE
+        // =====================================================
 
-        passwordButton.setOnAction(e -> {
+        private void loadUser() {
 
-            setActiveButton(
-                    passwordButton);
+                if (farmerEmail == null
+                                || farmerEmail.trim().isEmpty()) {
 
-            showPassword();
-        });
+                        System.out.println(
+                                        "Settings: Farmer email is empty.");
 
-        notificationButton.setOnAction(e -> {
+                        return;
+                }
 
-            setActiveButton(
-                    notificationButton);
+                try {
 
-            showNotifications();
-        });
+                        user = userController.getUserByEmail(
+                                        farmerEmail);
 
-        paymentButton.setOnAction(e -> {
+                        if (user != null) {
 
-            setActiveButton(
-                    paymentButton);
+                                System.out.println(
+                                                "====================================");
 
-            showPaymentMethods();
-        });
+                                System.out.println(
+                                                "Settings user loaded successfully");
 
-        privacyButton.setOnAction(e -> {
+                                System.out.println(
+                                                "User Name: "
+                                                                + user.getFullName());
 
-            setActiveButton(
-                    privacyButton);
+                                System.out.println(
+                                                "User Email: "
+                                                                + user.getEmail());
 
-            showPrivacy();
-        });
+                                System.out.println(
+                                                "User Mobile: "
+                                                                + user.getMobileNumber());
 
-        languageButton.setOnAction(e -> {
+                                System.out.println(
+                                                "User Gender: "
+                                                                + user.getGender());
 
-            setActiveButton(
-                    languageButton);
+                                System.out.println(
+                                                "User Role: "
+                                                                + user.getRole());
 
-            showLanguage();
-        });
+                                System.out.println(
+                                                "====================================");
 
-        // =================================================
-        // DEFAULT
-        // =================================================
+                        } else {
 
-        activeButton =
-                accountButton;
+                                System.out.println(
+                                                "Settings user not found: "
+                                                                + farmerEmail);
+                        }
 
-        showAccount();
+                } catch (Exception e) {
 
-        // =================================================
-        // ADD TO LAYOUT
-        // =================================================
+                        System.out.println(
+                                        "Error loading settings user:");
 
-        layout.getChildren()
-                .addAll(
-                        menu,
-                        contentPanel);
+                        e.printStackTrace();
+                }
+        }
 
-        VBox.setVgrow(
-                layout,
-                Priority.ALWAYS);
+        // =====================================================
+        // MAIN VIEW
+        // =====================================================
 
-        root.getChildren()
-                .addAll(
-                        titles,
-                        layout);
+        public Node getView() {
 
-        // =================================================
-        // SCROLL
-        // =================================================
+                VBox root = new VBox(18);
 
-        ScrollPane scrollPane =
-                new ScrollPane(root);
+                root.setPadding(
+                                new Insets(
+                                                10,
+                                                10,
+                                                20,
+                                                10));
 
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
+                root.setStyle(
+                                "-fx-background-color:"
+                                                + MAIN_BG
+                                                + ";");
 
-        scrollPane.setHbarPolicy(
-                ScrollPane.ScrollBarPolicy.NEVER);
+                // =================================================
+                // PAGE HEADER
+                // =================================================
 
-        scrollPane.setVbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED);
+                VBox titles = new VBox(4);
 
-        scrollPane.setStyle(
-                "-fx-background-color:"
-                        + MAIN_BG
-                        + ";"
-                        + "-fx-background:"
-                        + MAIN_BG
-                        + ";");
+                Label title = new Label("Settings");
 
+                title.setStyle(
+                                "-fx-font-size:30px;"
+                                                + "-fx-font-weight:800;"
+                                                + "-fx-text-fill:"
+                                                + PRIMARY_TEXT
+                                                + ";");
+
+                Label sub = new Label(
+                                "Manage your account and preferences.");
+
+                sub.setStyle(
+                                "-fx-font-size:15px;"
+                                                + "-fx-text-fill:"
+                                                + SECONDARY_TEXT
+                                                + ";");
+
+                titles.getChildren()
+                                .addAll(
+                                                title,
+                                                sub);
+
+                // =================================================
+                // MAIN SETTINGS LAYOUT
+                // =================================================
+
+                HBox layout = new HBox(26);
+
+                layout.setFillHeight(true);
+
+                // =================================================
+                // LEFT MENU
+                // =================================================
+
+                VBox menu = new VBox(6);
+
+                menu.setPrefWidth(220);
+                menu.setMinWidth(200);
+                menu.setMaxWidth(230);
+
+                Button accountButton = createMenuItem(
+                                "Account",
+                                true);
+
+                Button passwordButton = createMenuItem(
+                                "Password",
+                                false);
+
+                Button notificationButton = createMenuItem(
+                                "Notifications",
+                                false);
+
+                Button paymentButton = createMenuItem(
+                                "Payment Methods",
+                                false);
+
+                Button privacyButton = createMenuItem(
+                                "Privacy",
+                                false);
+
+                Button languageButton = createMenuItem(
+                                "Language",
+                                false);
+
+                menu.getChildren()
+                                .addAll(
+                                                accountButton,
+                                                passwordButton,
+                                                notificationButton,
+                                                paymentButton,
+                                                privacyButton,
+                                                languageButton);
+
+                // =================================================
+                // CONTENT PANEL
+                // =================================================
+
+                contentPanel = new VBox(18);
+
+                contentPanel.setPadding(
+                                new Insets(28));
+
+                contentPanel.setMinHeight(520);
+
+                contentPanel.setMaxWidth(
+                                Double.MAX_VALUE);
+
+                HBox.setHgrow(
+                                contentPanel,
+                                Priority.ALWAYS);
+
+                contentPanel.setStyle(
+                                "-fx-background-color:#FFFFFF;"
+                                                + "-fx-background-radius:14px;"
+                                                + "-fx-border-color:"
+                                                + BORDER_COLOR
+                                                + ";"
+                                                + "-fx-border-radius:14px;");
+
+                // =================================================
+                // BUTTON EVENTS
+                // =================================================
+
+                accountButton.setOnAction(e -> {
+
+                        setActiveButton(
+                                        accountButton);
+
+                        showAccount();
+                });
+
+                passwordButton.setOnAction(e -> {
+
+                        setActiveButton(
+                                        passwordButton);
+
+                        showPassword();
+                });
+
+                notificationButton.setOnAction(e -> {
+
+                        setActiveButton(
+                                        notificationButton);
+
+                        showNotifications();
+                });
+
+                paymentButton.setOnAction(e -> {
+
+                        setActiveButton(
+                                        paymentButton);
+
+                        showPaymentMethods();
+                });
+
+                privacyButton.setOnAction(e -> {
+
+                        setActiveButton(
+                                        privacyButton);
+
+                        showPrivacy();
+                });
+
+                languageButton.setOnAction(e -> {
+
+                        setActiveButton(
+                                        languageButton);
+
+                        showLanguage();
+                });
+
+                // =================================================
+                // DEFAULT PAGE
+                // =================================================
+
+                activeButton = accountButton;
+
+                showAccount();
+
+                // =================================================
+                // LAYOUT
+                // =================================================
+
+                layout.getChildren()
+                                .addAll(
+                                                menu,
+                                                contentPanel);
+
+                VBox.setVgrow(
+                                layout,
+                                Priority.ALWAYS);
+
+                root.getChildren()
+                                .addAll(
+                                                titles,
+                                                layout);
+
+                // =================================================
+                // SCROLL PANE
+                // =================================================
+
+                ScrollPane scrollPane = new ScrollPane(root);
+
+                scrollPane.setFitToWidth(true);
+
+                scrollPane.setFitToHeight(true);
+
+                scrollPane.setHbarPolicy(
+                                ScrollPane.ScrollBarPolicy.NEVER);
+
+                scrollPane.setVbarPolicy(
+                                ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+                scrollPane.setStyle(
+                                "-fx-background-color:"
+                                                + MAIN_BG
+                                                + ";"
+                                                + "-fx-background:"
+                                                + MAIN_BG
+                                                + ";");
+
+                LanguageManager.apply(scrollPane);
         return scrollPane;
-    }
-
-    // =====================================================
-    // ACTIVE MENU
-    // =====================================================
-
-    private void setActiveButton(
-            Button button) {
-
-        if (activeButton != null) {
-
-            activeButton.setStyle(
-                    "-fx-background-color:transparent;"
-                            + "-fx-text-fill:"
-                            + PRIMARY_TEXT
-                            + ";"
-                            + "-fx-font-size:14px;"
-                            + "-fx-font-weight:600;"
-                            + "-fx-background-radius:9px;"
-                            + "-fx-cursor:hand;");
         }
 
-        button.setStyle(
-                "-fx-background-color:#D4EFDF;"
-                        + "-fx-text-fill:"
-                        + PRIMARY_GREEN
-                        + ";"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-font-size:14px;"
-                        + "-fx-background-radius:9px;"
-                        + "-fx-cursor:hand;");
-
-        activeButton = button;
-    }
-
-    // =====================================================
-    // ACCOUNT
-    // =====================================================
-
-    private void showAccount() {
-
-        contentPanel.getChildren().clear();
-
-        Label title =
-                createSectionTitle(
-                        "Account Settings");
-
-        Label subtitle =
-                createSubtitle(
-                        "Manage your personal account information.");
-
-        String fullName =
-                user != null
-                        ? safe(user.getFullName())
-                        : "Not available";
-
-        String email =
-                user != null
-                        ? safe(user.getEmail())
-                        : farmerEmail;
-
-        String mobile =
-                user != null
-                        ? safe(user.getMobileNumber())
-                        : "Not provided";
-
-        String gender =
-                user != null
-                        ? safe(user.getGender())
-                        : "Not provided";
-
-        String role =
-                user != null
-                        ? safe(user.getRole())
-                        : "Farmer";
-
-        HBox row1 =
-                new HBox(35);
-
-        VBox nameBox =
-                createInfoBox(
-                        "Full Name",
-                        fullName);
-
-        VBox emailBox =
-                createInfoBox(
-                        "Email",
-                        email);
-
-        HBox.setHgrow(
-                nameBox,
-                Priority.ALWAYS);
-
-        HBox.setHgrow(
-                emailBox,
-                Priority.ALWAYS);
-
-        row1.getChildren()
-                .addAll(
-                        nameBox,
-                        emailBox);
-
-        HBox row2 =
-                new HBox(35);
-
-        VBox phoneBox =
-                createInfoBox(
-                        "Phone Number",
-                        mobile);
-
-        VBox genderBox =
-                createInfoBox(
-                        "Gender",
-                        gender);
-
-        HBox.setHgrow(
-                phoneBox,
-                Priority.ALWAYS);
-
-        HBox.setHgrow(
-                genderBox,
-                Priority.ALWAYS);
-
-        row2.getChildren()
-                .addAll(
-                        phoneBox,
-                        genderBox);
-
-        VBox roleBox =
-                createInfoBox(
-                        "Role",
-                        role);
-
-        contentPanel.getChildren()
-                .addAll(
-                        title,
-                        subtitle,
-                        new Region(),
-                        row1,
-                        row2,
-                        roleBox);
-    }
-
-    // =====================================================
-    // PASSWORD
-    // =====================================================
-
-    private void showPassword() {
-
-        contentPanel.getChildren().clear();
-
-        Label title =
-                createSectionTitle(
-                        "Password");
-
-        Label subtitle =
-                createSubtitle(
-                        "Manage your account password.");
-
-        PasswordField currentPassword =
-                new PasswordField();
-
-        currentPassword.setPromptText(
-                "Current Password");
-
-        PasswordField newPassword =
-                new PasswordField();
-
-        newPassword.setPromptText(
-                "New Password");
-
-        PasswordField confirmPassword =
-                new PasswordField();
-
-        confirmPassword.setPromptText(
-                "Confirm New Password");
-
-        styleField(
-                currentPassword);
-
-        styleField(
-                newPassword);
-
-        styleField(
-                confirmPassword);
-
-        Button save =
-                new Button(
-                        "Save Password");
-
-        stylePrimaryButton(
-                save);
-
-        save.setOnAction(e -> {
-
-            System.out.println(
-                    "Password update requested.");
-
-            /*
-             * Firebase password update can be
-             * connected here later using your
-             * existing authentication logic.
-             */
-        });
-
-        contentPanel.getChildren()
-                .addAll(
-                        title,
-                        subtitle,
-                        currentPassword,
-                        newPassword,
-                        confirmPassword,
-                        save);
-    }
-
-    // =====================================================
-    // NOTIFICATIONS
-    // =====================================================
-
-    private void showNotifications() {
-
-        contentPanel.getChildren().clear();
-
-        Label title =
-                createSectionTitle(
-                        "Notifications");
-
-        Label subtitle =
-                createSubtitle(
-                        "Choose which notifications you want to receive.");
-
-        CheckBox orders =
-                new CheckBox(
-                        "Order and rental updates");
-
-        CheckBox equipment =
-                new CheckBox(
-                        "Equipment availability updates");
-
-        CheckBox market =
-                new CheckBox(
-                        "Market and crop price updates");
-
-        CheckBox weather =
-                new CheckBox(
-                        "Weather alerts");
-
-        CheckBox recommendations =
-                new CheckBox(
-                        "AI recommendations");
-
-        orders.setSelected(true);
-        equipment.setSelected(true);
-        market.setSelected(true);
-        weather.setSelected(true);
-        recommendations.setSelected(true);
-
-        styleCheckBox(orders);
-        styleCheckBox(equipment);
-        styleCheckBox(market);
-        styleCheckBox(weather);
-        styleCheckBox(recommendations);
-
-        contentPanel.getChildren()
-                .addAll(
-                        title,
-                        subtitle,
-                        orders,
-                        equipment,
-                        market,
-                        weather,
-                        recommendations);
-    }
-
-    // =====================================================
-    // PAYMENT METHODS
-    // =====================================================
-
-    private void showPaymentMethods() {
-
-        contentPanel.getChildren().clear();
-
-        Label title =
-                createSectionTitle(
-                        "Payment Methods");
-
-        Label subtitle =
-                createSubtitle(
-                        "Manage your payment methods.");
-
-        VBox paymentCard =
-                new VBox(8);
-
-        paymentCard.setPadding(
-                new Insets(20));
-
-        paymentCard.setStyle(
-                "-fx-background-color:#F8FBF9;"
-                        + "-fx-border-color:"
-                        + BORDER_COLOR
-                        + ";"
-                        + "-fx-border-radius:10px;"
-                        + "-fx-background-radius:10px;");
-
-        Label razorpay =
-                new Label(
-                        "Razorpay");
-
-        razorpay.setStyle(
-                "-fx-font-size:16px;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-text-fill:"
-                        + PRIMARY_TEXT
-                        + ";");
-
-        Label status =
-                new Label(
-                        "Payment gateway will be available during checkout.");
-
-        status.setStyle(
-                "-fx-font-size:14px;"
-                        + "-fx-text-fill:"
-                        + SECONDARY_TEXT
-                        + ";");
-
-        paymentCard.getChildren()
-                .addAll(
-                        razorpay,
-                        status);
-
-        contentPanel.getChildren()
-                .addAll(
-                        title,
-                        subtitle,
-                        paymentCard);
-    }
-
-    // =====================================================
-    // PRIVACY
-    // =====================================================
-
-    private void showPrivacy() {
-
-        contentPanel.getChildren().clear();
-
-        Label title =
-                createSectionTitle(
-                        "Privacy");
-
-        Label subtitle =
-                createSubtitle(
-                        "Manage your privacy preferences.");
-
-        CheckBox profileVisibility =
-                new CheckBox(
-                        "Allow my profile to be visible to other users");
-
-        CheckBox equipmentVisibility =
-                new CheckBox(
-                        "Allow my listed equipment to appear in marketplace");
-
-        CheckBox recommendations =
-                new CheckBox(
-                        "Allow personalized recommendations");
-
-        profileVisibility.setSelected(true);
-        equipmentVisibility.setSelected(true);
-        recommendations.setSelected(true);
-
-        styleCheckBox(
-                profileVisibility);
-
-        styleCheckBox(
-                equipmentVisibility);
-
-        styleCheckBox(
-                recommendations);
-
-        contentPanel.getChildren()
-                .addAll(
-                        title,
-                        subtitle,
-                        profileVisibility,
-                        equipmentVisibility,
-                        recommendations);
-    }
-
-    // =====================================================
-    // LANGUAGE
-    // =====================================================
-
-    private void showLanguage() {
-
-        contentPanel.getChildren().clear();
-
-        Label title =
-                createSectionTitle(
-                        "Language");
-
-        Label subtitle =
-                createSubtitle(
-                        "Choose your preferred application language.");
-
-        Label languageLabel =
-                new Label(
-                        "Application Language");
-
-        languageLabel.setStyle(
-                "-fx-font-size:14px;"
-                        + "-fx-text-fill:"
-                        + SECONDARY_TEXT
-                        + ";");
-
-        ComboBox<String> language =
-                new ComboBox<>();
-
-        language.getItems()
-                .addAll(
-                        "English",
-                        "Marathi",
-                        "Hindi");
-
-        language.setValue(
-                "English");
-
-        language.setPrefWidth(
-                300);
-
-        language.setPrefHeight(
-                42);
-
-        language.setStyle(
-                "-fx-background-color:white;"
-                        + "-fx-border-color:"
-                        + BORDER_COLOR
-                        + ";"
-                        + "-fx-border-radius:8px;"
-                        + "-fx-background-radius:8px;"
-                        + "-fx-font-size:14px;");
-
-        contentPanel.getChildren()
-                .addAll(
-                        title,
-                        subtitle,
-                        languageLabel,
-                        language);
-    }
-
-    // =====================================================
-    // MENU BUTTON
-    // =====================================================
-
-    private Button createMenuItem(
-            String name,
-            boolean active) {
-
-        Button button =
-                new Button(name);
-
-        button.setMaxWidth(
-                Double.MAX_VALUE);
-
-        button.setPrefHeight(
-                44);
-
-        button.setAlignment(
-                Pos.CENTER_LEFT);
-
-        button.setPadding(
-                new Insets(
-                        8,
-                        15,
-                        8,
-                        25));
-
-        if (active) {
-
-            button.setStyle(
-                    "-fx-background-color:#D4EFDF;"
-                            + "-fx-text-fill:"
-                            + PRIMARY_GREEN
-                            + ";"
-                            + "-fx-font-weight:bold;"
-                            + "-fx-font-size:14px;"
-                            + "-fx-background-radius:9px;"
-                            + "-fx-cursor:hand;");
-
-        } else {
-
-            button.setStyle(
-                    "-fx-background-color:transparent;"
-                            + "-fx-text-fill:"
-                            + PRIMARY_TEXT
-                            + ";"
-                            + "-fx-font-size:14px;"
-                            + "-fx-font-weight:600;"
-                            + "-fx-background-radius:9px;"
-                            + "-fx-cursor:hand;");
+        // =====================================================
+        // ACTIVE MENU BUTTON
+        // =====================================================
+
+        private void setActiveButton(
+                        Button button) {
+
+                if (activeButton != null) {
+
+                        activeButton.setStyle(
+                                        "-fx-background-color:transparent;"
+                                                        + "-fx-text-fill:"
+                                                        + PRIMARY_TEXT
+                                                        + ";"
+                                                        + "-fx-font-size:14px;"
+                                                        + "-fx-font-weight:600;"
+                                                        + "-fx-background-radius:9px;"
+                                                        + "-fx-cursor:hand;");
+                }
+
+                button.setStyle(
+                                "-fx-background-color:#D4EFDF;"
+                                                + "-fx-text-fill:"
+                                                + PRIMARY_GREEN
+                                                + ";"
+                                                + "-fx-font-weight:bold;"
+                                                + "-fx-font-size:14px;"
+                                                + "-fx-background-radius:9px;"
+                                                + "-fx-cursor:hand;");
+
+                activeButton = button;
         }
 
-        return button;
-    }
+        // =====================================================
+        // ACCOUNT PAGE
+        // =====================================================
 
-    // =====================================================
-    // INFO BOX
-    // =====================================================
+        private void showAccount() {
 
-    private VBox createInfoBox(
-            String key,
-            String value) {
+                contentPanel.getChildren().clear();
 
-        VBox box =
-                new VBox(6);
+                contentPanel.setSpacing(18);
 
-        HBox.setHgrow(
-                box,
-                Priority.ALWAYS);
+                // =================================================
+                // TITLE
+                // =================================================
 
-        Label keyLabel =
-                new Label(key);
+                Label title = createSectionTitle(
+                                "Account Settings");
 
-        keyLabel.setStyle(
-                "-fx-font-size:14px;"
-                        + "-fx-text-fill:"
-                        + SECONDARY_TEXT
-                        + ";");
+                Label subtitle = createSubtitle(
+                                "Manage your personal account information.");
 
-        Label valueLabel =
-                new Label(value);
+                // =================================================
+                // PERSONAL INFORMATION
+                // =================================================
 
-        valueLabel.setWrapText(true);
+                Label personalTitle = new Label(
+                                "Personal Information");
 
-        valueLabel.setStyle(
-                "-fx-font-size:16px;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-text-fill:"
-                        + PRIMARY_TEXT
-                        + ";");
+                personalTitle.setStyle(
+                                "-fx-font-size:16px;"
+                                                + "-fx-font-weight:bold;"
+                                                + "-fx-text-fill:"
+                                                + PRIMARY_TEXT
+                                                + ";");
 
-        box.getChildren()
-                .addAll(
-                        keyLabel,
-                        valueLabel);
+                // =================================================
+                // FETCH FIRESTORE DATA
+                // =================================================
 
-        return box;
-    }
+                String fullName = user != null
+                                ? safe(user.getFullName())
+                                : "Not available";
 
-    // =====================================================
-    // SECTION TITLE
-    // =====================================================
+                String email = user != null
+                                ? safe(user.getEmail())
+                                : safe(farmerEmail);
 
-    private Label createSectionTitle(
-            String text) {
+                String mobile = user != null
+                                ? safe(user.getMobileNumber())
+                                : "Not provided";
 
-        Label label =
-                new Label(text);
+                String gender = user != null
+                                ? safe(user.getGender())
+                                : "Not provided";
 
-        label.setStyle(
-                "-fx-font-size:21px;"
-                        + "-fx-font-weight:800;"
-                        + "-fx-text-fill:"
-                        + PRIMARY_TEXT
-                        + ";");
+                String role = user != null
+                                ? safe(user.getRole())
+                                : "Farmer";
 
-        return label;
-    }
+                // =================================================
+                // FIRST ROW
+                // =================================================
 
-    // =====================================================
-    // SUBTITLE
-    // =====================================================
+                HBox row1 = new HBox(18);
 
-    private Label createSubtitle(
-            String text) {
+                row1.setFillHeight(true);
 
-        Label label =
-                new Label(text);
+                VBox nameBox = createAccountCard(
+                                "Full Name",
+                                fullName);
 
-        label.setStyle(
-                "-fx-font-size:14px;"
-                        + "-fx-text-fill:"
-                        + SECONDARY_TEXT
-                        + ";");
+                VBox emailBox = createAccountCard(
+                                "Email",
+                                email);
 
-        return label;
-    }
+                HBox.setHgrow(
+                                nameBox,
+                                Priority.ALWAYS);
 
-    // =====================================================
-    // TEXT FIELD STYLE
-    // =====================================================
+                HBox.setHgrow(
+                                emailBox,
+                                Priority.ALWAYS);
 
-    private void styleField(
-            PasswordField field) {
+                row1.getChildren()
+                                .addAll(
+                                                nameBox,
+                                                emailBox);
 
-        field.setPrefHeight(42);
-        field.setMaxWidth(450);
+                // =================================================
+                // SECOND ROW
+                // =================================================
 
-        field.setStyle(
-                "-fx-background-color:#F8FBF9;"
-                        + "-fx-border-color:"
-                        + BORDER_COLOR
-                        + ";"
-                        + "-fx-border-radius:8px;"
-                        + "-fx-background-radius:8px;"
-                        + "-fx-font-size:14px;");
-    }
+                HBox row2 = new HBox(18);
 
-    // =====================================================
-    // PRIMARY BUTTON
-    // =====================================================
+                row2.setFillHeight(true);
 
-    private void stylePrimaryButton(
-            Button button) {
+                VBox phoneBox = createAccountCard(
+                                "Phone Number",
+                                mobile);
 
-        button.setPrefHeight(42);
-        button.setPadding(
-                new Insets(
-                        8,
-                        22,
-                        8,
-                        22));
+                VBox genderBox = createAccountCard(
+                                "Gender",
+                                gender);
 
-        button.setStyle(
-                "-fx-background-color:"
-                        + PRIMARY_GREEN
-                        + ";"
-                        + "-fx-text-fill:white;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-font-size:14px;"
-                        + "-fx-background-radius:8px;"
-                        + "-fx-cursor:hand;");
-    }
+                HBox.setHgrow(
+                                phoneBox,
+                                Priority.ALWAYS);
 
-    // =====================================================
-    // CHECKBOX STYLE
-    // =====================================================
+                HBox.setHgrow(
+                                genderBox,
+                                Priority.ALWAYS);
 
-    private void styleCheckBox(
-            CheckBox checkBox) {
+                row2.getChildren()
+                                .addAll(
+                                                phoneBox,
+                                                genderBox);
 
-        checkBox.setStyle(
-                "-fx-font-size:14px;"
-                        + "-fx-text-fill:"
-                        + PRIMARY_TEXT
-                        + ";");
+                // =================================================
+                // ACCOUNT TYPE TITLE
+                // =================================================
 
-        checkBox.setPadding(
-                new Insets(
-                        8,
-                        0,
-                        8,
-                        0));
-    }
+                Label accountTypeTitle = new Label(
+                                "Account Type");
 
-    // =====================================================
-    // SAFE STRING
-    // =====================================================
+                accountTypeTitle.setStyle(
+                                "-fx-font-size:16px;"
+                                                + "-fx-font-weight:bold;"
+                                                + "-fx-text-fill:"
+                                                + PRIMARY_TEXT
+                                                + ";");
 
-    private String safe(
-            String value) {
+                // =================================================
+                // ROLE CARD
+                // =================================================
 
-        if (value == null
-                || value.trim().isEmpty()) {
+                VBox roleCard = new VBox(5);
 
-            return "Not provided";
+                roleCard.setPadding(
+                                new Insets(
+                                                15,
+                                                18,
+                                                15,
+                                                18));
+
+                roleCard.setMinHeight(78);
+
+                roleCard.setMaxWidth(400);
+
+                roleCard.setStyle(
+                                "-fx-background-color:#F4FAF6;"
+                                                + "-fx-background-radius:10px;"
+                                                + "-fx-border-color:"
+                                                + BORDER_COLOR
+                                                + ";"
+                                                + "-fx-border-radius:10px;");
+
+                Label roleLabel = new Label("Role");
+
+                roleLabel.setStyle(
+                                "-fx-font-size:13px;"
+                                                + "-fx-text-fill:"
+                                                + SECONDARY_TEXT
+                                                + ";");
+
+                Label roleValue = new Label(role);
+
+                roleValue.setStyle(
+                                "-fx-font-size:16px;"
+                                                + "-fx-font-weight:bold;"
+                                                + "-fx-text-fill:"
+                                                + PRIMARY_GREEN
+                                                + ";");
+
+                roleCard.getChildren()
+                                .addAll(
+                                                roleLabel,
+                                                roleValue);
+
+                // =================================================
+                // BOTTOM SPACE
+                // =================================================
+
+                Region bottomSpace = new Region();
+
+                VBox.setVgrow(
+                                bottomSpace,
+                                Priority.ALWAYS);
+
+                // =================================================
+                // ADD CONTENT
+                // =================================================
+
+                contentPanel.getChildren()
+                                .addAll(
+                                                title,
+                                                subtitle,
+                                                personalTitle,
+                                                row1,
+                                                row2,
+                                                accountTypeTitle,
+                                                roleCard,
+                                                bottomSpace);
         }
 
-        return value;
-    }
+        // =====================================================
+        // ACCOUNT CARD
+        // =====================================================
+
+        private VBox createAccountCard(
+                        String label,
+                        String value) {
+
+                VBox card = new VBox(7);
+
+                card.setPadding(
+                                new Insets(
+                                                15,
+                                                18,
+                                                15,
+                                                18));
+
+                card.setMinHeight(82);
+
+                card.setMaxWidth(
+                                Double.MAX_VALUE);
+
+                HBox.setHgrow(
+                                card,
+                                Priority.ALWAYS);
+
+                card.setStyle(
+                                "-fx-background-color:#F4FAF6;"
+                                                + "-fx-background-radius:10px;"
+                                                + "-fx-border-color:"
+                                                + BORDER_COLOR
+                                                + ";"
+                                                + "-fx-border-radius:10px;");
+
+                Label labelText = new Label(label);
+
+                labelText.setStyle(
+                                "-fx-font-size:13px;"
+                                                + "-fx-text-fill:"
+                                                + SECONDARY_TEXT
+                                                + ";");
+
+                Label valueText = new Label(value);
+
+                valueText.setWrapText(true);
+
+                valueText.setStyle(
+                                "-fx-font-size:16px;"
+                                                + "-fx-font-weight:bold;"
+                                                + "-fx-text-fill:"
+                                                + PRIMARY_TEXT
+                                                + ";");
+
+                card.getChildren()
+                                .addAll(
+                                                labelText,
+                                                valueText);
+
+                return card;
+        }
+
+        // =====================================================
+        // PASSWORD PAGE
+        // =====================================================
+
+        private void showPassword() {
+
+                contentPanel.getChildren().clear();
+
+                Label title = createSectionTitle(
+                                "Password");
+
+                Label subtitle = createSubtitle(
+                                "Manage your account password.");
+
+                // =================================================
+                // CURRENT PASSWORD
+                // =================================================
+
+                PasswordField currentPassword = new PasswordField();
+
+                currentPassword.setPromptText(
+                                "Current Password");
+
+                // =================================================
+                // NEW PASSWORD
+                // =================================================
+
+                PasswordField newPassword = new PasswordField();
+
+                newPassword.setPromptText(
+                                "New Password");
+
+                // =================================================
+                // CONFIRM PASSWORD
+                // =================================================
+
+                PasswordField confirmPassword = new PasswordField();
+
+                confirmPassword.setPromptText(
+                                "Confirm New Password");
+
+                styleField(
+                                currentPassword);
+
+                styleField(
+                                newPassword);
+
+                styleField(
+                                confirmPassword);
+
+                // =================================================
+                // SAVE BUTTON
+                // =================================================
+
+                Button save = new Button(
+                                "Save Password");
+
+                stylePrimaryButton(
+                                save);
+
+                // =================================================
+                // SAVE PASSWORD ACTION
+                // =================================================
+
+                save.setOnAction(e -> {
+
+                        String current = currentPassword.getText();
+
+                        String newPass = newPassword.getText();
+
+                        String confirm = confirmPassword.getText();
+
+                        // =============================================
+                        // EMPTY FIELD CHECK
+                        // =============================================
+
+                        if (current == null
+                                        || current.trim().isEmpty()
+                                        || newPass == null
+                                        || newPass.trim().isEmpty()
+                                        || confirm == null
+                                        || confirm.trim().isEmpty()) {
+
+                                showAlert(
+                                                Alert.AlertType.WARNING,
+                                                "Missing Information",
+                                                "Please fill in all password fields.");
+
+                                return;
+                        }
+
+                        // =============================================
+                        // PASSWORD MATCH
+                        // =============================================
+
+                        if (!newPass.equals(confirm)) {
+
+                                showAlert(
+                                                Alert.AlertType.WARNING,
+                                                "Password Mismatch",
+                                                "New password and confirm password do not match.");
+
+                                return;
+                        }
+
+                        // =============================================
+                        // PASSWORD LENGTH
+                        // =============================================
+
+                        if (newPass.length() < 6) {
+
+                                showAlert(
+                                                Alert.AlertType.WARNING,
+                                                "Invalid Password",
+                                                "New password must contain at least 6 characters.");
+
+                                return;
+                        }
+
+                        // =============================================
+                        // SAME PASSWORD
+                        // =============================================
+
+                        if (current.equals(newPass)) {
+
+                                showAlert(
+                                                Alert.AlertType.WARNING,
+                                                "Invalid Password",
+                                                "New password must be different from your current password.");
+
+                                return;
+                        }
+
+                        // =============================================
+                        // EMAIL CHECK
+                        // =============================================
+
+                        String email = farmerEmail;
+
+                        if (email == null
+                                        || email.trim().isEmpty()) {
+
+                                showAlert(
+                                                Alert.AlertType.ERROR,
+                                                "Account Error",
+                                                "Unable to determine your account email.");
+
+                                return;
+                        }
+
+                        // =============================================
+                        // DISABLE BUTTON
+                        // =============================================
+
+                        save.setDisable(true);
+
+                        save.setText(
+                                        "Changing Password...");
+
+                        // =============================================
+                        // BACKGROUND TASK
+                        // =============================================
+
+                        Task<Boolean> changePasswordTask = new Task<>() {
+
+                                @Override
+                                protected Boolean call() {
+
+                                        System.out.println(
+                                                        "====================================");
+
+                                        System.out.println(
+                                                        "Password change requested");
+
+                                        System.out.println(
+                                                        "Email: " + email);
+
+                                        System.out.println(
+                                                        "Verifying current password...");
+
+                                        boolean result = authController.changePassword(
+                                                        email,
+                                                        current,
+                                                        newPass);
+
+                                        System.out.println(
+                                                        "Password change result: "
+                                                                        + result);
+
+                                        System.out.println(
+                                                        "====================================");
+
+                                        return result;
+                                }
+                        };
+
+                        // =============================================
+                        // SUCCESS / FAILURE
+                        // =============================================
+
+                        changePasswordTask.setOnSucceeded(event -> {
+
+                                Boolean result = changePasswordTask.getValue();
+
+                                save.setDisable(false);
+
+                                save.setText(
+                                                "Save Password");
+
+                                if (Boolean.TRUE.equals(result)) {
+
+                                        currentPassword.clear();
+                                        newPassword.clear();
+                                        confirmPassword.clear();
+
+                                        showAlert(
+                                                        Alert.AlertType.INFORMATION,
+                                                        "Password Changed",
+                                                        "Your password has been changed successfully.");
+
+                                } else {
+
+                                        showAlert(
+                                                        Alert.AlertType.ERROR,
+                                                        "Password Change Failed",
+                                                        "Current password is incorrect or the password could not be changed.");
+                                }
+                        });
+
+                        // =============================================
+                        // EXCEPTION
+                        // =============================================
+
+                        changePasswordTask.setOnFailed(event -> {
+
+                                save.setDisable(false);
+
+                                save.setText(
+                                                "Save Password");
+
+                                Throwable exception = changePasswordTask.getException();
+
+                                if (exception != null) {
+
+                                        exception.printStackTrace();
+                                }
+
+                                showAlert(
+                                                Alert.AlertType.ERROR,
+                                                "Error",
+                                                "An error occurred while changing your password.");
+                        });
+
+                        Thread passwordThread = new Thread(
+                                        changePasswordTask);
+
+                        passwordThread.setDaemon(true);
+
+                        passwordThread.start();
+                });
+
+                // =================================================
+                // ADD CONTENT
+                // =================================================
+
+                contentPanel.getChildren()
+                                .addAll(
+                                                title,
+                                                subtitle,
+                                                currentPassword,
+                                                newPassword,
+                                                confirmPassword,
+                                                save);
+        }
+
+        // =====================================================
+        // ALERT
+        // =====================================================
+
+        private void showAlert(
+                        Alert.AlertType type,
+                        String title,
+                        String message) {
+
+                Platform.runLater(() -> {
+
+                        Alert alert = new Alert(type);
+
+                        alert.setTitle(title);
+
+                        alert.setHeaderText(null);
+
+                        alert.setContentText(message);
+
+                        alert.showAndWait();
+                });
+        }
+
+        // =====================================================
+        // NOTIFICATIONS PAGE
+        // =====================================================
+
+        private void showNotifications() {
+
+                contentPanel.getChildren().clear();
+
+                Label title = createSectionTitle(
+                                "Notifications");
+
+                Label subtitle = createSubtitle(
+                                "Choose which notifications you want to receive.");
+
+                CheckBox orders = createCheckBox(
+                                "Order and rental updates");
+
+                CheckBox equipment = createCheckBox(
+                                "Equipment availability updates");
+
+                CheckBox market = createCheckBox(
+                                "Market and crop price updates");
+
+                CheckBox weather = createCheckBox(
+                                "Weather alerts");
+
+                CheckBox recommendations = createCheckBox(
+                                "AI recommendations");
+
+                contentPanel.getChildren()
+                                .addAll(
+                                                title,
+                                                subtitle,
+                                                orders,
+                                                equipment,
+                                                market,
+                                                weather,
+                                                recommendations);
+        }
+
+        // =====================================================
+        // PAYMENT METHODS
+        // =====================================================
+
+        private void showPaymentMethods() {
+
+                contentPanel.getChildren().clear();
+
+                Label title = createSectionTitle(
+                                "Payment Methods");
+
+                Label subtitle = createSubtitle(
+                                "Manage your payment methods.");
+
+                VBox paymentCard = new VBox(8);
+
+                paymentCard.setPadding(
+                                new Insets(20));
+
+                paymentCard.setStyle(
+                                "-fx-background-color:#F4FAF6;"
+                                                + "-fx-background-radius:10px;"
+                                                + "-fx-border-color:"
+                                                + BORDER_COLOR
+                                                + ";"
+                                                + "-fx-border-radius:10px;");
+
+                Label razorpay = new Label(
+                                "Razorpay");
+
+                razorpay.setStyle(
+                                "-fx-font-size:17px;"
+                                                + "-fx-font-weight:bold;"
+                                                + "-fx-text-fill:"
+                                                + PRIMARY_TEXT
+                                                + ";");
+
+                Label status = new Label(
+                                "Payment gateway will be available during checkout.");
+
+                status.setWrapText(true);
+
+                status.setStyle(
+                                "-fx-font-size:14px;"
+                                                + "-fx-text-fill:"
+                                                + SECONDARY_TEXT
+                                                + ";");
+
+                paymentCard.getChildren()
+                                .addAll(
+                                                razorpay,
+                                                status);
+
+                contentPanel.getChildren()
+                                .addAll(
+                                                title,
+                                                subtitle,
+                                                paymentCard);
+        }
+
+        // =====================================================
+        // PRIVACY
+        // =====================================================
+
+        private void showPrivacy() {
+
+                contentPanel.getChildren().clear();
+
+                Label title = createSectionTitle(
+                                "Privacy");
+
+                Label subtitle = createSubtitle(
+                                "Manage your privacy preferences.");
+
+                CheckBox profileVisibility = createCheckBox(
+                                "Allow my profile to be visible to other users");
+
+                CheckBox equipmentVisibility = createCheckBox(
+                                "Allow my listed equipment to appear in marketplace");
+
+                CheckBox recommendations = createCheckBox(
+                                "Allow personalized recommendations");
+
+                contentPanel.getChildren()
+                                .addAll(
+                                                title,
+                                                subtitle,
+                                                profileVisibility,
+                                                equipmentVisibility,
+                                                recommendations);
+        }
+
+        // =====================================================
+        // LANGUAGE
+        // =====================================================
+
+        private void showLanguage() {
+
+                contentPanel.getChildren().clear();
+
+                Label title = createSectionTitle(
+                                "Language");
+
+                Label subtitle = createSubtitle(
+                                "Choose your preferred application language.");
+
+                Label languageLabel = new Label(
+                                "Application Language");
+
+                languageLabel.setStyle(
+                                "-fx-font-size:14px;"
+                                                + "-fx-text-fill:"
+                                                + SECONDARY_TEXT
+                                                + ";");
+
+                ComboBox<String> language = new ComboBox<>();
+
+                language.getItems()
+                                .addAll(
+                                                "English",
+                                                "Marathi");
+
+                language.setValue(
+                                LanguageManager.getLanguage());
+
+                language.setOnAction(e -> {
+
+                        LanguageManager.setLanguage(
+                                        language.getValue());
+
+                        if (languageChanged != null) {
+                                languageChanged.run();
+                        } else {
+                                showLanguage();
+                        }
+                });
+
+                language.setPrefWidth(300);
+
+                language.setPrefHeight(42);
+
+                language.setStyle(
+                                "-fx-background-color:white;"
+                                                + "-fx-border-color:"
+                                                + BORDER_COLOR
+                                                + ";"
+                                                + "-fx-border-radius:8px;"
+                                                + "-fx-background-radius:8px;"
+                                                + "-fx-font-size:14px;");
+
+                contentPanel.getChildren()
+                                .addAll(
+                                                title,
+                                                subtitle,
+                                                languageLabel,
+                                                language);
+        }
+
+        // =====================================================
+        // MENU BUTTON
+        // =====================================================
+
+        private Button createMenuItem(
+                        String name,
+                        boolean active) {
+
+                Button button = new Button(name);
+
+                button.setMaxWidth(
+                                Double.MAX_VALUE);
+
+                button.setPrefHeight(44);
+
+                button.setAlignment(
+                                Pos.CENTER_LEFT);
+
+                button.setPadding(
+                                new Insets(
+                                                8,
+                                                15,
+                                                8,
+                                                25));
+
+                if (active) {
+
+                        button.setStyle(
+                                        "-fx-background-color:#D4EFDF;"
+                                                        + "-fx-text-fill:"
+                                                        + PRIMARY_GREEN
+                                                        + ";"
+                                                        + "-fx-font-weight:bold;"
+                                                        + "-fx-font-size:14px;"
+                                                        + "-fx-background-radius:9px;"
+                                                        + "-fx-cursor:hand;");
+
+                } else {
+
+                        button.setStyle(
+                                        "-fx-background-color:transparent;"
+                                                        + "-fx-text-fill:"
+                                                        + PRIMARY_TEXT
+                                                        + ";"
+                                                        + "-fx-font-size:14px;"
+                                                        + "-fx-font-weight:600;"
+                                                        + "-fx-background-radius:9px;"
+                                                        + "-fx-cursor:hand;");
+                }
+
+                return button;
+        }
+
+        // =====================================================
+        // CHECKBOX
+        // =====================================================
+
+        private CheckBox createCheckBox(
+                        String text) {
+
+                CheckBox checkBox = new CheckBox(text);
+
+                checkBox.setSelected(true);
+
+                checkBox.setPadding(
+                                new Insets(
+                                                8,
+                                                0,
+                                                8,
+                                                0));
+
+                checkBox.setStyle(
+                                "-fx-font-size:14px;"
+                                                + "-fx-text-fill:"
+                                                + PRIMARY_TEXT
+                                                + ";");
+
+                return checkBox;
+        }
+
+        // =====================================================
+        // SECTION TITLE
+        // =====================================================
+
+        private Label createSectionTitle(
+                        String text) {
+
+                Label label = new Label(text);
+
+                label.setStyle(
+                                "-fx-font-size:26px;"
+                                                + "-fx-font-weight:800;"
+                                                + "-fx-text-fill:"
+                                                + PRIMARY_TEXT
+                                                + ";");
+
+                return label;
+        }
+
+        // =====================================================
+        // SUBTITLE
+        // =====================================================
+
+        private Label createSubtitle(
+                        String text) {
+
+                Label label = new Label(text);
+
+                label.setStyle(
+                                "-fx-font-size:14px;"
+                                                + "-fx-text-fill:"
+                                                + SECONDARY_TEXT
+                                                + ";");
+
+                return label;
+        }
+
+        // =====================================================
+        // PASSWORD FIELD STYLE
+        // =====================================================
+
+        private void styleField(
+                        PasswordField field) {
+
+                field.setPrefHeight(42);
+
+                field.setMaxWidth(450);
+
+                field.setStyle(
+                                "-fx-background-color:#F4FAF6;"
+                                                + "-fx-border-color:"
+                                                + BORDER_COLOR
+                                                + ";"
+                                                + "-fx-border-radius:8px;"
+                                                + "-fx-background-radius:8px;"
+                                                + "-fx-font-size:14px;");
+        }
+
+        // =====================================================
+        // PRIMARY BUTTON
+        // =====================================================
+
+        private void stylePrimaryButton(
+                        Button button) {
+
+                button.setPrefHeight(42);
+
+                button.setPadding(
+                                new Insets(
+                                                8,
+                                                22,
+                                                8,
+                                                22));
+
+                button.setStyle(
+                                "-fx-background-color:"
+                                                + PRIMARY_GREEN
+                                                + ";"
+                                                + "-fx-text-fill:white;"
+                                                + "-fx-font-weight:bold;"
+                                                + "-fx-font-size:14px;"
+                                                + "-fx-background-radius:8px;"
+                                                + "-fx-cursor:hand;");
+        }
+
+        // =====================================================
+        // SAFE VALUE
+        // =====================================================
+
+        private String safe(
+                        String value) {
+
+                if (value == null
+                                || value.trim().isEmpty()) {
+
+                        return "Not provided";
+                }
+
+                return value;
+        }
 }

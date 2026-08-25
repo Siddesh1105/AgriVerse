@@ -1,5 +1,7 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.util.LanguageManager;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -33,6 +35,7 @@ public class VoiceAssistant {
         hints.setStyle("-fx-text-fill: #64748B; -fx-text-alignment: center; -fx-font-size: 14px;");
 
         root.getChildren().addAll(greeting, btnMic, hints);
+        LanguageManager.apply(root);
         return root;
     }
 }

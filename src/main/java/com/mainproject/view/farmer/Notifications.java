@@ -1,10 +1,17 @@
 package com.mainproject.view.farmer;
 
+import com.mainproject.util.LanguageManager;
 
+import com.mainproject.controller.NotificationController;
+import com.mainproject.model.Notification;
+
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
@@ -17,33 +24,32 @@ import java.util.List;
 
 public class Notifications {
 
-    private static final String GREEN = "#117864";
-    private static final String BORDER = "#A2D9CE";
-    private static final String TEXT = "#1B2631";
-    private static final String SUB_TEXT = "#566573";
+    private final String farmerEmail;
+    private final NotificationController notificationController;
 
-    private final List<AppNotification> notifications = new ArrayList<>();
+    private final VBox notificationContainer = new VBox(10);
 
-    private VBox notificationContainer;
+    private final Label unreadLabel = new Label("0 unread");
 
-    private Label unreadLabel;
+    private List<Notification> notifications = new ArrayList<>();
 
-    private String selectedFilter = "All";
-
-    // =========================================================
+    // =====================================================
     // CONSTRUCTOR
-    // =========================================================
+    // =====================================================
 
-    public Notifications(FarmerDashboard farmerDashboard) {
+    public Notifications(FarmerDashboard farmerDashboard, String farmerEmail) {
 
-        // IMPORTANT:
-        // Load notifications when the page is created.
-        loadNotifications();
+        this.farmerEmail = farmerEmail;
+        this.notificationController = new NotificationController();
+
+        System.out.println(
+                "Notifications opened for: "
+                        + farmerEmail);
     }
 
-    // =========================================================
+    // =====================================================
     // GET VIEW
-    // =========================================================
+    // =====================================================
 
     public Node getView() {
 
@@ -52,40 +58,41 @@ public class Notifications {
         root.setPadding(
                 new Insets(10));
 
-        // =====================================================
-        // TITLE
-        // =====================================================
+        // =================================================
+        // HEADER
+        // =================================================
 
-        Label title = new Label("Notifications");
+        Label title = new Label(
+                "Notifications");
 
         title.setStyle(
                 "-fx-font-size: 22px;" +
                         "-fx-font-weight: 800;" +
-                        "-fx-text-fill: " + TEXT + ";");
+                        "-fx-text-fill: #1B2631;");
 
         Label subtitle = new Label(
                 "Stay updated with your farm activities.");
 
         subtitle.setStyle(
                 "-fx-font-size: 13px;" +
-                        "-fx-text-fill: " + SUB_TEXT + ";");
+                        "-fx-text-fill: #566573;");
 
         VBox header = new VBox(
                 3,
                 title,
                 subtitle);
 
-        // =====================================================
-        // ACTION BAR
-        // =====================================================
+        // =================================================
+        // ACTION BUTTONS
+        // =================================================
 
         Button markAllButton = new Button(
                 "✓ Mark all as read");
 
         markAllButton.setStyle(
                 "-fx-background-color: transparent;" +
-                        "-fx-text-fill: " + GREEN + ";" +
-                        "-fx-border-color: " + BORDER + ";" +
+                        "-fx-text-fill: #117864;" +
+                        "-fx-border-color: #A2D9CE;" +
                         "-fx-border-radius: 7px;" +
                         "-fx-background-radius: 7px;" +
                         "-fx-padding: 7 14;" +
@@ -109,12 +116,10 @@ public class Notifications {
                 spacer,
                 Priority.ALWAYS);
 
-        unreadLabel = new Label();
-
         unreadLabel.setStyle(
                 "-fx-font-size: 12px;" +
                         "-fx-font-weight: bold;" +
-                        "-fx-text-fill: " + GREEN + ";");
+                        "-fx-text-fill: #117864;");
 
         HBox actionBar = new HBox(
                 10,
@@ -126,151 +131,55 @@ public class Notifications {
         actionBar.setAlignment(
                 Pos.CENTER_LEFT);
 
-        // =====================================================
+        // =================================================
         // MARK ALL
-        // =====================================================
+        // =================================================
 
         markAllButton.setOnAction(
                 event -> {
 
-                    for (AppNotification notification : notifications) {
+                    new Thread(() -> {
 
-                        notification.read = true;
-                    }
+                        boolean success = notificationController
+                                .markAllAsRead(
+                                        farmerEmail);
 
-                    refresh();
+                        if (success) {
+                            loadNotifications();
+                        }
+
+                    }).start();
                 });
 
-        // =====================================================
+        // =================================================
         // CLEAR ALL
-        // =====================================================
+        // =================================================
 
         clearButton.setOnAction(
                 event -> {
 
-                    notifications.clear();
+                    new Thread(() -> {
 
-                    refresh();
+                        boolean success = notificationController
+                                .deleteAll(
+                                        farmerEmail);
+
+                        if (success) {
+                            loadNotifications();
+                        }
+
+                    }).start();
                 });
 
-        // =====================================================
-        // FILTER BUTTONS
-        // =====================================================
-
-        Button allButton = createFilterButton("All");
-
-        Button ordersButton = createFilterButton("Orders");
-
-        Button systemButton = createFilterButton("System");
-
-        Button weatherButton = createFilterButton("Weather");
-
-        Button marketButton = createFilterButton("Market");
-
-        HBox filters = new HBox(
-                10,
-                allButton,
-                ordersButton,
-                systemButton,
-                weatherButton,
-                marketButton);
-
-        // =====================================================
-        // FILTER ACTIONS
-        // =====================================================
-
-        allButton.setOnAction(
-                e -> {
-
-                    selectedFilter = "All";
-
-                    setSelectedFilter(
-                            allButton,
-                            ordersButton,
-                            systemButton,
-                            weatherButton,
-                            marketButton);
-
-                    refresh();
-                });
-
-        ordersButton.setOnAction(
-                e -> {
-
-                    selectedFilter = "Orders";
-
-                    setSelectedFilter(
-                            ordersButton,
-                            allButton,
-                            systemButton,
-                            weatherButton,
-                            marketButton);
-
-                    refresh();
-                });
-
-        systemButton.setOnAction(
-                e -> {
-
-                    selectedFilter = "System";
-
-                    setSelectedFilter(
-                            systemButton,
-                            allButton,
-                            ordersButton,
-                            weatherButton,
-                            marketButton);
-
-                    refresh();
-                });
-
-        weatherButton.setOnAction(
-                e -> {
-
-                    selectedFilter = "Weather";
-
-                    setSelectedFilter(
-                            weatherButton,
-                            allButton,
-                            ordersButton,
-                            systemButton,
-                            marketButton);
-
-                    refresh();
-                });
-
-        marketButton.setOnAction(
-                e -> {
-
-                    selectedFilter = "Market";
-
-                    setSelectedFilter(
-                            marketButton,
-                            allButton,
-                            ordersButton,
-                            systemButton,
-                            weatherButton);
-
-                    refresh();
-                });
-
-        // =====================================================
-        // NOTIFICATION CONTAINER
-        // =====================================================
-
-        notificationContainer = new VBox(10);
-
-        notificationContainer.setFillWidth(
-                true);
-
-        // =====================================================
-        // SCROLL PANE
-        // =====================================================
+        // =================================================
+        // SCROLL
+        // =================================================
 
         ScrollPane scroll = new ScrollPane(
                 notificationContainer);
 
-        scroll.setFitToWidth(true);
+        scroll.setFitToWidth(
+                true);
 
         scroll.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER);
@@ -283,102 +192,84 @@ public class Notifications {
                 scroll,
                 Priority.ALWAYS);
 
-        // =====================================================
-        // ROOT
-        // =====================================================
-
         root.getChildren().addAll(
                 header,
                 actionBar,
-                filters,
                 scroll);
 
-        // =====================================================
-        // FIRST REFRESH
-        // =====================================================
+        // =================================================
+        // LOAD FIRESTORE
+        // =================================================
 
-        refresh();
+        loadNotifications();
 
+        LanguageManager.apply(root);
         return root;
     }
 
-    // =========================================================
+    // =====================================================
     // LOAD NOTIFICATIONS
-    // =========================================================
+    // =====================================================
 
     private void loadNotifications() {
 
-        System.out.println(
-                "Loading notifications...");
+        Platform.runLater(() -> {
 
-        notifications.add(
-                new AppNotification(
-                        "Orders",
-                        "New order received for Tomato (50 kg)",
-                        "2 min ago",
-                        false));
+            notificationContainer
+                    .getChildren()
+                    .clear();
 
-        notifications.add(
-                new AppNotification(
-                        "System",
-                        "Your product Onion is low in stock.",
-                        "1 hour ago",
-                        false));
+            Label loading = new Label(
+                    "Loading notifications...");
 
-        notifications.add(
-                new AppNotification(
-                        "Weather",
-                        "Heavy rainfall expected tomorrow.",
-                        "3 hours ago",
-                        false));
+            loading.setStyle(
+                    "-fx-text-fill: #566573;" +
+                            "-fx-padding: 20px;");
 
-        notifications.add(
-                new AppNotification(
-                        "Orders",
-                        "Payment of ₹2,500 received for Order #ORD123",
-                        "5 hours ago",
-                        false));
+            notificationContainer
+                    .getChildren()
+                    .add(
+                            loading);
+        });
 
-        notifications.add(
-                new AppNotification(
-                        "Market",
-                        "Market price for Wheat increased by 3%.",
-                        "Yesterday",
-                        true));
+        Thread thread = new Thread(() -> {
 
-        System.out.println(
-                "Notifications loaded: "
-                        + notifications.size());
+            List<Notification> result = notificationController
+                    .getFarmerNotifications(
+                            farmerEmail);
+
+            Platform.runLater(() -> {
+
+                notifications = result;
+
+                refreshNotifications();
+            });
+        });
+
+        thread.setDaemon(
+                true);
+
+        thread.start();
     }
 
-    // =========================================================
-    // REFRESH
-    // =========================================================
+    // =====================================================
+    // REFRESH UI
+    // =====================================================
 
-    private void refresh() {
+    private void refreshNotifications() {
 
         notificationContainer
                 .getChildren()
                 .clear();
 
-        int unreadCount = 0;
+        int unread = 0;
 
-        int displayedCount = 0;
+        int displayed = 0;
 
-        for (AppNotification notification : notifications) {
+        for (Notification notification : notifications) {
 
-            if (!notification.read) {
-
-                unreadCount++;
-            }
-
-            // FILTER
-            if (!selectedFilter.equals("All")
-                    &&
-                    !notification.type.equals(
-                            selectedFilter)) {
-
-                continue;
+            if (!notification.isRead()) {
+                unread++;
             }
 
             notificationContainer
@@ -387,166 +278,245 @@ public class Notifications {
                             createNotificationCard(
                                     notification));
 
-            displayedCount++;
+            displayed++;
         }
 
         unreadLabel.setText(
-                unreadCount + " unread");
+                unread + " unread");
 
-        // =====================================================
-        // EMPTY MESSAGE
-        // =====================================================
-
-        if (displayedCount == 0) {
+        if (displayed == 0) {
 
             Label empty = new Label(
                     "No notifications found.");
 
             empty.setStyle(
                     "-fx-font-size: 14px;" +
-                            "-fx-text-fill: " + SUB_TEXT + ";" +
-                            "-fx-padding: 30;");
+                            "-fx-text-fill: #566573;" +
+                            "-fx-padding: 30px;");
 
             notificationContainer
                     .getChildren()
-                    .add(empty);
+                    .add(
+                            empty);
         }
-
-        System.out.println(
-                "Displayed notifications: "
-                        + displayedCount);
     }
 
-    // =========================================================
+    // =====================================================
     // CREATE CARD
-    // =========================================================
+    // =====================================================
 
     private HBox createNotificationCard(
-            AppNotification notification) {
+            Notification notification) {
 
-        HBox card = new HBox(16);
+        HBox card = new HBox(15);
+
+        card.setPadding(
+                new Insets(15));
 
         card.setAlignment(
                 Pos.CENTER_LEFT);
 
-        card.setPadding(
-                new Insets(16));
-
-        card.setMaxWidth(
-                Double.MAX_VALUE);
-
-        String background = notification.read
+        String background = notification.isRead()
                 ? "#FFFFFF"
                 : "#E8F8F5";
 
         card.setStyle(
                 "-fx-background-color: "
-                        + background
-                        + ";" +
-                        "-fx-border-color: "
-                        + BORDER
-                        + ";" +
-                        "-fx-border-radius: 8px;" +
-                        "-fx-background-radius: 8px;");
+                        + background + ";" +
+                        "-fx-border-color: #A2D9CE;" +
+                        "-fx-border-radius: 10px;" +
+                        "-fx-background-radius: 10px;" +
+                        "-fx-cursor: hand;");
 
-        // =====================================================
+        // =================================================
         // ICON
-        // =====================================================
+        // =================================================
 
         Label icon = new Label(
                 getIcon(
-                        notification.type));
+                        notification.getType()));
 
         icon.setStyle(
                 "-fx-font-size: 22px;");
 
-        icon.setMinWidth(35);
+        // =================================================
+        // CONTENT
+        // =================================================
 
-        // =====================================================
-        // MESSAGE
-        // =====================================================
-
-        VBox textBox = new VBox(4);
+        VBox content = new VBox(4);
 
         HBox.setHgrow(
-                textBox,
+                content,
                 Priority.ALWAYS);
 
+        Label title = new Label(
+                notification.getTitle());
+
+        title.setStyle(
+                "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #1B2631;");
+
         Label message = new Label(
-                notification.message);
+                notification.getMessage());
 
         message.setWrapText(
                 true);
 
         message.setStyle(
-                "-fx-font-size: 14px;" +
-                        "-fx-font-weight: "
-                        +
-                        (notification.read
-                                ? "normal"
-                                : "bold")
-                        + ";" +
-                        "-fx-text-fill: " + TEXT + ";");
+                "-fx-font-size: 13px;" +
+                        "-fx-text-fill: #566573;");
 
         Label type = new Label(
-                notification.type);
+                notification.getType());
 
         type.setStyle(
                 "-fx-font-size: 11px;" +
-                        "-fx-text-fill: " + GREEN + ";");
+                        "-fx-text-fill: #117864;");
 
-        textBox.getChildren().addAll(
+        content.getChildren().addAll(
+                title,
                 message,
                 type);
 
-        // =====================================================
+        // =================================================
         // TIME
-        // =====================================================
+        // =================================================
 
         Label time = new Label(
-                notification.time);
+                notification.getTimestamp());
 
         time.setStyle(
-                "-fx-font-size: 12px;" +
-                        "-fx-text-fill: " + SUB_TEXT + ";");
+                "-fx-font-size: 11px;" +
+                        "-fx-text-fill: #566573;");
 
-        // =====================================================
-        // UNREAD
-        // =====================================================
+        // =================================================
+        // UNREAD DOT
+        // =================================================
 
         Label dot = new Label(
-                notification.read
+                notification.isRead()
                         ? ""
                         : "●");
 
         dot.setStyle(
-                "-fx-text-fill: " + GREEN + ";" +
-                        "-fx-font-size: 11px;");
+                "-fx-font-size: 12px;" +
+                        "-fx-text-fill: #117864;");
 
-        // =====================================================
-        // CLICK
-        // =====================================================
+        // =================================================
+        // DELETE BUTTON
+        // =================================================
+
+        Button deleteButton = new Button(
+                "Delete");
+
+        deleteButton.setStyle(
+                "-fx-background-color: transparent;" +
+                        "-fx-text-fill: #C0392B;" +
+                        "-fx-border-color: #E6B0AA;" +
+                        "-fx-border-radius: 7px;" +
+                        "-fx-background-radius: 7px;" +
+                        "-fx-padding: 6 12;" +
+                        "-fx-cursor: hand;");
+
+        deleteButton.setOnAction(
+                event -> {
+
+                    event.consume();
+
+                    Alert alert =
+                            new Alert(
+                                    Alert.AlertType.CONFIRMATION);
+
+                    alert.setTitle(
+                            "Delete Notification");
+
+                    alert.setHeaderText(
+                            "Delete this notification?");
+
+                    alert.setContentText(
+                            "This notification will be permanently deleted.");
+
+                    alert.showAndWait()
+                            .ifPresent(
+                                    response -> {
+
+                                        if (response
+                                                == ButtonType.OK) {
+
+                                            new Thread(
+                                                    () -> {
+
+                                                        boolean success =
+                                                                notificationController
+                                                                        .deleteNotification(
+                                                                                notification
+                                                                                        .getNotificationId());
+
+                                                        if (success) {
+
+                                                            notifications
+                                                                    .remove(
+                                                                            notification);
+
+                                                            Platform.runLater(
+                                                                    this::refreshNotifications);
+                                                        }
+
+                                                    }).start();
+                                        }
+
+                                    });
+                });
+
+        // =================================================
+        // ADD EVERYTHING
+        // =================================================
+
+        card.getChildren().addAll(
+                icon,
+                content,
+                time,
+                dot,
+                deleteButton);
+
+        // =================================================
+        // CLICK → MARK AS READ
+        // =================================================
 
         card.setOnMouseClicked(
                 event -> {
 
-                    notification.read = true;
+                    if (!notification.isRead()) {
 
-                    refresh();
+                        new Thread(
+                                () -> {
+
+                                    boolean success =
+                                            notificationController
+                                                    .markAsRead(
+                                                            notification
+                                                                    .getNotificationId());
+
+                                    if (success) {
+
+                                        notification.setRead(
+                                                true);
+
+                                        Platform.runLater(
+                                                this::refreshNotifications);
+                                    }
+
+                                }).start();
+                    }
                 });
-
-        card.getChildren().addAll(
-                icon,
-                textBox,
-                time,
-                dot);
 
         return card;
     }
 
-    // =========================================================
+    // =====================================================
     // ICON
-    // =========================================================
+    // =====================================================
 
     private String getIcon(
             String type) {
@@ -556,122 +526,17 @@ public class Notifications {
             case "Orders":
                 return "📦";
 
-            case "System":
-                return "⚠";
-
             case "Weather":
-                return "☁";
+                return "🌧";
 
             case "Market":
                 return "📈";
 
+            case "System":
+                return "🔔";
+
             default:
                 return "🔔";
-        }
-    }
-
-    // =========================================================
-    // FILTER BUTTON
-    // =========================================================
-
-    private Button createFilterButton(
-            String text) {
-
-        Button button = new Button(text);
-
-        if (text.equals(
-                selectedFilter)) {
-
-            setSelectedStyle(
-                    button);
-
-        } else {
-
-            setNormalStyle(
-                    button);
-        }
-
-        return button;
-    }
-
-    // =========================================================
-    // SET SELECTED FILTER
-    // =========================================================
-
-    private void setSelectedFilter(
-            Button selected,
-            Button... others) {
-
-        setSelectedStyle(
-                selected);
-
-        for (Button button : others) {
-
-            setNormalStyle(
-                    button);
-        }
-    }
-
-    // =========================================================
-    // SELECTED STYLE
-    // =========================================================
-
-    private void setSelectedStyle(
-            Button button) {
-
-        button.setStyle(
-                "-fx-background-color: " + GREEN + ";" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-background-radius: 20px;" +
-                        "-fx-padding: 7 18;" +
-                        "-fx-cursor: hand;");
-    }
-
-    // =========================================================
-    // NORMAL STYLE
-    // =========================================================
-
-    private void setNormalStyle(
-            Button button) {
-
-        button.setStyle(
-                "-fx-background-color: white;" +
-                        "-fx-text-fill: " + TEXT + ";" +
-                        "-fx-border-color: " + BORDER + ";" +
-                        "-fx-border-radius: 20px;" +
-                        "-fx-background-radius: 20px;" +
-                        "-fx-padding: 7 18;" +
-                        "-fx-cursor: hand;");
-    }
-
-    // =========================================================
-    // MODEL
-    // =========================================================
-
-    private static class AppNotification {
-
-        String type;
-
-        String message;
-
-        String time;
-
-        boolean read;
-
-        AppNotification(
-                String type,
-                String message,
-                String time,
-                boolean read) {
-
-            this.type = type;
-
-            this.message = message;
-
-            this.time = time;
-
-            this.read = read;
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.util.LanguageManager;
+
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -35,6 +37,7 @@ public class Wishlist {
         ScrollPane sp = new ScrollPane(root);
         sp.setFitToWidth(true);
         sp.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
+        LanguageManager.apply(sp);
         return sp;
     }
 

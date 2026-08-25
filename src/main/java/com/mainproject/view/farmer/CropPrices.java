@@ -1,5 +1,7 @@
 package com.mainproject.view.farmer;
 
+import com.mainproject.util.LanguageManager;
+
 import com.mainproject.controller.CropPriceController;
 import com.mainproject.model.CropPrice;
 import javafx.application.Platform;

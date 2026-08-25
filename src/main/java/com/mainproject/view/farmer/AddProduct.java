@@ -1,12 +1,16 @@
 package com.mainproject.view.farmer;
 
+import com.mainproject.util.LanguageManager;
+
 import java.io.File;
 import java.util.Map;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.mainproject.config.CloudinaryConfig;
-import com.mainproject.dao.ProductDAO;
+import com.mainproject.controller.NotificationController;
+import com.mainproject.controller.ProductController;
+import com.mainproject.model.Notification;
 import com.mainproject.model.Product;
 
 import javafx.geometry.Insets;
@@ -30,18 +34,16 @@ import javafx.stage.FileChooser;
 
 public class AddProduct {
 
-    // =====================================================
-    // VARIABLES
-    // =====================================================
-
     private final FarmerDashboard navigator;
 
     private final String farmerEmail;
 
-    private final ProductDAO productDAO;
+    private final ProductController productController;
 
-    // Cloudinary directly from Config
-    private final Cloudinary cloudinary = CloudinaryConfig.getCloudinary();
+    private final NotificationController notificationController;
+
+    private final Cloudinary cloudinary =
+            CloudinaryConfig.getCloudinary();
 
     private File selectedImageFile;
 
@@ -58,9 +60,19 @@ public class AddProduct {
             String farmerEmail) {
 
         this.navigator = navigator;
+
         this.farmerEmail = farmerEmail;
 
-        this.productDAO = new ProductDAO();
+        this.productController =
+                new ProductController();
+
+        this.notificationController =
+                new NotificationController();
+
+        System.out.println(
+                "AddProduct opened for farmer: "
+                        + farmerEmail
+        );
     }
 
     // =====================================================
@@ -69,267 +81,323 @@ public class AddProduct {
 
     public Node getView() {
 
-        VBox root = new VBox(18);
+        VBox root =
+                new VBox(18);
 
         root.setPadding(
-                new Insets(10));
+                new Insets(10)
+        );
 
         // =================================================
         // HEADER
         // =================================================
 
-        VBox titles = new VBox(3);
+        VBox titles =
+                new VBox(3);
 
-        Label title = new Label(
-                "Add Product");
+        Label title =
+                new Label(
+                        "Add Product"
+                );
 
         title.setStyle(
                 "-fx-font-size: 22px;" +
-                        "-fx-font-weight: 800;" +
-                        "-fx-text-fill: #1B2631;");
+                "-fx-font-weight: 800;" +
+                "-fx-text-fill: #1B2631;"
+        );
 
-        Label subtitle = new Label(
-                "List your farm produce on AgriLink.");
+        Label subtitle =
+                new Label(
+                        "List your farm produce on AgriLink."
+                );
 
         subtitle.setStyle(
                 "-fx-font-size: 13px;" +
-                        "-fx-text-fill: #566573;");
+                "-fx-text-fill: #566573;"
+        );
 
         titles.getChildren().addAll(
                 title,
-                subtitle);
+                subtitle
+        );
 
         // =================================================
         // FORM
         // =================================================
 
-        VBox form = new VBox(16);
+        VBox form =
+                new VBox(16);
 
         form.setPadding(
-                new Insets(22));
+                new Insets(22)
+        );
 
         form.setStyle(
                 "-fx-background-color: #FFFFFF;" +
-                        "-fx-background-radius: 14px;" +
-                        "-fx-border-color: #A2D9CE;" +
-                        "-fx-border-radius: 14px;");
+                "-fx-background-radius: 14px;" +
+                "-fx-border-color: #A2D9CE;" +
+                "-fx-border-radius: 14px;"
+        );
 
         // =================================================
         // GRID
         // =================================================
 
-        GridPane grid = new GridPane();
+        GridPane grid =
+                new GridPane();
 
         grid.setHgap(18);
+
         grid.setVgap(15);
 
         // =================================================
         // PRODUCT NAME
         // =================================================
 
-        TextField nameField = new TextField();
+        TextField nameField =
+                new TextField();
 
         nameField.setPromptText(
-                "Enter product name");
+                "Enter product name"
+        );
 
-        styleInput(
-                nameField);
+        styleInput(nameField);
 
         grid.add(
                 createInputBox(
                         "Product Name",
-                        nameField),
+                        nameField
+                ),
                 0,
-                0);
+                0
+        );
 
         // =================================================
         // UNIT
         // =================================================
 
-        ComboBox<String> unitBox = new ComboBox<>();
+        ComboBox<String> unitBox =
+                new ComboBox<>();
 
         unitBox.getItems().addAll(
                 "kg",
                 "quintal",
                 "ton",
                 "piece",
-                "dozen");
+                "dozen"
+        );
 
         unitBox.setValue(
-                "kg");
+                "kg"
+        );
 
-        styleComboBox(
-                unitBox);
+        styleComboBox(unitBox);
 
         grid.add(
                 createInputBox(
                         "Unit",
-                        unitBox),
+                        unitBox
+                ),
                 1,
-                0);
+                0
+        );
 
         // =================================================
         // CATEGORY
         // =================================================
 
-        ComboBox<String> categoryBox = new ComboBox<>();
+        ComboBox<String> categoryBox =
+                new ComboBox<>();
 
         categoryBox.getItems().addAll(
                 "Vegetables",
                 "Fruits",
                 "Grains",
-                "Pulses");
+                "Pulses"
+        );
 
         categoryBox.setValue(
-                "Vegetables");
+                "Vegetables"
+        );
 
-        styleComboBox(
-                categoryBox);
+        styleComboBox(categoryBox);
 
         grid.add(
                 createInputBox(
                         "Category",
-                        categoryBox),
+                        categoryBox
+                ),
                 0,
-                1);
+                1
+        );
 
         // =================================================
         // VARIETY
         // =================================================
 
-        TextField varietyField = new TextField();
+        TextField varietyField =
+                new TextField();
 
         varietyField.setPromptText(
-                "Optional");
+                "Optional"
+        );
 
-        styleInput(
-                varietyField);
+        styleInput(varietyField);
 
         grid.add(
                 createInputBox(
                         "Variety",
-                        varietyField),
+                        varietyField
+                ),
                 1,
-                1);
+                1
+        );
 
         // =================================================
         // PRICE
         // =================================================
 
-        TextField priceField = new TextField();
+        TextField priceField =
+                new TextField();
 
         priceField.setPromptText(
-                "Enter price");
+                "Enter price"
+        );
 
-        styleInput(
-                priceField);
+        styleInput(priceField);
 
         grid.add(
                 createInputBox(
                         "Price",
-                        priceField),
+                        priceField
+                ),
                 0,
-                2);
+                2
+        );
 
         // =================================================
         // STOCK
         // =================================================
 
-        TextField stockField = new TextField();
+        TextField stockField =
+                new TextField();
 
         stockField.setPromptText(
-                "Enter available stock");
+                "Enter available stock"
+        );
 
-        styleInput(
-                stockField);
+        styleInput(stockField);
 
         grid.add(
                 createInputBox(
                         "Available Stock",
-                        stockField),
+                        stockField
+                ),
                 1,
-                2);
+                2
+        );
 
         // =================================================
         // HARVEST DATE
         // =================================================
 
-        DatePicker harvestDate = new DatePicker();
+        DatePicker harvestDate =
+                new DatePicker();
 
         harvestDate.setMaxWidth(
-                Double.MAX_VALUE);
+                Double.MAX_VALUE
+        );
 
         grid.add(
                 createInputBox(
                         "Harvest Date",
-                        harvestDate),
+                        harvestDate
+                ),
                 0,
-                3);
+                3
+        );
 
         // =================================================
         // DESCRIPTION
         // =================================================
 
-        TextArea descriptionField = new TextArea();
+        TextArea descriptionField =
+                new TextArea();
 
         descriptionField.setPromptText(
-                "Describe your product...");
+                "Describe your product..."
+        );
 
         descriptionField.setPrefRowCount(
-                4);
+                4
+        );
 
         descriptionField.setWrapText(
-                true);
+                true
+        );
 
         descriptionField.setStyle(
                 "-fx-background-radius: 8px;" +
-                        "-fx-border-color: #A2D9CE;" +
-                        "-fx-border-radius: 8px;");
+                "-fx-border-color: #A2D9CE;" +
+                "-fx-border-radius: 8px;"
+        );
 
         // =================================================
-        // IMAGE SECTION
+        // IMAGE
         // =================================================
 
-        VBox imageSection = createImageSection();
+        VBox imageSection =
+                createImageSection();
 
         // =================================================
-        // ACTION BUTTONS
+        // ACTIONS
         // =================================================
 
-        HBox actions = new HBox(10);
+        HBox actions =
+                new HBox(10);
 
         actions.setAlignment(
-                Pos.CENTER_RIGHT);
+                Pos.CENTER_RIGHT
+        );
 
-        Button cancelBtn = new Button(
-                "Cancel");
+        Button cancelBtn =
+                new Button(
+                        "Cancel"
+                );
 
         cancelBtn.setStyle(
                 "-fx-background-color: transparent;" +
-                        "-fx-text-fill: #1B2631;" +
-                        "-fx-padding: 8 18;" +
-                        "-fx-cursor: hand;");
+                "-fx-text-fill: #1B2631;" +
+                "-fx-padding: 8 18;" +
+                "-fx-cursor: hand;"
+        );
 
         cancelBtn.setOnAction(
                 e -> navigator.navigateTo(
-                        "Products"));
+                        "Products"
+                )
+        );
 
-        Button saveBtn = new Button(
-                "Add Product");
+        Button saveBtn =
+                new Button(
+                        "Add Product"
+                );
 
         saveBtn.setStyle(
                 "-fx-background-color: #117864;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-background-radius: 8px;" +
-                        "-fx-padding: 9 22;" +
-                        "-fx-cursor: hand;");
+                "-fx-text-fill: white;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 8px;" +
+                "-fx-padding: 9 22;" +
+                "-fx-cursor: hand;"
+        );
 
         saveBtn.setOnAction(
                 e -> {
 
                     saveBtn.setDisable(
-                            true);
+                            true
+                    );
 
                     saveProduct(
                             nameField,
@@ -340,44 +408,53 @@ public class AddProduct {
                             stockField,
                             harvestDate,
                             descriptionField,
-                            saveBtn);
-                });
+                            saveBtn
+                    );
+                }
+        );
 
         actions.getChildren().addAll(
                 cancelBtn,
-                saveBtn);
+                saveBtn
+        );
 
         form.getChildren().addAll(
                 grid,
 
                 createInputBox(
                         "Description",
-                        descriptionField),
+                        descriptionField
+                ),
 
                 imageSection,
 
-                actions);
+                actions
+        );
 
         root.getChildren().addAll(
                 titles,
-                form);
+                form
+        );
 
         // =================================================
-        // SCROLL PANE
+        // SCROLL
         // =================================================
 
-        ScrollPane scroll = new ScrollPane(
-                root);
+        ScrollPane scroll =
+                new ScrollPane(root);
 
         scroll.setFitToWidth(
-                true);
+                true
+        );
 
         scroll.setHbarPolicy(
-                ScrollPane.ScrollBarPolicy.NEVER);
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
 
         scroll.setStyle(
                 "-fx-background-color: transparent;" +
-                        "-fx-background: transparent;");
+                "-fx-background: transparent;"
+        );
 
         return scroll;
     }
@@ -388,118 +465,143 @@ public class AddProduct {
 
     private VBox createImageSection() {
 
-        VBox section = new VBox(10);
+        VBox section =
+                new VBox(10);
 
-        Label title = new Label(
-                "Product Image");
+        Label title =
+                new Label(
+                        "Product Image"
+                );
 
         title.setStyle(
                 "-fx-font-size: 13px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #566573;");
+                "-fx-font-weight: bold;" +
+                "-fx-text-fill: #566573;"
+        );
 
-        HBox imageArea = new HBox(15);
+        HBox imageArea =
+                new HBox(15);
 
         imageArea.setAlignment(
-                Pos.CENTER_LEFT);
+                Pos.CENTER_LEFT
+        );
 
-        // =================================================
-        // IMAGE PREVIEW
-        // =================================================
-
-        StackPane previewBox = new StackPane();
+        StackPane previewBox =
+                new StackPane();
 
         previewBox.setPrefSize(
                 180,
-                130);
+                130
+        );
 
         previewBox.setStyle(
                 "-fx-background-color: #E9F7EF;" +
-                        "-fx-border-color: #A2D9CE;" +
-                        "-fx-border-radius: 10px;" +
-                        "-fx-background-radius: 10px;");
+                "-fx-border-color: #A2D9CE;" +
+                "-fx-border-radius: 10px;" +
+                "-fx-background-radius: 10px;"
+        );
 
-        imagePreview = new ImageView();
+        imagePreview =
+                new ImageView();
 
         imagePreview.setFitWidth(
-                165);
+                165
+        );
 
         imagePreview.setFitHeight(
-                115);
+                115
+        );
 
         imagePreview.setPreserveRatio(
-                true);
+                true
+        );
 
-        Label placeholder = new Label(
-                "🌱\nSelect Image");
+        Label placeholder =
+                new Label(
+                        "🌱\nSelect Image"
+                );
 
         placeholder.setAlignment(
-                Pos.CENTER);
+                Pos.CENTER
+        );
 
         placeholder.setStyle(
                 "-fx-font-size: 14px;" +
-                        "-fx-text-fill: #566573;");
+                "-fx-text-fill: #566573;"
+        );
 
         previewBox.getChildren().add(
-                placeholder);
+                placeholder
+        );
 
-        // =================================================
-        // CHOOSE IMAGE BUTTON
-        // =================================================
-
-        Button chooseButton = new Button(
-                "📷 Choose Image");
+        Button chooseButton =
+                new Button(
+                        "📷 Choose Image"
+                );
 
         chooseButton.setStyle(
                 "-fx-background-color: white;" +
-                        "-fx-border-color: #A2D9CE;" +
-                        "-fx-border-radius: 8px;" +
-                        "-fx-background-radius: 8px;" +
-                        "-fx-padding: 8 16;" +
-                        "-fx-cursor: hand;");
+                "-fx-border-color: #A2D9CE;" +
+                "-fx-border-radius: 8px;" +
+                "-fx-background-radius: 8px;" +
+                "-fx-padding: 8 16;" +
+                "-fx-cursor: hand;"
+        );
 
         chooseButton.setOnAction(
                 e -> chooseImage(
-                        previewBox));
+                        previewBox
+                )
+        );
 
-        imageStatus = new Label(
-                "No image selected");
+        imageStatus =
+                new Label(
+                        "No image selected"
+                );
 
         imageStatus.setStyle(
                 "-fx-font-size: 12px;" +
-                        "-fx-text-fill: #566573;");
+                "-fx-text-fill: #566573;"
+        );
 
-        VBox controls = new VBox(10);
+        VBox controls =
+                new VBox(10);
 
         controls.setPrefWidth(
-                280);
+                280
+        );
 
         controls.getChildren().addAll(
                 chooseButton,
-                imageStatus);
+                imageStatus
+        );
 
         imageArea.getChildren().addAll(
                 previewBox,
-                controls);
+                controls
+        );
 
         section.getChildren().addAll(
                 title,
-                imageArea);
+                imageArea
+        );
 
         return section;
     }
 
     // =====================================================
-    // SELECT IMAGE
+    // CHOOSE IMAGE
     // =====================================================
 
     private void chooseImage(
             StackPane previewBox) {
 
-        FileChooser chooser = new FileChooser();
+        FileChooser chooser =
+                new FileChooser();
 
         chooser.setTitle(
-                "Select Product Image");
+                "Select Product Image"
+        );
 
         chooser.getExtensionFilters()
                 .add(
@@ -508,37 +610,48 @@ public class AddProduct {
                                 "*.png",
                                 "*.jpg",
                                 "*.jpeg",
-                                "*.webp"));
+                                "*.webp"
+                        )
+                );
 
-        File file = chooser.showOpenDialog(
-                previewBox
-                        .getScene()
-                        .getWindow());
+        File file =
+                chooser.showOpenDialog(
+                        previewBox
+                                .getScene()
+                                .getWindow()
+                );
 
         if (file == null) {
             return;
         }
 
-        selectedImageFile = file;
+        selectedImageFile =
+                file;
 
-        Image image = new Image(
-                file.toURI()
-                        .toString());
+        Image image =
+                new Image(
+                        file.toURI()
+                                .toString()
+                );
 
         imagePreview.setImage(
-                image);
+                image
+        );
 
         previewBox.getChildren()
                 .setAll(
-                        imagePreview);
+                        imagePreview
+                );
 
         imageStatus.setText(
                 "Selected: "
-                        + file.getName());
+                        + file.getName()
+        );
 
         imageStatus.setStyle(
                 "-fx-font-size: 12px;" +
-                        "-fx-text-fill: #117864;");
+                "-fx-text-fill: #117864;"
+        );
     }
 
     // =====================================================
@@ -562,20 +675,46 @@ public class AddProduct {
             // GET VALUES
             // =================================================
 
-            String name = nameField.getText()
-                    .trim();
+            String name =
+                    nameField.getText()
+                            .trim();
 
-            String variety = varietyField.getText()
-                    .trim();
+            String variety =
+                    varietyField.getText()
+                            .trim();
 
-            String priceText = priceField.getText()
-                    .trim();
+            String priceText =
+                    priceField.getText()
+                            .trim();
 
-            String stockText = stockField.getText()
-                    .trim();
+            String stockText =
+                    stockField.getText()
+                            .trim();
 
-            String description = descriptionField.getText()
-                    .trim();
+            String description =
+                    descriptionField.getText()
+                            .trim();
+
+            // =================================================
+            // FARMER EMAIL VALIDATION
+            // =================================================
+
+            if (
+                    farmerEmail == null
+                            ||
+                    farmerEmail.trim().isEmpty()
+            ) {
+
+                showError(
+                        "Logged-in farmer email is missing."
+                );
+
+                saveBtn.setDisable(
+                        false
+                );
+
+                return;
+            }
 
             // =================================================
             // VALIDATION
@@ -584,10 +723,12 @@ public class AddProduct {
             if (name.isEmpty()) {
 
                 showError(
-                        "Product name is required.");
+                        "Product name is required."
+                );
 
                 saveBtn.setDisable(
-                        false);
+                        false
+                );
 
                 return;
             }
@@ -595,10 +736,12 @@ public class AddProduct {
             if (priceText.isEmpty()) {
 
                 showError(
-                        "Price is required.");
+                        "Price is required."
+                );
 
                 saveBtn.setDisable(
-                        false);
+                        false
+                );
 
                 return;
             }
@@ -606,10 +749,12 @@ public class AddProduct {
             if (stockText.isEmpty()) {
 
                 showError(
-                        "Stock is required.");
+                        "Stock is required."
+                );
 
                 saveBtn.setDisable(
-                        false);
+                        false
+                );
 
                 return;
             }
@@ -617,27 +762,35 @@ public class AddProduct {
             if (selectedImageFile == null) {
 
                 showError(
-                        "Please select a product image.");
+                        "Please select a product image."
+                );
 
                 saveBtn.setDisable(
-                        false);
+                        false
+                );
 
                 return;
             }
 
-            double price = Double.parseDouble(
-                    priceText);
+            double price =
+                    Double.parseDouble(
+                            priceText
+                    );
 
-            double stock = Double.parseDouble(
-                    stockText);
+            double stock =
+                    Double.parseDouble(
+                            stockText
+                    );
 
             if (price < 0) {
 
                 showError(
-                        "Price cannot be negative.");
+                        "Price cannot be negative."
+                );
 
                 saveBtn.setDisable(
-                        false);
+                        false
+                );
 
                 return;
             }
@@ -645,97 +798,111 @@ public class AddProduct {
             if (stock < 0) {
 
                 showError(
-                        "Stock cannot be negative.");
+                        "Stock cannot be negative."
+                );
 
                 saveBtn.setDisable(
-                        false);
+                        false
+                );
 
                 return;
             }
 
             // =================================================
-            // UPLOAD IMAGE TO CLOUDINARY
+            // CLOUDINARY
             // =================================================
 
             imageStatus.setText(
-                    "Uploading image...");
+                    "Uploading image..."
+            );
 
-            System.out.println(
-                    "Uploading image to Cloudinary...");
+            Map<?, ?> uploadResult =
+                    cloudinary
+                            .uploader()
+                            .upload(
+                                    selectedImageFile,
+                                    ObjectUtils.asMap(
+                                            "folder",
+                                            "agrilink/products"
+                                    )
+                            );
 
-            Map<?, ?> uploadResult = cloudinary.uploader()
-                    .upload(
-                            selectedImageFile,
-                            ObjectUtils.asMap(
-                                    "folder",
-                                    "agrilink/products"));
+            String imageUrl =
+                    (String)
+                            uploadResult.get(
+                                    "secure_url"
+                            );
 
-            // =================================================
-            // GET CLOUDINARY URL
-            // =================================================
-
-            String imageUrl = (String) uploadResult.get(
-                    "secure_url");
-
-            if (imageUrl == null
-                    ||
-                    imageUrl.isEmpty()) {
+            if (
+                    imageUrl == null
+                            ||
+                    imageUrl.isEmpty()
+            ) {
 
                 showError(
-                        "Cloudinary did not return an image URL.");
+                        "Cloudinary did not return an image URL."
+                );
 
                 saveBtn.setDisable(
-                        false);
+                        false
+                );
 
                 return;
             }
 
-            System.out.println(
-                    "Cloudinary upload successful.");
-
-            System.out.println(
-                    "Image URL: "
-                            + imageUrl);
-
             imageStatus.setText(
-                    "Image uploaded successfully");
+                    "Image uploaded successfully"
+            );
 
             // =================================================
             // CREATE PRODUCT
             // =================================================
 
-            Product product = new Product();
+            Product product =
+                    new Product();
 
+            /*
+             * Set farmer email locally.
+             */
             product.setFarmerEmail(
-                    farmerEmail);
+                    farmerEmail.trim()
+            );
 
             product.setName(
-                    name);
+                    name
+            );
 
             product.setUnit(
-                    unitBox.getValue());
+                    unitBox.getValue()
+            );
 
             product.setCategory(
-                    categoryBox.getValue());
+                    categoryBox.getValue()
+            );
 
             product.setVariety(
-                    variety);
+                    variety
+            );
 
             product.setDescription(
-                    description);
+                    description
+            );
 
             product.setHarvestDate(
                     harvestDate.getValue() == null
                             ? ""
                             : harvestDate
                                     .getValue()
-                                    .toString());
+                                    .toString()
+            );
 
             product.setPrice(
-                    price);
+                    price
+            );
 
             product.setStock(
-                    stock);
+                    stock
+            );
 
             // =================================================
             // STATUS
@@ -744,58 +911,148 @@ public class AddProduct {
             if (stock <= 0) {
 
                 product.setStatus(
-                        "Sold Out");
+                        "Sold Out"
+                );
 
             } else {
 
                 product.setStatus(
-                        "Active");
+                        "Active"
+                );
             }
 
             // =================================================
-            // IMPORTANT
-            // CLOUDINARY URL → PRODUCT
+            // IMAGE
             // =================================================
 
             product.setImageUrl(
-                    imageUrl);
+                    imageUrl
+            );
 
             // =================================================
-            // SAVE PRODUCT TO FIRESTORE
+            // DEBUG
             // =================================================
 
             System.out.println(
-                    "Saving product to Firestore...");
+                    "===================================="
+            );
 
-            boolean saved = productDAO.addProduct(
-                    product);
+            System.out.println(
+                    "Saving Product"
+            );
+
+            System.out.println(
+                    "Farmer Email: "
+                            + farmerEmail
+            );
+
+            System.out.println(
+                    "Product Name: "
+                            + product.getName()
+            );
+
+            System.out.println(
+                    "Status: "
+                            + product.getStatus()
+            );
+
+            System.out.println(
+                    "===================================="
+            );
+
+            // =================================================
+            // SAVE
+            // =================================================
+
+            boolean saved =
+                    productController.addProduct(
+                            product,
+                            farmerEmail
+                    );
+
+            // =================================================
+            // SUCCESS
+            // =================================================
 
             if (saved) {
 
                 System.out.println(
-                        "Product saved successfully!");
+                        "Product saved successfully!"
+                );
+
+                // ---------------------------------------------
+                // NOTIFICATION
+                // ---------------------------------------------
+
+                try {
+
+                    Notification notification =
+                            new Notification(
+                                    farmerEmail,
+                                    "Product Added",
+                                    "Your product \""
+                                            + product.getName()
+                                            + "\" has been added successfully.",
+                                    "System"
+                            );
+
+                    boolean notificationSaved =
+                            notificationController
+                                    .addNotification(
+                                            notification
+                                    );
+
+                    if (notificationSaved) {
+
+                        System.out.println(
+                                "Notification created successfully!"
+                        );
+                    }
+
+                } catch (Exception notificationException) {
+
+                    System.out.println(
+                            "Notification creation failed:"
+                    );
+
+                    notificationException
+                            .printStackTrace();
+                }
+
+                // ---------------------------------------------
+                // SUCCESS ALERT
+                // ---------------------------------------------
 
                 showSuccess();
 
+                // ---------------------------------------------
+                // GO BACK TO PRODUCTS
+                // ---------------------------------------------
+
                 navigator.navigateTo(
-                        "Products");
+                        "Products"
+                );
 
             } else {
 
                 showError(
-                        "Product could not be saved to Firestore.");
+                        "Product could not be saved to Firestore."
+                );
 
                 saveBtn.setDisable(
-                        false);
+                        false
+                );
             }
 
         } catch (NumberFormatException e) {
 
             showError(
-                    "Price and stock must be valid numbers.");
+                    "Price and stock must be valid numbers."
+            );
 
             saveBtn.setDisable(
-                    false);
+                    false
+            );
 
         } catch (Exception e) {
 
@@ -803,10 +1060,12 @@ public class AddProduct {
 
             showError(
                     "Something went wrong:\n"
-                            + e.getMessage());
+                            + e.getMessage()
+            );
 
             saveBtn.setDisable(
-                    false);
+                    false
+            );
         }
     }
 
@@ -818,14 +1077,16 @@ public class AddProduct {
             TextField field) {
 
         field.setMaxWidth(
-                Double.MAX_VALUE);
+                Double.MAX_VALUE
+        );
 
         field.setStyle(
                 "-fx-background-color: white;" +
-                        "-fx-background-radius: 8px;" +
-                        "-fx-border-color: #A2D9CE;" +
-                        "-fx-border-radius: 8px;" +
-                        "-fx-padding: 8px;");
+                "-fx-background-radius: 8px;" +
+                "-fx-border-color: #A2D9CE;" +
+                "-fx-border-radius: 8px;" +
+                "-fx-padding: 8px;"
+        );
     }
 
     // =====================================================
@@ -836,13 +1097,15 @@ public class AddProduct {
             ComboBox<String> combo) {
 
         combo.setMaxWidth(
-                Double.MAX_VALUE);
+                Double.MAX_VALUE
+        );
 
         combo.setStyle(
                 "-fx-background-color: white;" +
-                        "-fx-background-radius: 8px;" +
-                        "-fx-border-color: #A2D9CE;" +
-                        "-fx-border-radius: 8px;");
+                "-fx-background-radius: 8px;" +
+                "-fx-border-color: #A2D9CE;" +
+                "-fx-border-radius: 8px;"
+        );
     }
 
     // =====================================================
@@ -853,62 +1116,76 @@ public class AddProduct {
             String label,
             Node input) {
 
-        VBox box = new VBox(5);
+        VBox box =
+                new VBox(5);
 
-        Label labelNode = new Label(
-                label);
+        Label labelNode =
+                new Label(label);
 
         labelNode.setStyle(
                 "-fx-font-size: 12px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #566573;");
+                "-fx-font-weight: bold;" +
+                "-fx-text-fill: #566573;"
+        );
 
         box.getChildren().addAll(
                 labelNode,
-                input);
+                input
+        );
 
         return box;
     }
 
     // =====================================================
-    // ERROR ALERT
+    // ERROR
     // =====================================================
 
     private void showError(
             String message) {
 
-        Alert alert = new Alert(
-                Alert.AlertType.ERROR);
+        Alert alert =
+                new Alert(
+                        Alert.AlertType.ERROR
+                );
 
         alert.setTitle(
-                "Add Product");
+                "Add Product"
+        );
 
         alert.setHeaderText(
-                "Unable to add product");
+                "Unable to add product"
+        );
 
         alert.setContentText(
-                message);
+                message
+        );
 
         alert.showAndWait();
     }
 
     // =====================================================
-    // SUCCESS ALERT
+    // SUCCESS
     // =====================================================
 
     private void showSuccess() {
 
-        Alert alert = new Alert(
-                Alert.AlertType.INFORMATION);
+        Alert alert =
+                new Alert(
+                        Alert.AlertType.INFORMATION
+                );
 
         alert.setTitle(
-                "Product Added");
+                "Product Added"
+        );
 
         alert.setHeaderText(
-                "Product added successfully!");
+                "Product added successfully!"
+        );
 
         alert.setContentText(
-                "The product image was uploaded to Cloudinary and its URL was saved in Firestore.");
+                "The product image was uploaded to Cloudinary "
+                        + "and the product was saved in Firestore."
+        );
 
         alert.showAndWait();
     }

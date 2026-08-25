@@ -1,5 +1,7 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.util.LanguageManager;
+
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -48,6 +50,7 @@ public class FarmerProfile {
         );
 
         root.getChildren().addAll(profileCard, lblList, prods);
+        LanguageManager.apply(root);
         return root;
     }
 
