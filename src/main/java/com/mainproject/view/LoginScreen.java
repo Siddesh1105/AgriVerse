@@ -5,8 +5,10 @@ import com.mainproject.view.farmer.FarmerDashboard;
 import com.mainproject.controller.AuthController;
 import com.mainproject.dao.UserDAO;
 import com.mainproject.model.User;
+
 import javafx.application.Application;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -22,6 +24,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class LoginScreen extends Application {
@@ -468,6 +471,9 @@ public class LoginScreen extends Application {
                 rightPanel.setStyle(
                                 "-fx-background-color: #f1efef;");
 
+                // =================================================
+                // MAIN
+                // =================================================
 
                 HBox main = new HBox(
                                 leftPanel,
@@ -477,16 +483,19 @@ public class LoginScreen extends Application {
                                 rightPanel,
                                 Priority.ALWAYS);
 
-                rightPanel.prefWidthProperty().bind(main.widthProperty().multiply(0.8));
+                rightPanel.prefWidthProperty()
+                                .bind(
+                                                main.widthProperty()
+                                                                .multiply(0.8));
 
                 // =================================================
                 // SCENE
                 // =================================================
-                
-                Rectangle2D screenSize= Screen.getPrimary().getVisualBounds();
 
-                HomePageScene = new Scene(main,screenSize.getHeight(),screenSize.getWidth());
-                
+                HomePageScene = new Scene(
+                                main);
+                Rectangle2D screen = Screen.getPrimary()
+                                .getVisualBounds();
 
                 HomePageScene.setFill(
                                 Color.WHITE);
@@ -494,32 +503,30 @@ public class LoginScreen extends Application {
                 Homestage.setScene(
                                 HomePageScene);
 
-                HomePageScene.setFill(Color.WHITE);
-                Homestage.setScene(HomePageScene);
                 Homestage.show();
         }
 
+        // =====================================================
+        // SWITCH SCENE
+        // =====================================================
 
-        public static void switchScene(Scene scene) {
-
-                if (Homestage != null) {
-                        Homestage.setScene(scene);
-                }
-        }
-
-       
-
-        public static void logoutToLogin() {
+        public static void switchScene(
+                        Scene scene) {
 
                 if (Homestage != null) {
 
-                        new LoginScreen()
-                                        .start(
-                                                        Homestage);
+                        Homestage.setScene(
+                                        scene);
                 }
         }
 
-       
+        // =====================================================
+        // LOGOUT
+        // ====================================================
+        // =====================================================
+        // BACK TO LOGIN
+        // =====================================================
+
         public void backtoLoginScreen() {
 
                 Homestage.setScene(

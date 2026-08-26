@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.mainproject.model.Product;
 import com.mainproject.model.User;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -42,27 +43,24 @@ public class FarmerDashboard {
 
     private final User user;
 
+    // Logged-in farmer email
+    private String farmerEmail;
+
     // =====================================================
     // COLORS
     // =====================================================
 
-    private static final String MAIN_BG =
-            "#E9F7EF";
+    private static final String MAIN_BG = "#E9F7EF";
 
-    private static final String PANEL_BG =
-            "#D4EFDF";
+    private static final String PANEL_BG = "#D4EFDF";
 
-    private static final String PRIMARY_GREEN =
-            "#117864";
+    private static final String PRIMARY_GREEN = "#117864";
 
-    private static final String PRIMARY_TEXT =
-            "#1B2631";
+    private static final String PRIMARY_TEXT = "#1B2631";
 
-    private static final String BORDER_COLOR =
-            "#A2D9CE";
+    private static final String BORDER_COLOR = "#A2D9CE";
 
-    private static final String ACCENT_YELLOW =
-            "#F1C40F";
+    private static final String ACCENT_YELLOW = "#F1C40F";
 
     // =====================================================
     // CONSTRUCTOR
@@ -72,24 +70,28 @@ public class FarmerDashboard {
 
         this.user = user;
 
+        // IMPORTANT:
+        // Store the logged-in user's email
+        this.farmerEmail = user.getEmail();
+
         System.out.println(
-                "Opening Farmer Dashboard..."
-        );
+                "Opening Farmer Dashboard...");
 
         System.out.println(
                 "Farmer Dashboard opened for: "
-                        + user.getEmail()
-        );
+                        + farmerEmail);
 
         System.out.println(
                 "Farmer Name: "
-                        + user.getFullName()
-        );
+                        + user.getFullName());
 
         System.out.println(
                 "Farmer Role: "
-                        + user.getRole()
-        );
+                        + user.getRole());
+
+        System.out.println(
+                "Farmer Email: "
+                        + farmerEmail);
     }
 
     // =====================================================
@@ -100,8 +102,7 @@ public class FarmerDashboard {
 
         if (scene == null) {
 
-            scene =
-                    getFarmerDashboardScene();
+            scene = getFarmerDashboardScene();
         }
 
         return scene;
@@ -123,24 +124,21 @@ public class FarmerDashboard {
         root.setStyle(
                 "-fx-background-color: "
                         + MAIN_BG
-                        + ";"
-        );
+                        + ";");
 
         // =================================================
         // TOP BAR
         // =================================================
 
         root.setTop(
-                createTopBar()
-        );
+                createTopBar());
 
         // =================================================
         // SIDEBAR
         // =================================================
 
         root.setLeft(
-                createSidebar()
-        );
+                createSidebar());
 
         // =================================================
         // CONTENT AREA
@@ -154,21 +152,17 @@ public class FarmerDashboard {
                         18,
                         22,
                         20,
-                        22
-                )
-        );
+                        22));
 
         root.setCenter(
-                contentArea
-        );
+                contentArea);
 
         // =================================================
         // DEFAULT PAGE
         // =================================================
 
         navigateTo(
-                "Dashboard"
-        );
+                "Dashboard");
 
         // =================================================
         // SCENE
@@ -178,8 +172,7 @@ public class FarmerDashboard {
                 new Scene(
                         root,
                         screen.getWidth(),
-                        screen.getHeight()
-                );
+                        screen.getHeight());
 
         return scene;
     }
@@ -194,29 +187,25 @@ public class FarmerDashboard {
                 new HBox(15);
 
         topBar.setAlignment(
-                Pos.CENTER_LEFT
-        );
+                Pos.CENTER_LEFT);
 
         topBar.setPadding(
                 new Insets(
                         10,
                         25,
                         10,
-                        20
-                )
-        );
+                        20));
 
         topBar.setPrefHeight(
-                80
-        );
+                80);
 
         topBar.setStyle(
                 "-fx-background-color: #FFFFFF;"
                         + "-fx-border-color: "
                         + BORDER_COLOR
                         + ";"
-                        + "-fx-border-width: 0 0 1.5px 0;"
-        );
+                        + "-fx-border-width: "
+                        + "0 0 1.5px 0;");
 
         // =================================================
         // LOGO
@@ -231,31 +220,24 @@ public class FarmerDashboard {
                     new Image(
                             getClass()
                                     .getResourceAsStream(
-                                            "/assets/icons/AgriLinklogo.png"
-                                    )
-                    );
+                                            "/assets/icons/AgriLinklogo.png"));
 
             logo.setImage(
-                    image
-            );
+                    image);
 
             logo.setFitWidth(
-                    260
-            );
+                    260);
 
             logo.setFitHeight(
-                    65
-            );
+                    65);
 
             logo.setPreserveRatio(
-                    true
-            );
+                    true);
 
         } catch (Exception e) {
 
             System.out.println(
-                    "Logo not found."
-            );
+                    "Logo not found.");
         }
 
         // =================================================
@@ -267,8 +249,7 @@ public class FarmerDashboard {
 
         HBox.setHgrow(
                 spacer,
-                Priority.ALWAYS
-        );
+                Priority.ALWAYS);
 
         // =================================================
         // NOTIFICATION
@@ -279,48 +260,37 @@ public class FarmerDashboard {
 
         notification.setPrefSize(
                 40,
-                40
-        );
+                40);
 
         notification.setStyle(
-                "-fx-cursor: hand;"
-        );
+                "-fx-cursor: hand;");
 
         Label bell =
-                new Label(
-                        "🔔"
-                );
+                new Label("🔔");
 
         bell.setStyle(
-                "-fx-font-size: 20px;"
-        );
+                "-fx-font-size: 20px;");
 
         Circle notificationDot =
                 new Circle(
                         5,
                         Color.web(
-                                ACCENT_YELLOW
-                        )
-                );
+                                ACCENT_YELLOW));
 
         notificationDot.setTranslateX(
-                8
-        );
+                8);
 
         notificationDot.setTranslateY(
-                -8
-        );
+                -8);
 
-        notification.getChildren().addAll(
-                bell,
-                notificationDot
-        );
+        notification.getChildren()
+                .addAll(
+                        bell,
+                        notificationDot);
 
         notification.setOnMouseClicked(
                 e -> navigateTo(
-                        "Notifications"
-                )
-        );
+                        "Notifications"));
 
         // =================================================
         // USER PROFILE
@@ -330,63 +300,52 @@ public class FarmerDashboard {
                 new HBox(10);
 
         userBox.setAlignment(
-                Pos.CENTER
-        );
+                Pos.CENTER);
 
         userBox.setStyle(
-                "-fx-cursor: hand;"
-        );
+                "-fx-cursor: hand;");
 
         Circle avatarCircle =
                 new Circle(
                         20,
                         Color.web(
-                                PANEL_BG
-                        )
-                );
+                                PANEL_BG));
 
         Label farmerIcon =
-                new Label(
-                        "👨‍🌾"
-                );
+                new Label("👨‍🌾");
 
         StackPane avatar =
                 new StackPane(
                         avatarCircle,
-                        farmerIcon
-                );
+                        farmerIcon);
 
         Label farmerName =
                 new Label(
                         user.getFullName()
-                                + " ▼"
-                );
+                                + " ▼");
 
         farmerName.setStyle(
                 "-fx-font-size: 14px;"
                         + "-fx-font-weight: bold;"
                         + "-fx-text-fill: "
                         + PRIMARY_TEXT
-                        + ";"
-        );
+                        + ";");
 
-        userBox.getChildren().addAll(
-                avatar,
-                farmerName
-        );
+        userBox.getChildren()
+                .addAll(
+                        avatar,
+                        farmerName);
 
         userBox.setOnMouseClicked(
                 e -> navigateTo(
-                        "Profile"
-                )
-        );
+                        "Profile"));
 
-        topBar.getChildren().addAll(
-                logo,
-                spacer,
-                notification,
-                userBox
-        );
+        topBar.getChildren()
+                .addAll(
+                        logo,
+                        spacer,
+                        notification,
+                        userBox);
 
         return topBar;
     }
@@ -401,25 +360,22 @@ public class FarmerDashboard {
                 new VBox(5);
 
         sidebar.setPrefWidth(
-                235
-        );
+                235);
 
         sidebar.setPadding(
                 new Insets(
                         15,
                         10,
                         15,
-                        10
-                )
-        );
+                        10));
 
         sidebar.setStyle(
                 "-fx-background-color: #FFFFFF;"
                         + "-fx-border-color: "
                         + BORDER_COLOR
                         + ";"
-                        + "-fx-border-width: 0 1.5px 0 0;"
-        );
+                        + "-fx-border-width: "
+                        + "0 1.5px 0 0;");
 
         // =================================================
         // FARMER INFORMATION
@@ -429,76 +385,64 @@ public class FarmerDashboard {
                 new HBox(10);
 
         farmerInfo.setAlignment(
-                Pos.CENTER_LEFT
-        );
+                Pos.CENTER_LEFT);
 
         farmerInfo.setPadding(
                 new Insets(
                         5,
                         10,
                         18,
-                        10
-                )
-        );
+                        10));
 
         Circle farmerCircle =
                 new Circle(
                         22,
                         Color.web(
-                                PANEL_BG
-                        )
-                );
+                                PANEL_BG));
 
         Label farmerEmoji =
-                new Label(
-                        "👨‍🌾"
-                );
+                new Label("👨‍🌾");
 
         StackPane farmerAvatar =
                 new StackPane(
                         farmerCircle,
-                        farmerEmoji
-                );
+                        farmerEmoji);
 
         VBox farmerDetails =
                 new VBox(2);
 
         Label name =
                 new Label(
-                        user.getFullName()
-                );
+                        user.getFullName());
 
         name.setStyle(
                 "-fx-font-size: 14px;"
                         + "-fx-font-weight: bold;"
                         + "-fx-text-fill: "
                         + PRIMARY_TEXT
-                        + ";"
-        );
+                        + ";");
 
         Label role =
                 new Label(
-                        user.getRole()
-                );
+                        user.getRole());
 
         role.setStyle(
                 "-fx-font-size: 12px;"
-                        + "-fx-text-fill: #64748B;"
-        );
+                        + "-fx-text-fill: #64748B;");
 
-        farmerDetails.getChildren().addAll(
-                name,
-                role
-        );
+        farmerDetails.getChildren()
+                .addAll(
+                        name,
+                        role);
 
-        farmerInfo.getChildren().addAll(
-                farmerAvatar,
-                farmerDetails
-        );
+        farmerInfo.getChildren()
+                .addAll(
+                        farmerAvatar,
+                        farmerDetails);
 
-        sidebar.getChildren().add(
-                farmerInfo
-        );
+        sidebar.getChildren()
+                .add(
+                        farmerInfo);
 
         // =================================================
         // NAVIGATION
@@ -510,77 +454,78 @@ public class FarmerDashboard {
         addNavigation(
                 sidebar,
                 "Dashboard",
-                "🏠"
-        );
+                "🏠");
 
         addNavigation(
                 sidebar,
                 "Products",
-                "🎁"
-        );
+                "🎁");
 
         addNavigation(
                 sidebar,
                 "Orders",
-                "📦"
-        );
-
-        addNavigation(
-                sidebar,
-                "Marketplace",
-                "🏪"
-        );
+                "📦");
 
         addNavigation(
                 sidebar,
                 "Equipment Rental",
-                "🚜"
-        );
+                "🚜");
+
+        // =================================================
+        // MY CART
+        // =================================================
 
         addNavigation(
                 sidebar,
-                "Crop Prices",
-                "📈"
-        );
+                "My Cart",
+                "🛒");
+
+        // =================================================
+        // MY EQUIPMENT
+        // =================================================
+
+        addNavigation(
+                sidebar,
+                "My Equipment",
+                "⚙");
+
+        addNavigation(
+                sidebar,
+                "Marketplace",
+                "📈");
 
         addNavigation(
                 sidebar,
                 "Weather",
-                "🌤"
-        );
+                "🌤");
 
         addNavigation(
                 sidebar,
                 "AI Recommendations",
-                "✨"
-        );
+                "✨");
 
         addNavigation(
                 sidebar,
                 "Notifications",
-                "🔔"
-        );
+                "🔔");
 
         addNavigation(
                 sidebar,
                 "Profile",
-                "👤"
-        );
+                "👤");
 
         addNavigation(
                 sidebar,
                 "Settings",
-                "⚙"
-        );
+                "⚙");
 
         addNavigation(
                 sidebar,
                 "Logout",
-                "🚪"
-        );
+                "🚪");
 
-                return sidebar;
-        }
+        return sidebar;
+    }
 
     // =====================================================
     // ADD NAVIGATION BUTTON
@@ -594,17 +539,14 @@ public class FarmerDashboard {
         ToggleButton button =
                 createNavigationButton(
                         title,
-                        emoji
-                );
+                        emoji);
 
         navMap.put(
                 title,
-                button
-        );
+                button);
 
-        sidebar.getChildren().add(
-                button
-        );
+        sidebar.getChildren()
+                .add(button);
     }
 
     // =====================================================
@@ -616,68 +558,53 @@ public class FarmerDashboard {
             String emoji) {
 
         Label icon =
-                new Label(
-                        emoji
-                );
+                new Label(emoji);
 
         icon.setStyle(
-                "-fx-font-size: 18px;"
-        );
+                "-fx-font-size: 18px;");
 
         Label text =
-                new Label(
-                        title
-                );
+                new Label(title);
 
         text.setStyle(
                 "-fx-font-size: 13px;"
                         + "-fx-text-fill: "
                         + PRIMARY_TEXT
-                        + ";"
-        );
+                        + ";");
 
         HBox content =
                 new HBox(
                         12,
                         icon,
-                        text
-                );
+                        text);
 
         content.setAlignment(
-                Pos.CENTER_LEFT
-        );
+                Pos.CENTER_LEFT);
 
         ToggleButton button =
                 new ToggleButton();
 
         button.setGraphic(
-                content
-        );
+                content);
 
         button.setToggleGroup(
-                navGroup
-        );
+                navGroup);
 
         button.setMaxWidth(
-                Double.MAX_VALUE
-        );
+                Double.MAX_VALUE);
 
         button.setPrefHeight(
-                42
-        );
+                42);
 
         button.setPadding(
                 new Insets(
                         0,
                         10,
                         0,
-                        14
-                )
-        );
+                        14));
 
         button.setFocusTraversable(
-                false
-        );
+                false);
 
         // =================================================
         // STYLE UPDATE
@@ -686,46 +613,41 @@ public class FarmerDashboard {
         Runnable updateStyle =
                 () -> {
 
-                    if (
-                            button.isSelected()
-                    ) {
+                    if (button.isSelected()) {
 
                         button.setStyle(
                                 "-fx-background-color: "
                                         + PRIMARY_GREEN
                                         + ";"
                                         + "-fx-background-radius: 9px;"
-                                        + "-fx-cursor: hand;"
-                        );
+                                        + "-fx-cursor: hand;");
 
                         text.setStyle(
                                 "-fx-font-size: 13px;"
                                         + "-fx-font-weight: bold;"
-                                        + "-fx-text-fill: white;"
-                        );
+                                        + "-fx-text-fill: white;");
 
                     } else {
 
                         button.setStyle(
                                 "-fx-background-color: transparent;"
                                         + "-fx-background-radius: 9px;"
-                                        + "-fx-cursor: hand;"
-                        );
+                                        + "-fx-cursor: hand;");
 
                         text.setStyle(
                                 "-fx-font-size: 13px;"
                                         + "-fx-text-fill: "
                                         + PRIMARY_TEXT
-                                        + ";"
-                        );
+                                        + ";");
                     }
                 };
 
         button.selectedProperty()
                 .addListener(
-                        (obs, oldValue, newValue) ->
-                                updateStyle.run()
-                );
+                        (obs,
+                                oldValue,
+                                newValue)
+                                -> updateStyle.run());
 
         updateStyle.run();
 
@@ -736,42 +658,36 @@ public class FarmerDashboard {
         button.setOnMouseEntered(
                 e -> {
 
-                    if (
-                            !button.isSelected()
-                    ) {
+                    if (!button.isSelected()) {
 
                         button.setStyle(
                                 "-fx-background-color: "
                                         + PANEL_BG
                                         + ";"
                                         + "-fx-background-radius: 9px;"
-                                        + "-fx-cursor: hand;"
-                        );
+                                        + "-fx-cursor: hand;");
                     }
-                }
-        );
+                });
 
         button.setOnMouseExited(
                 e -> {
 
-                    if (
-                            !button.isSelected()
-                    ) {
+                    if (!button.isSelected()) {
 
                         button.setStyle(
                                 "-fx-background-color: transparent;"
                                         + "-fx-background-radius: 9px;"
-                                        + "-fx-cursor: hand;"
-                        );
+                                        + "-fx-cursor: hand;");
                     }
-                }
-        );
+                });
+
+        // =================================================
+        // NAVIGATION
+        // =================================================
 
         button.setOnAction(
                 e -> navigateTo(
-                        title
-                )
-        );
+                        title));
 
         return button;
     }
@@ -780,20 +696,18 @@ public class FarmerDashboard {
     // NAVIGATION
     // =====================================================
 
-    public void navigateTo(String page) {
+    public void navigateTo(
+            String page) {
 
         // =================================================
         // UPDATE SELECTED SIDEBAR BUTTON
         // =================================================
 
-        if (
-                navMap.containsKey(page)
-        ) {
+        if (navMap.containsKey(page)) {
 
             navMap.get(page)
                     .setSelected(
-                            true
-                    );
+                            true);
         }
 
         // =================================================
@@ -816,8 +730,8 @@ public class FarmerDashboard {
 
                 viewNode =
                         new DashboardOverview(
-                                this
-                        ).getView();
+                                this)
+                                .getView();
 
                 break;
 
@@ -830,8 +744,8 @@ public class FarmerDashboard {
                 viewNode =
                         new Products(
                                 this,
-                                user.getEmail()
-                        ).getView();
+                                user.getEmail())
+                                .getView();
 
                 break;
 
@@ -844,8 +758,8 @@ public class FarmerDashboard {
                 viewNode =
                         new AddProduct(
                                 this,
-                                user.getEmail()
-                        ).getView();
+                                user.getEmail())
+                                .getView();
 
                 break;
 
@@ -868,9 +782,9 @@ public class FarmerDashboard {
             case "Marketplace":
 
                 viewNode =
-                        new MarketPlace(
-                                this
-                        ).getView();
+                        new CropPrices(
+                                this)
+                                .getView();
 
                 break;
 
@@ -880,20 +794,81 @@ public class FarmerDashboard {
 
             case "Equipment Rental":
 
+    viewNode =
+            new EquipmentRental(
+                    user.getEmail(),
+                    user.getFullName())
+                    .getView();
+
+    break;
+
+            // =============================================
+            // MY CART
+            // =============================================
+
+            case "My Cart":
+
                 viewNode =
-                        new EquipmentRental()
+                        new Cart(
+                                user.getEmail(),
+                                user.getFullName(),
+
+                                // Continue Shopping
+                                () -> navigateTo(
+                                        "Equipment Rental"),
+
+                                // Checkout
+                                () -> {
+
+                                    System.out.println(
+                                            "Checkout clicked.");
+
+                                    System.out.println(
+                                            "Razorpay payment will be integrated later.");
+                                })
+
                                 .getView();
 
                 break;
 
             // =============================================
-            // CROP PRICES
+            // MY EQUIPMENT
             // =============================================
 
-            case "Crop Prices":
+            case "My Equipment":
 
                 viewNode =
-                        new CropPrices(this)
+                        new MyEquipment(
+                                user.getEmail(),
+                                user.getFullName(),
+
+                                // Open Add Equipment
+                                () -> navigateTo(
+                                        "AddEquipment"),
+
+                                // Back to Equipment Rental
+                                () -> navigateTo(
+                                        "Equipment Rental"))
+
+                                .getView();
+
+                break;
+
+            // =============================================
+            // ADD EQUIPMENT
+            // =============================================
+
+            case "AddEquipment":
+
+                viewNode =
+                        new AddEquipment(
+                                user.getEmail(),
+                                user.getFullName(),
+
+                                // After successful save
+                                () -> navigateTo(
+                                        "Equipment Rental"))
+
                                 .getView();
 
                 break;
@@ -929,7 +904,8 @@ public class FarmerDashboard {
             case "Notifications":
 
                 viewNode =
-                        new Notifications(this)
+                        new Notifications(
+                                this)
                                 .getView();
 
                 break;
@@ -940,8 +916,20 @@ public class FarmerDashboard {
 
             case "Profile":
 
+                System.out.println(
+                        "Opening Profile for: "
+                                + user.getEmail());
+
+                /*
+                 * IMPORTANT:
+                 * Pass the logged-in user's email.
+                 * Profile will use this email to
+                 * retrieve the user from Firestore.
+                 */
+
                 viewNode =
-                        new Profile()
+                        new Profile(
+                                user.getEmail())
                                 .getView();
 
                 break;
@@ -953,7 +941,7 @@ public class FarmerDashboard {
             case "Settings":
 
                 viewNode =
-                        new Settings()
+                        new Settings(user.getEmail())
                                 .getView();
 
                 break;
@@ -976,8 +964,8 @@ public class FarmerDashboard {
 
                 viewNode =
                         new DashboardOverview(
-                                this
-                        ).getView();
+                                this)
+                                .getView();
 
                 break;
         }
@@ -986,16 +974,23 @@ public class FarmerDashboard {
         // DISPLAY VIEW
         // =================================================
 
-        if (
-                contentArea != null
-        ) {
+        if (contentArea != null) {
 
             contentArea
                     .getChildren()
                     .setAll(
-                            viewNode
-                    );
+                            viewNode);
         }
+    }
+
+    // =====================================================
+    // EQUIPMENT RENTAL NAVIGATION
+    // =====================================================
+
+    public void navigateToEquipmentRental() {
+
+        navigateTo(
+                "Equipment Rental");
     }
 
     // =====================================================
@@ -1005,40 +1000,37 @@ public class FarmerDashboard {
     public void navigateToEditProduct(
             Product product) {
 
-        if (
-                product == null
-        ) {
+        if (product == null) {
 
             System.out.println(
-                    "Cannot edit product."
-            );
+                    "Cannot edit product.");
 
             return;
         }
 
         System.out.println(
-                "Opening Edit Product..."
-        );
+                "Opening Edit Product...");
 
         System.out.println(
                 "Product ID: "
-                        + product.getProductId()
-        );
+                        + product.getProductId());
 
         System.out.println(
                 "Product Name: "
-                        + product.getName()
-        );
+                        + product.getName());
 
-        EditProduct editProduct =new EditProduct( this,product);
+        EditProduct editProduct =
+                new EditProduct(
+                        this,
+                        product);
 
-        Node editView =editProduct.getView();
+        Node editView =
+                editProduct.getView();
 
         contentArea
                 .getChildren()
                 .setAll(
-                        editView
-                );
+                        editView);
     }
 
     // =====================================================
@@ -1049,21 +1041,11 @@ public class FarmerDashboard {
 
         System.out.println(
                 "Farmer logged out: "
-                        + user.getEmail()
-        );
+                        + user.getEmail());
 
-        /*
-         * If you already have a LoginScreen instance,
-         * put your login navigation code here.
-         *
-         * For now, this closes the dashboard window.
-         */
-
-        if (
-                scene != null
-                        &&
-                scene.getWindow() != null
-        ) {
+        if (scene != null
+                &&
+                scene.getWindow() != null) {
 
             scene.getWindow()
                     .hide();
