@@ -1,9 +1,10 @@
 package com.mainproject.view.farmer;
 
+
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.mainproject.config.CloudinaryConfig;
-import com.mainproject.dao.UserDAO;
+import com.mainproject.controller.UserController;
 import com.mainproject.model.User;
 
 import javafx.geometry.Insets;
@@ -40,7 +41,7 @@ public class Profile {
     // DAO
     // =====================================================
 
-    private final UserDAO userDAO;
+    private final UserController userController;
 
     // =====================================================
     // CLOUDINARY
@@ -113,8 +114,8 @@ public class Profile {
         this.userEmail =
                 userEmail;
 
-        this.userDAO =
-                new UserDAO();
+        this.userController =
+                new UserController();
 
         this.cloudinary =
                 CloudinaryConfig.getCloudinary();
@@ -155,7 +156,7 @@ public class Profile {
             );
 
             currentUser =
-                    userDAO.getUserByEmail(
+                    userController.getUserByEmail(
                             userEmail.trim()
                     );
 
@@ -823,7 +824,7 @@ public class Profile {
         );
 
         boolean saved =
-                userDAO.updateProfile(
+                userController.updateProfile(
                         currentUser
                 );
 
@@ -982,7 +983,7 @@ public class Profile {
             );
 
             boolean saved =
-                    userDAO.updateProfileImage(
+                    userController.updateProfileImage(
                             currentUser.getEmail(),
                             imageUrl
                     );

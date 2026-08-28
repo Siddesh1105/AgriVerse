@@ -4,7 +4,7 @@ package com.mainproject.view.farmer;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mainproject.dao.ProductDAO;
+import com.mainproject.controller.ProductController;
 import com.mainproject.model.Product;
 
 import javafx.geometry.Insets;
@@ -39,7 +39,7 @@ public class Products {
 
     private final String farmerEmail;
 
-    private final ProductDAO productDAO;
+    private final ProductController productController;
 
     private final VBox productContainer = new VBox(12);
 
@@ -61,7 +61,7 @@ public class Products {
     public Products(FarmerDashboard navigator,String farmerEmail) {
         this.navigator = navigator;
         this.farmerEmail = farmerEmail;
-        this.productDAO = new ProductDAO();
+        this.productController = new ProductController();
     }
 
     // =====================================================
@@ -381,7 +381,7 @@ public class Products {
 
         try {
 
-            List<Product> products = productDAO.getFarmerProducts(
+            List<Product> products = productController.getFarmerProducts(
                     farmerEmail);
 
             if (products != null
@@ -840,7 +840,7 @@ public class Products {
 
                             if (result == javafx.scene.control.ButtonType.OK) {
 
-                                boolean deleted = productDAO
+                                boolean deleted = productController
                                         .deleteProduct(
                                                 product
                                                         .getProductId());

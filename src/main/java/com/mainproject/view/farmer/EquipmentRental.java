@@ -1,7 +1,11 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.dao.EquipmentDAO;
+
+import com.mainproject.controller.EquipmentController;
+import com.mainproject.controller.CartController;
 import com.mainproject.model.Equipment;
+import com.mainproject.model.CartItem;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -13,9 +17,11 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
@@ -23,929 +29,1214 @@ import java.util.List;
 
 public class EquipmentRental {
 
-    private final String farmerEmail;
-    private final String farmerName;
+        // =========================================================
+        // COLORS
+        // =========================================================
 
-    private final EquipmentDAO equipmentDAO = new EquipmentDAO();
+        private static final String GREEN = "#117864";
+        private static final String GREEN_DARK = "#0E6655";
+        private static final String BORDER = "#A2D9CE";
+        private static final String TEXT = "#1B2631";
+        private static final String SECONDARY = "#566573";
 
-    private final List<Equipment> equipmentList = new ArrayList<>();
+        // =========================================================
+        // DAO
+        // =========================================================
 
-    private VBox equipmentContainer;
+        private final EquipmentController equipmentController = new EquipmentController();
 
-    private TextField searchField;
+        private final CartController cartController = new CartController();
 
-    private ComboBox<String> categoryCombo;
+        // =========================================================
+        // DATA
+        // =========================================================
 
-    private ComboBox<String> locationCombo;
+        private final List<Equipment> equipmentList = new ArrayList<>();
 
-    // =====================================================
-    // CONSTRUCTOR
-    // =====================================================
+        // =========================================================
+        // CURRENT LOGGED-IN FARMER
+        // =========================================================
 
-    public EquipmentRental(
-            String farmerEmail,
-            String farmerName) {
+        private final String farmerEmail;
+        private final String farmerName;
 
-        this.farmerEmail = farmerEmail;
+        private final Runnable openAddEquipment;
 
-        this.farmerName = farmerName;
+        // =========================================================
+        // UI
+        // =========================================================
 
-        loadEquipment();
-    }
+        private GridPane equipmentGrid;
 
-    // =====================================================
-    // GET VIEW
-    // =====================================================
+        private TextField searchField;
 
-    public Node getView() {
+        private ComboBox<String> categoryCombo;
 
-        VBox root = new VBox(18);
+        private ComboBox<String> locationCombo;
 
-        root.setPadding(
-                new Insets(20));
+        // =========================================================
+        // CONSTRUCTOR
+        // =========================================================
 
-        root.setStyle(
-                "-fx-background-color:#F4FBF7;");
+        public EquipmentRental(
+                        String farmerEmail,
+                        String farmerName,
+                        Runnable openAddEquipment) {
 
-        // =================================================
-        // HEADER
-        // =================================================
+                this.farmerEmail = farmerEmail;
+                this.farmerName = farmerName;
+                this.openAddEquipment = openAddEquipment;
 
-        HBox header = new HBox(15);
-
-        header.setAlignment(
-                Pos.CENTER_LEFT);
-
-        VBox titleBox = new VBox(4);
-
-        Label title = new Label(
-                "Equipment Rental");
-
-        title.setStyle(
-                "-fx-font-size:30px;"
-                        + "-fx-font-weight:800;"
-                        + "-fx-text-fill:#17202A;");
-
-        Label subtitle = new Label(
-                "Rent equipment for your farm or list your equipment.");
-
-        subtitle.setStyle(
-                "-fx-font-size:15px;"
-                        + "-fx-text-fill:#566573;");
-
-        titleBox.getChildren()
-                .addAll(
-                        title,
-                        subtitle);
-
-        HBox.setHgrow(
-                titleBox,
-                Priority.ALWAYS);
-
-        // =================================================
-        // ADD EQUIPMENT BUTTON
-        // =================================================
-
-        Button addEquipmentButton = new Button(
-                "+ Add Equipment");
-
-        addEquipmentButton.setPrefHeight(
-                48);
-
-        addEquipmentButton.setPrefWidth(
-                200);
-
-        addEquipmentButton.setStyle(
-                "-fx-background-color:#117864;"
-                        + "-fx-text-fill:white;"
-                        + "-fx-font-size:14px;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-background-radius:10px;"
-                        + "-fx-cursor:hand;");
-
-        /*
-         * Keep your existing Add Equipment navigation here
-         * if you already have it connected.
-         */
-
-        addEquipmentButton.setOnAction(
-                e -> {
-
-                    showAlert(
-                            Alert.AlertType.INFORMATION,
-                            "Add Equipment",
-                            "Connect this button to your Add Equipment screen.");
-                });
-
-        header.getChildren()
-                .addAll(
-                        titleBox,
-                        addEquipmentButton);
-
-        // =================================================
-        // SEARCH
-        // =================================================
-
-        HBox searchBox = new HBox(12);
-
-        searchBox.setAlignment(
-                Pos.CENTER_LEFT);
-
-        searchField = new TextField();
-
-        searchField.setPromptText(
-                "Search equipment...");
-
-        searchField.setPrefHeight(
-                52);
-
-        searchField.setStyle(
-                "-fx-background-color:white;"
-                        + "-fx-border-color:#A2D9CE;"
-                        + "-fx-border-radius:9px;"
-                        + "-fx-background-radius:9px;"
-                        + "-fx-padding:0 15px;"
-                        + "-fx-font-size:14px;");
-
-        HBox.setHgrow(
-                searchField,
-                Priority.ALWAYS);
-
-        // =================================================
-        // CATEGORY
-        // =================================================
-
-        categoryCombo = new ComboBox<>();
-
-        categoryCombo.setPrefHeight(
-                52);
-
-        categoryCombo.setPrefWidth(
-                215);
-
-        categoryCombo
-                .getItems()
-                .add(
-                        "All Categories");
-
-        categoryCombo
-                .setValue(
-                        "All Categories");
-
-        categoryCombo.setStyle(
-                "-fx-background-color:white;"
-                        + "-fx-border-color:#A2D9CE;"
-                        + "-fx-border-radius:9px;"
-                        + "-fx-background-radius:9px;");
-
-        // =================================================
-        // LOCATION
-        // =================================================
-
-        locationCombo = new ComboBox<>();
-
-        locationCombo.setPrefHeight(
-                52);
-
-        locationCombo.setPrefWidth(
-                215);
-
-        locationCombo
-                .getItems()
-                .add(
-                        "All Locations");
-
-        locationCombo
-                .setValue(
-                        "All Locations");
-
-        locationCombo.setStyle(
-                "-fx-background-color:white;"
-                        + "-fx-border-color:#A2D9CE;"
-                        + "-fx-border-radius:9px;"
-                        + "-fx-background-radius:9px;");
-
-        // =================================================
-        // SEARCH BUTTON
-        // =================================================
-
-        Button searchButton = new Button(
-                "Search");
-
-        searchButton.setPrefHeight(
-                52);
-
-        searchButton.setPrefWidth(
-                120);
-
-        searchButton.setStyle(
-                "-fx-background-color:#117864;"
-                        + "-fx-text-fill:white;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-background-radius:9px;"
-                        + "-fx-cursor:hand;");
-
-        searchButton.setOnAction(
-                e -> filterEquipment());
-
-        searchBox.getChildren()
-                .addAll(
-                        searchField,
-                        categoryCombo,
-                        locationCombo,
-                        searchButton);
-
-        // =================================================
-        // EQUIPMENT CONTAINER
-        // =================================================
-
-        equipmentContainer = new VBox(20);
-
-        equipmentContainer.setPadding(
-                new Insets(5));
-
-        ScrollPane scrollPane = new ScrollPane(
-                equipmentContainer);
-
-        scrollPane.setFitToWidth(
-                true);
-
-        scrollPane.setHbarPolicy(
-                ScrollPane.ScrollBarPolicy.NEVER);
-
-        scrollPane.setStyle(
-                "-fx-background-color:transparent;"
-                        + "-fx-border-color:transparent;");
-
-        VBox.setVgrow(
-                scrollPane,
-                Priority.ALWAYS);
-
-        // =================================================
-        // ROOT
-        // =================================================
-
-        root.getChildren()
-                .addAll(
-                        header,
-                        searchBox,
-                        scrollPane);
-
-        populateCategories();
-        populateLocations();
-        displayEquipment(
-                equipmentList);
-
-        return root;
-    }
-
-    // =====================================================
-    // LOAD EQUIPMENT
-    // =====================================================
-
-    private void loadEquipment() {
-
-        equipmentList.clear();
-
-        try {
-
-            List<Equipment> loaded = equipmentDAO.getAllEquipment();
-
-            if (loaded != null) {
-
-                equipmentList.addAll(
-                        loaded);
-            }
-
-            System.out.println(
-                    "Equipment loaded: "
-                            + equipmentList.size());
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Error loading equipment:");
-
-            e.printStackTrace();
-        }
-    }
-
-    // =====================================================
-    // POPULATE CATEGORIES
-    // =====================================================
-
-    private void populateCategories() {
-
-        if (categoryCombo == null) {
-
-            return;
+                loadEquipment();
         }
 
-        categoryCombo
-                .getItems()
-                .clear();
+        // =========================================================
+        // MAIN VIEW
+        // =========================================================
 
-        categoryCombo
-                .getItems()
-                .add(
-                        "All Categories");
+        public Node getView() {
 
-        for (Equipment equipment : equipmentList) {
+                VBox root = new VBox(18);
 
-            String category = equipment.getCategory();
+                root.setPadding(
+                                new Insets(20));
 
-            if (category != null
-                    && !category.trim().isEmpty()
-                    && !categoryCombo
-                            .getItems()
-                            .contains(category)) {
+                root.setStyle(
+                                "-fx-background-color:#F4FBF7;");
+
+                // =====================================================
+                // TITLE
+                // =====================================================
+
+                Label title = new Label("Equipment Rental");
+
+                title.setStyle(
+                                "-fx-font-size:28px;" +
+                                                "-fx-font-weight:800;" +
+                                                "-fx-text-fill:" + TEXT + ";");
+
+                Label subtitle = new Label(
+                                "Rent equipment for your farm or list your equipment.");
+
+                subtitle.setStyle(
+                                "-fx-font-size:14px;" +
+                                                "-fx-text-fill:" + SECONDARY + ";");
+
+                VBox titleBox = new VBox(
+                                4,
+                                title,
+                                subtitle);
+
+                HBox.setHgrow(
+                                titleBox,
+                                Priority.ALWAYS);
+
+                // =====================================================
+                // ADD EQUIPMENT BUTTON
+                // =====================================================
+
+                Button addButton = new Button("+ Add Equipment");
+
+                addButton.setPrefHeight(42);
+
+                addButton.setPrefWidth(155);
+
+                addButton.setStyle(
+                                primaryStyle());
+
+                addButton.setOnMouseEntered(
+                                e -> addButton.setStyle(
+                                                primaryHoverStyle()));
+
+                addButton.setOnMouseExited(
+                                e -> addButton.setStyle(
+                                                primaryStyle()));
+
+                addButton.setOnAction(
+                                e -> {
+
+                                        if (openAddEquipment != null) {
+
+                                                openAddEquipment.run();
+                                        }
+                                });
+
+                // =====================================================
+                // HEADER
+                // =====================================================
+
+                HBox header = new HBox(
+                                titleBox,
+                                addButton);
+
+                header.setAlignment(
+                                Pos.CENTER_LEFT);
+
+                // =====================================================
+                // SEARCH FIELD
+                // =====================================================
+
+                searchField = new TextField();
+
+                searchField.setPromptText(
+                                "Search equipment...");
+
+                searchField.setPrefHeight(42);
+
+                searchField.setStyle(
+                                inputStyle());
+
+                HBox.setHgrow(
+                                searchField,
+                                Priority.ALWAYS);
+
+                searchField.textProperty()
+                                .addListener(
+                                                (obs, oldValue, newValue) -> filterEquipment());
+
+                // =====================================================
+                // CATEGORY FILTER
+                // =====================================================
+
+                categoryCombo = new ComboBox<>();
 
                 categoryCombo
-                        .getItems()
-                        .add(category);
-            }
-        }
+                                .getItems()
+                                .add(
+                                                "All Categories");
 
-        categoryCombo
-                .setValue(
-                        "All Categories");
-    }
+                addCategories();
 
-    // =====================================================
-    // POPULATE LOCATIONS
-    // =====================================================
+                categoryCombo.setValue(
+                                "All Categories");
 
-    private void populateLocations() {
+                categoryCombo.setPrefHeight(42);
 
-        if (locationCombo == null) {
+                categoryCombo.setPrefWidth(165);
 
-            return;
-        }
+                categoryCombo.setStyle(
+                                comboStyle());
 
-        locationCombo
-                .getItems()
-                .clear();
+                categoryCombo.setOnAction(
+                                e -> filterEquipment());
 
-        locationCombo
-                .getItems()
-                .add(
-                        "All Locations");
+                // =====================================================
+                // LOCATION FILTER
+                // =====================================================
 
-        for (Equipment equipment : equipmentList) {
-
-            String location = equipment.getLocation();
-
-            if (location != null
-                    && !location.trim().isEmpty()
-                    && !locationCombo
-                            .getItems()
-                            .contains(location)) {
+                locationCombo = new ComboBox<>();
 
                 locationCombo
-                        .getItems()
-                        .add(location);
-            }
+                                .getItems()
+                                .add(
+                                                "All Locations");
+
+                addLocations();
+
+                locationCombo.setValue(
+                                "All Locations");
+
+                locationCombo.setPrefHeight(42);
+
+                locationCombo.setPrefWidth(150);
+
+                locationCombo.setStyle(
+                                comboStyle());
+
+                locationCombo.setOnAction(
+                                e -> filterEquipment());
+
+                // =====================================================
+                // SEARCH BUTTON
+                // =====================================================
+
+                Button searchButton = new Button("Search");
+
+                searchButton.setPrefWidth(90);
+
+                searchButton.setPrefHeight(42);
+
+                searchButton.setStyle(
+                                primaryStyle());
+
+                searchButton.setOnAction(
+                                e -> filterEquipment());
+
+                // =====================================================
+                // FILTER BAR
+                // =====================================================
+
+                HBox filters = new HBox(
+                                10,
+                                searchField,
+                                categoryCombo,
+                                locationCombo,
+                                searchButton);
+
+                filters.setAlignment(
+                                Pos.CENTER_LEFT);
+
+                // =====================================================
+                // EQUIPMENT GRID
+                // =====================================================
+
+                equipmentGrid = new GridPane();
+
+                equipmentGrid.setHgap(16);
+
+                equipmentGrid.setVgap(16);
+
+                equipmentGrid.setPadding(
+                                new Insets(
+                                                4,
+                                                0,
+                                                20,
+                                                0));
+
+                // Four equal columns
+                for (int i = 0; i < 4; i++) {
+
+                        ColumnConstraints column = new ColumnConstraints();
+
+                        column.setPercentWidth(25);
+
+                        column.setHgrow(
+                                        Priority.ALWAYS);
+
+                        equipmentGrid
+                                        .getColumnConstraints()
+                                        .add(column);
+                }
+
+                // =====================================================
+                // BUILD INITIAL CARDS
+                // =====================================================
+
+                buildCards(
+                                equipmentList);
+
+                // =====================================================
+                // SCROLL PANE
+                // =====================================================
+
+                ScrollPane scroll = new ScrollPane(
+                                equipmentGrid);
+
+                scroll.setFitToWidth(true);
+
+                scroll.setHbarPolicy(
+                                ScrollPane.ScrollBarPolicy.NEVER);
+
+                scroll.setStyle(
+                                "-fx-background-color:transparent;" +
+                                                "-fx-background:transparent;" +
+                                                "-fx-border-color:transparent;");
+
+                VBox.setVgrow(
+                                scroll,
+                                Priority.ALWAYS);
+
+                // =====================================================
+                // ROOT
+                // =====================================================
+
+                root.getChildren().addAll(
+                                header,
+                                filters,
+                                scroll);
+
+
+                return root;
         }
 
-        locationCombo
-                .setValue(
-                        "All Locations");
-    }
+        // =========================================================
+        // LOAD EQUIPMENT
+        // =========================================================
+        //
+        // IMPORTANT:
+        //
+        // Show ONLY equipment belonging to OTHER farmers.
+        //
+        // The current logged-in farmer's equipment is excluded
+        // using ownerEmail.
+        //
+        // =========================================================
 
-    // =====================================================
-    // DISPLAY EQUIPMENT
-    // =====================================================
+        private void loadEquipment() {
 
-    private void displayEquipment(
-            List<Equipment> list) {
+                try {
 
-        if (equipmentContainer == null) {
+                        equipmentList.clear();
 
-            return;
+                        // Get all equipment from Firestore
+                        List<Equipment> data = equipmentController.getAllEquipment();
+
+                        if (data != null) {
+
+                                for (Equipment equipment : data) {
+
+                                        String ownerEmail = safe(
+                                                        equipment.getOwnerEmail(),
+                                                        "");
+
+                                        /*
+                                         * IMPORTANT FILTER
+                                         *
+                                         * If ownerEmail is the same as the
+                                         * logged-in farmer's email, DO NOT
+                                         * show that equipment.
+                                         *
+                                         * Otherwise, add it to the rental list.
+                                         */
+
+                                        if (!ownerEmail.isEmpty()
+                                                        && farmerEmail != null
+                                                        && ownerEmail.equalsIgnoreCase(
+                                                                        farmerEmail.trim())) {
+
+                                                // This is MY equipment.
+                                                // Do NOT show it here.
+                                                continue;
+                                        }
+
+                                        // Equipment belongs to another farmer
+                                        equipmentList.add(
+                                                        equipment);
+                                }
+                        }
+
+                        System.out.println(
+                                        "Other farmers' equipment loaded: "
+                                                        + equipmentList.size());
+
+                } catch (Exception e) {
+
+                        System.out.println(
+                                        "Error loading other farmers' equipment:");
+
+                        e.printStackTrace();
+                }
         }
 
-        equipmentContainer
-                .getChildren()
-                .clear();
+        // =========================================================
+        // ADD CATEGORIES
+        // =========================================================
 
-        if (list == null
-                || list.isEmpty()) {
+        private void addCategories() {
 
-            Label empty = new Label(
-                    "No equipment available.");
+                for (Equipment e : equipmentList) {
 
-            empty.setStyle(
-                    "-fx-font-size:18px;"
-                            + "-fx-font-weight:bold;"
-                            + "-fx-text-fill:#566573;");
+                        String value = safe(
+                                        e.getCategory(),
+                                        "");
 
-            equipmentContainer
-                    .getChildren()
-                    .add(empty);
+                        if (!value.isEmpty()
+                                        && !categoryCombo
+                                                        .getItems()
+                                                        .contains(value)) {
 
-            return;
+                                categoryCombo
+                                                .getItems()
+                                                .add(value);
+                        }
+                }
         }
 
-        /*
-         * 4 cards horizontally.
-         */
+        // =========================================================
+        // ADD LOCATIONS
+        // =========================================================
 
-        GridPane grid = new GridPane();
+        private void addLocations() {
 
-        grid.setHgap(16);
-        grid.setVgap(16);
+                for (Equipment e : equipmentList) {
 
-        grid.setPadding(
-                new Insets(5));
+                        String value = safe(
+                                        e.getLocation(),
+                                        "");
 
-        for (int i = 0; i < list.size(); i++) {
+                        if (!value.isEmpty()
+                                        && !locationCombo
+                                                        .getItems()
+                                                        .contains(value)) {
 
-            Equipment equipment = list.get(i);
-
-            VBox card = createEquipmentCard(
-                    equipment);
-
-            int column = i % 4;
-
-            int row = i / 4;
-
-            grid.add(
-                    card,
-                    column,
-                    row);
-
-            GridPane.setHgrow(
-                    card,
-                    Priority.ALWAYS);
+                                locationCombo
+                                                .getItems()
+                                                .add(value);
+                        }
+                }
         }
 
-        equipmentContainer
-                .getChildren()
-                .add(grid);
-    }
+        // =========================================================
+        // BUILD EQUIPMENT CARDS
+        // =========================================================
 
-    // =====================================================
-    // CREATE EQUIPMENT CARD
-    // =====================================================
+        private void buildCards(
+                        List<Equipment> list) {
 
-    private VBox createEquipmentCard(
-            Equipment equipment) {
+                equipmentGrid
+                                .getChildren()
+                                .clear();
 
-        VBox card = new VBox(9);
+                // =====================================================
+                // EMPTY STATE
+                // =====================================================
 
-        card.setPrefWidth(245);
-        card.setMinWidth(225);
-        card.setMaxWidth(255);
-        card.setPadding(
-                new Insets(14));
+                if (list == null
+                                || list.isEmpty()) {
 
-        card.setStyle(
-                "-fx-background-color:white;"
-                        + "-fx-border-color:#A2D9CE;"
-                        + "-fx-border-radius:14px;"
-                        + "-fx-background-radius:14px;"
-                        + "-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.08),8,0,0,3);");
+                        VBox empty = new VBox(8);
 
-        // =================================================
-        // IMAGE
-        // =================================================
+                        empty.setAlignment(
+                                        Pos.CENTER);
 
-        VBox imageBox = new VBox();
+                        empty.setPadding(
+                                        new Insets(50));
 
-        imageBox.setAlignment(
-                Pos.CENTER);
+                        Label icon = new Label("🚜");
 
-        imageBox.setPrefHeight(120);
+                        icon.setStyle(
+                                        "-fx-font-size:40px;");
 
-        imageBox.setStyle(
-                "-fx-background-color:#F1FAF6;"
-                        + "-fx-background-radius:10px;");
+                        Label message = new Label(
+                                        "No equipment found.");
 
-        String imageUrl = equipment.getImageUrl();
+                        message.setStyle(
+                                        "-fx-font-size:16px;" +
+                                                        "-fx-font-weight:bold;" +
+                                                        "-fx-text-fill:" +
+                                                        SECONDARY +
+                                                        ";");
 
-        if (imageUrl != null
-                && !imageUrl.trim().isEmpty()) {
+                        empty.getChildren().addAll(
+                                        icon,
+                                        message);
 
-            try {
+                        equipmentGrid.add(
+                                        empty,
+                                        0,
+                                        0,
+                                        4,
+                                        1);
 
-                Image image = new Image(
-                        imageUrl,
-                        205,
-                        110,
-                        true,
-                        true,
-                        true);
+                        return;
+                }
 
-                ImageView imageView = new ImageView(
-                        image);
+                // =====================================================
+                // FOUR CARDS PER ROW
+                // =====================================================
 
-                imageView.setFitWidth(205);
-                imageView.setFitHeight(110);
+                int column = 0;
 
-                imageView.setPreserveRatio(
-                        true);
+                int row = 0;
 
-                imageBox.getChildren()
-                        .add(imageView);
+                for (Equipment equipment : list) {
 
-            } catch (Exception e) {
+                        VBox card = createCard(
+                                        equipment);
 
-                addImagePlaceholder(
-                        imageBox);
-            }
+                        equipmentGrid.add(
+                                        card,
+                                        column,
+                                        row);
 
-        } else {
+                        column++;
 
-            addImagePlaceholder(
-                    imageBox);
+                        if (column == 4) {
+
+                                column = 0;
+
+                                row++;
+                        }
+                }
         }
 
-        // =================================================
-        // NAME
-        // =================================================
+        // =========================================================
+        // CREATE EQUIPMENT CARD
+        // =========================================================
 
-        Label name = new Label(
-                safe(
-                        equipment.getName(),
-                        "Equipment"));
+        private VBox createCard(
+                        Equipment equipment) {
 
-        name.setStyle(
-                "-fx-font-size:18px;"
-                        + "-fx-font-weight:800;"
-                        + "-fx-text-fill:#17202A;");
+                VBox card = new VBox(8);
 
-        // =================================================
-        // CATEGORY
-        // =================================================
+                card.setPrefWidth(260);
 
-        Label category = new Label(
-                safe(
-                        equipment.getCategory(),
-                        "Equipment"));
+                card.setMinWidth(0);
 
-        category.setStyle(
-                "-fx-font-size:14px;"
-                        + "-fx-text-fill:#566573;");
+                card.setMaxWidth(
+                                Double.MAX_VALUE);
 
-        // =================================================
-        // PRICE
-        // =================================================
+                card.setPrefHeight(310);
 
-        Label price = new Label(
-                "₹"
-                        + formatPrice(
-                                equipment.getPrice())
-                        + " / day");
+                card.setPadding(
+                                new Insets(12));
 
-        price.setStyle(
-                "-fx-font-size:17px;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-text-fill:#117864;");
+                card.setStyle(
+                                cardStyle());
 
-        // =================================================
-        // AVAILABLE
-        // =================================================
+                // =====================================================
+                // IMAGE BOX
+                // =====================================================
 
-        Label available = new Label();
+                StackPane imageBox = new StackPane();
 
-        if (equipment.isAvailable()) {
+                imageBox.setPrefHeight(125);
 
-            available.setText(
-                    "● Available");
+                imageBox.setMinHeight(125);
 
-            available.setStyle(
-                    "-fx-font-size:14px;"
-                            + "-fx-font-weight:bold;"
-                            + "-fx-text-fill:#117864;");
+                imageBox.setMaxHeight(125);
 
-        } else {
+                imageBox.setStyle(
+                                "-fx-background-color:#F1FAF6;" +
+                                                "-fx-background-radius:10px;");
 
-            available.setText(
-                    "● Not Available");
+                String imageUrl = safe(
+                                equipment.getImageUrl(),
+                                "");
 
-            available.setStyle(
-                    "-fx-font-size:14px;"
-                            + "-fx-font-weight:bold;"
-                            + "-fx-text-fill:#C0392B;");
+                if (!imageUrl.isEmpty()) {
+
+                        try {
+
+                                Image image = new Image(
+                                                imageUrl,
+                                                240,
+                                                120,
+                                                true,
+                                                true,
+                                                true);
+
+                                ImageView imageView = new ImageView(
+                                                image);
+
+                                imageView.setFitWidth(240);
+
+                                imageView.setFitHeight(120);
+
+                                imageView.setPreserveRatio(
+                                                true);
+
+                                imageBox
+                                                .getChildren()
+                                                .add(
+                                                                imageView);
+
+                        } catch (Exception ex) {
+
+                                addPlaceholder(
+                                                imageBox);
+                        }
+
+                } else {
+
+                        addPlaceholder(
+                                        imageBox);
+                }
+
+                // =====================================================
+                // NAME
+                // =====================================================
+
+                Label name = new Label(
+                                safe(
+                                                equipment.getName(),
+                                                "Equipment"));
+
+                name.setStyle(
+                                "-fx-font-size:17px;" +
+                                                "-fx-font-weight:800;" +
+                                                "-fx-text-fill:" +
+                                                TEXT +
+                                                ";");
+
+                // =====================================================
+                // CATEGORY
+                // =====================================================
+
+                Label category = new Label(
+                                safe(
+                                                equipment.getCategory(),
+                                                "Agricultural Equipment"));
+
+                category.setStyle(
+                                "-fx-font-size:12px;" +
+                                                "-fx-text-fill:" +
+                                                SECONDARY +
+                                                ";");
+
+                // =====================================================
+                // PRICE
+                // =====================================================
+
+                Label price = new Label(
+                                "₹"
+                                                + formatPrice(
+                                                                equipment.getPrice())
+                                                + " / day");
+
+                price.setStyle(
+                                "-fx-font-size:16px;" +
+                                                "-fx-font-weight:800;" +
+                                                "-fx-text-fill:" +
+                                                GREEN +
+                                                ";");
+
+                // =====================================================
+                // AVAILABILITY
+                // =====================================================
+
+                Label availability = new Label(
+                                equipment.isAvailable()
+                                                ? "● Available"
+                                                : "● Not Available");
+
+                availability.setStyle(
+                                equipment.isAvailable()
+
+                                                ? "-fx-text-fill:#117864;" +
+                                                                "-fx-font-size:12px;" +
+                                                                "-fx-font-weight:bold;"
+
+                                                : "-fx-text-fill:#C0392B;" +
+                                                                "-fx-font-size:12px;" +
+                                                                "-fx-font-weight:bold;");
+
+                // =====================================================
+                // LOCATION
+                // =====================================================
+
+                Label location = new Label(
+                                "● "
+                                                + safe(
+                                                                equipment.getLocation(),
+                                                                "Unknown"));
+
+                location.setStyle(
+                                "-fx-font-size:12px;" +
+                                                "-fx-text-fill:" +
+                                                SECONDARY +
+                                                ";");
+
+                HBox.setHgrow(
+                                location,
+                                Priority.ALWAYS);
+
+                // =====================================================
+                // ADD TO CART BUTTON
+                // =====================================================
+
+                Button addToCart = new Button(
+                                "Add to Cart");
+
+                addToCart.setPrefHeight(32);
+
+                addToCart.setStyle(
+                                primaryStyle());
+
+                addToCart.setOnMouseEntered(
+                                e -> addToCart.setStyle(
+                                                primaryHoverStyle()));
+
+                addToCart.setOnMouseExited(
+                                e -> addToCart.setStyle(
+                                                primaryStyle()));
+
+                addToCart.setDisable(!equipment.isAvailable());
+
+                addToCart.setOnAction(
+                                e -> addEquipmentToCart(
+                                                equipment));
+
+                // =====================================================
+                // VIEW DETAILS BUTTON
+                // =====================================================
+
+                Button details = new Button(
+                                "View Details");
+
+                details.setPrefHeight(32);
+
+                details.setStyle(
+                                outlineStyle());
+
+                details.setOnMouseEntered(
+                                e -> details.setStyle(
+                                                outlineHoverStyle()));
+
+                details.setOnMouseExited(
+                                e -> details.setStyle(
+                                                outlineStyle()));
+
+                details.setOnAction(
+                                e -> showDetails(
+                                                equipment));
+
+                // =====================================================
+                // CARD BOTTOM
+                // =====================================================
+
+                HBox bottom = new HBox(
+                                8,
+                                location,
+                                addToCart,
+                                details);
+
+                bottom.setAlignment(
+                                Pos.CENTER_LEFT);
+
+                // =====================================================
+                // ADD CARD CONTENT
+                // =====================================================
+
+                card.getChildren().addAll(
+                                imageBox,
+                                name,
+                                category,
+                                price,
+                                availability,
+                                bottom);
+
+                // =====================================================
+                // CARD HOVER
+                // =====================================================
+
+                card.setOnMouseEntered(
+                                e -> card.setStyle(
+                                                cardHoverStyle()));
+
+                card.setOnMouseExited(
+                                e -> card.setStyle(
+                                                cardStyle()));
+
+                return card;
         }
 
-        // =================================================
-        // LOCATION
-        // =================================================
+        // =========================================================
+        // PLACEHOLDER IMAGE
+        // =========================================================
 
-        Label location = new Label(
-                "● "
-                        + safe(
-                                equipment.getLocation(),
-                                "-"));
+        private void addPlaceholder(
+                        StackPane box) {
 
-        location.setStyle(
-                "-fx-font-size:14px;"
-                        + "-fx-text-fill:#566573;");
+                Label label = new Label("🚜");
 
-        // =================================================
-        // BUTTONS
-        // =================================================
+                label.setStyle(
+                                "-fx-font-size:38px;");
 
-        Button viewButton = new Button(
-                "View Details");
-
-        viewButton.setPrefHeight(
-                40);
-
-        viewButton.setStyle(
-                "-fx-background-color:white;"
-                        + "-fx-text-fill:#117864;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-border-color:#A2D9CE;"
-                        + "-fx-border-radius:8px;"
-                        + "-fx-background-radius:8px;"
-                        + "-fx-cursor:hand;");
-
-        viewButton.setOnAction(
-                e -> showEquipmentDetails(
-                        equipment));
-
-        Button addToCartButton = new Button(
-                "Add to Cart");
-
-        addToCartButton.setPrefHeight(
-                40);
-
-        addToCartButton.setStyle(
-                "-fx-background-color:#117864;"
-                        + "-fx-text-fill:white;"
-                        + "-fx-font-weight:bold;"
-                        + "-fx-background-radius:8px;"
-                        + "-fx-cursor:hand;");
-
-        addToCartButton.setOnAction(
-                e -> addEquipmentToCart(
-                        equipment));
-
-        HBox buttons = new HBox(8);
-
-        buttons.setAlignment(
-                Pos.CENTER_LEFT);
-
-        buttons.getChildren()
-                .addAll(
-                        viewButton,
-                        addToCartButton);
-
-        // =================================================
-        // CARD
-        // =================================================
-
-        card.getChildren()
-                .addAll(
-                        imageBox,
-                        name,
-                        category,
-                        price,
-                        available,
-                        location,
-                        buttons);
-
-        return card;
-    }
-
-    // =====================================================
-    // ADD EQUIPMENT TO CART
-    // =====================================================
-
-    private void addEquipmentToCart(
-            Equipment equipment) {
-
-        if (equipment == null) {
-
-            return;
+                box.getChildren()
+                                .add(label);
         }
 
-        if (!equipment.isAvailable()) {
+        // =========================================================
+        // FILTER EQUIPMENT
+        // =========================================================
 
-            showAlert(
-                    Alert.AlertType.WARNING,
-                    "Not Available",
-                    "This equipment is currently unavailable.");
+        private void filterEquipment() {
 
-            return;
+                String search = searchField
+                                .getText()
+                                .trim()
+                                .toLowerCase();
+
+                String category = categoryCombo.getValue();
+
+                String location = locationCombo.getValue();
+
+                List<Equipment> filtered = new ArrayList<>();
+
+                for (Equipment e : equipmentList) {
+
+                        String name = safe(
+                                        e.getName(),
+                                        "").toLowerCase();
+
+                        String cat = safe(
+                                        e.getCategory(),
+                                        "").toLowerCase();
+
+                        String loc = safe(
+                                        e.getLocation(),
+                                        "").toLowerCase();
+
+                        // =================================================
+                        // SEARCH MATCH
+                        // =================================================
+
+                        boolean searchMatch = search.isEmpty()
+
+                                        || name.contains(
+                                                        search)
+
+                                        || cat.contains(
+                                                        search)
+
+                                        || loc.contains(
+                                                        search);
+
+                        // =================================================
+                        // CATEGORY MATCH
+                        // =================================================
+
+                        boolean categoryMatch = category == null
+
+                                        || category.equals(
+                                                        "All Categories")
+
+                                        || cat.equals(
+                                                        category.toLowerCase());
+
+                        // =================================================
+                        // LOCATION MATCH
+                        // =================================================
+
+                        boolean locationMatch = location == null
+
+                                        || location.equals(
+                                                        "All Locations")
+
+                                        || loc.equals(
+                                                        location.toLowerCase());
+
+                        // =================================================
+                        // ADD MATCHING EQUIPMENT
+                        // =================================================
+
+                        if (searchMatch
+                                        && categoryMatch
+                                        && locationMatch) {
+
+                                filtered.add(e);
+                        }
+                }
+
+                buildCards(
+                                filtered);
         }
 
-        if (farmerEmail == null
-                || farmerEmail.trim().isEmpty()) {
+        // =========================================================
+        // ADD EQUIPMENT TO CART
+        // =========================================================
 
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Login Required",
-                    "Farmer email is not available.");
+        private void addEquipmentToCart(
+                        Equipment equipment) {
 
-            return;
+                try {
+
+                        if (equipment == null) {
+                                showAlert(
+                                                Alert.AlertType.ERROR,
+                                                "Error",
+                                                "Equipment information is missing.");
+                                return;
+                        }
+
+                        if (!equipment.isAvailable()) {
+                                showAlert(
+                                                Alert.AlertType.WARNING,
+                                                "Equipment Unavailable",
+                                                "This equipment is currently not available.");
+                                return;
+                        }
+
+                        if (farmerEmail == null
+                                        || farmerEmail.trim().isEmpty()) {
+                                showAlert(
+                                                Alert.AlertType.ERROR,
+                                                "Login Required",
+                                                "Unable to identify the logged-in farmer.");
+                                return;
+                        }
+
+                        // A farmer cannot rent their own equipment.
+                        if (equipment.getOwnerEmail() != null
+                                        && equipment.getOwnerEmail().equalsIgnoreCase(
+                                                        farmerEmail.trim())) {
+                                showAlert(
+                                                Alert.AlertType.WARNING,
+                                                "Cannot Rent",
+                                                "You cannot rent your own equipment.");
+                                return;
+                        }
+
+                        CartItem cartItem = new CartItem(
+                                        farmerEmail,
+                                        equipment);
+
+                        boolean added = cartController.addToCart(
+                                        cartItem);
+
+                        if (added) {
+                                showAlert(
+                                                Alert.AlertType.INFORMATION,
+                                                "Added to Cart",
+                                                equipment.getName()
+                                                                + " has been added to your rental cart.");
+                        } else {
+                                showAlert(
+                                                Alert.AlertType.ERROR,
+                                                "Cart Error",
+                                                "Unable to add equipment to cart.");
+                        }
+
+                } catch (Exception e) {
+                        System.out.println(
+                                        "Error adding equipment to cart:");
+                        e.printStackTrace();
+
+                        showAlert(
+                                        Alert.AlertType.ERROR,
+                                        "Error",
+                                        "Something went wrong while adding equipment to cart.");
+                }
         }
 
-        /*
-         * This uses the CartDAO.
-         *
-         * Rental days automatically starts
-         * at 1.
-         */
+        // =========================================================
+        // SHOW ALERT
+        // =========================================================
 
-        com.mainproject.dao.CartDAO cartDAO = new com.mainproject.dao.CartDAO();
+        private void showAlert(
+                        Alert.AlertType type,
+                        String title,
+                        String message) {
 
-        com.mainproject.model.CartItem cartItem = new com.mainproject.model.CartItem(
-                farmerEmail,
-                equipment);
+                Alert alert = new Alert(type);
 
-        boolean success = cartDAO.addToCart(
-                cartItem);
-
-        if (success) {
-
-            showAlert(
-                    Alert.AlertType.INFORMATION,
-                    "Added to Cart",
-                    equipment.getName()
-                            + " has been added to your cart.");
-
-        } else {
-
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Cart Error",
-                    "Unable to add equipment to cart.");
-        }
-    }
-
-    // =====================================================
-    // FILTER
-    // =====================================================
-
-    private void filterEquipment() {
-
-        String search = searchField
-                .getText()
-                .trim()
-                .toLowerCase();
-
-        String selectedCategory = categoryCombo
-                .getValue();
-
-        String selectedLocation = locationCombo
-                .getValue();
-
-        List<Equipment> filtered = new ArrayList<>();
-
-        for (Equipment equipment : equipmentList) {
-
-            boolean matchesSearch = search.isEmpty()
-                    || safe(
-                            equipment.getName(),
-                            "")
-                            .toLowerCase()
-                            .contains(search)
-                    || safe(
-                            equipment.getCategory(),
-                            "")
-                            .toLowerCase()
-                            .contains(search);
-
-            boolean matchesCategory = selectedCategory == null
-                    || selectedCategory
-                            .equals("All Categories")
-                    || selectedCategory
-                            .equals(
-                                    equipment.getCategory());
-
-            boolean matchesLocation = selectedLocation == null
-                    || selectedLocation
-                            .equals("All Locations")
-                    || selectedLocation
-                            .equals(
-                                    equipment.getLocation());
-
-            if (matchesSearch
-                    && matchesCategory
-                    && matchesLocation) {
-
-                filtered.add(
-                        equipment);
-            }
+                alert.setTitle(title);
+                alert.setHeaderText(null);
+                alert.setContentText(message);
+                alert.showAndWait();
         }
 
-        displayEquipment(
-                filtered);
-    }
+        // =========================================================
+        // SHOW EQUIPMENT DETAILS
+        // =========================================================
 
-    // =====================================================
-    // VIEW DETAILS
-    // =====================================================
+        private void showDetails(
+                        Equipment equipment) {
 
-    private void showEquipmentDetails(
-            Equipment equipment) {
+                Alert alert = new Alert(
+                                Alert.AlertType.INFORMATION);
 
-        Alert alert = new Alert(
-                Alert.AlertType.INFORMATION);
+                alert.setTitle(
+                                "Equipment Details");
 
-        alert.setTitle(
-                "Equipment Details");
+                alert.setHeaderText(
+                                safe(
+                                                equipment.getName(),
+                                                "Equipment"));
 
-        alert.setHeaderText(
-                equipment.getName());
+                alert.setContentText(
 
-        alert.setContentText(
-                "Category: "
-                        + safe(
-                                equipment.getCategory(),
-                                "-")
-                        + "\n\nPrice: ₹"
-                        + formatPrice(
-                                equipment.getPrice())
-                        + " / day"
-                        + "\n\nLocation: "
-                        + safe(
-                                equipment.getLocation(),
-                                "-")
-                        + "\n\nDescription: "
-                        + safe(
-                                equipment.getDescription(),
-                                "No description available.")
-                        + "\n\nOwner: "
-                        + safe(
-                                equipment.getOwnerName(),
-                                "-"));
+                                "Category: "
+                                                + safe(
+                                                                equipment.getCategory(),
+                                                                "-")
 
-        alert.showAndWait();
-    }
+                                                + "\n\nPrice: ₹"
+                                                + formatPrice(
+                                                                equipment.getPrice())
+                                                + " / day"
 
-    // =====================================================
-    // IMAGE PLACEHOLDER
-    // =====================================================
+                                                + "\n\nLocation: "
+                                                + safe(
+                                                                equipment.getLocation(),
+                                                                "-")
 
-    private void addImagePlaceholder(
-            VBox imageBox) {
+                                                + "\n\nOwner: "
+                                                + safe(
+                                                                equipment.getOwnerName(),
+                                                                "-")
 
-        Label label = new Label("🚜");
+                                                + "\n\nContact: "
+                                                + safe(
+                                                                equipment.getOwnerEmail(),
+                                                                "-")
 
-        label.setStyle(
-                "-fx-font-size:45px;");
+                                                + "\n\nAvailability: "
+                                                + (equipment.isAvailable()
+                                                                ? "Available"
+                                                                : "Not Available")
 
-        imageBox.getChildren()
-                .add(label);
-    }
+                                                + "\n\nDescription: "
+                                                + safe(
+                                                                equipment.getDescription(),
+                                                                "-"));
 
-    // =====================================================
-    // SAFE STRING
-    // =====================================================
-
-    private String safe(
-            String value,
-            String fallback) {
-
-        return value == null
-                || value.trim().isEmpty()
-                        ? fallback
-                        : value;
-    }
-
-    // =====================================================
-    // FORMAT PRICE
-    // =====================================================
-
-    private String formatPrice(
-            double value) {
-
-        if (value == (long) value) {
-
-            return String.format(
-                    "%d",
-                    (long) value);
+                alert.showAndWait();
         }
 
-        return String.format(
-                "%.2f",
-                value);
-    }
+        // =========================================================
+        // SAFE STRING
+        // =========================================================
 
-    // =====================================================
-    // ALERT
-    // =====================================================
+        private String safe(
+                        String value,
+                        String fallback) {
 
-    private void showAlert(
-            Alert.AlertType type,
-            String title,
-            String message) {
+                return value == null
+                                || value.trim().isEmpty()
+                                                ? fallback
+                                                : value;
+        }
 
-        Alert alert = new Alert(type);
+        // =========================================================
+        // FORMAT PRICE
+        // =========================================================
 
-        alert.setTitle(
-                title);
+        private String formatPrice(
+                        double value) {
 
-        alert.setHeaderText(
-                null);
+                if (value == (long) value) {
 
-        alert.setContentText(
-                message);
+                        return String.format(
+                                        "%d",
+                                        (long) value);
+                }
 
-        alert.showAndWait();
-    }
+                return String.format(
+                                "%.2f",
+                                value);
+        }
+
+        // =========================================================
+        // INPUT STYLE
+        // =========================================================
+
+        private String inputStyle() {
+
+                return "-fx-background-color:white;" +
+                                "-fx-border-color:" +
+                                BORDER +
+                                ";" +
+                                "-fx-border-radius:9px;" +
+                                "-fx-background-radius:9px;" +
+                                "-fx-padding:0 13px;";
+        }
+
+        // =========================================================
+        // COMBO BOX STYLE
+        // =========================================================
+
+        private String comboStyle() {
+
+                return "-fx-background-color:white;" +
+                                "-fx-border-color:" +
+                                BORDER +
+                                ";" +
+                                "-fx-border-radius:9px;" +
+                                "-fx-background-radius:9px;";
+        }
+
+        // =========================================================
+        // PRIMARY BUTTON STYLE
+        // =========================================================
+
+        private String primaryStyle() {
+
+                return "-fx-background-color:" +
+                                GREEN +
+                                ";" +
+                                "-fx-text-fill:white;" +
+                                "-fx-font-weight:bold;" +
+                                "-fx-background-radius:9px;" +
+                                "-fx-cursor:hand;";
+        }
+
+        // =========================================================
+        // PRIMARY BUTTON HOVER
+        // =========================================================
+
+        private String primaryHoverStyle() {
+
+                return "-fx-background-color:" +
+                                GREEN_DARK +
+                                ";" +
+                                "-fx-text-fill:white;" +
+                                "-fx-font-weight:bold;" +
+                                "-fx-background-radius:9px;" +
+                                "-fx-cursor:hand;";
+        }
+
+        // =========================================================
+        // OUTLINE BUTTON
+        // =========================================================
+
+        private String outlineStyle() {
+
+                return "-fx-background-color:transparent;" +
+                                "-fx-text-fill:" +
+                                GREEN +
+                                ";" +
+                                "-fx-font-weight:bold;" +
+                                "-fx-border-color:" +
+                                BORDER +
+                                ";" +
+                                "-fx-border-radius:7px;" +
+                                "-fx-background-radius:7px;" +
+                                "-fx-cursor:hand;";
+        }
+
+        // =========================================================
+        // OUTLINE BUTTON HOVER
+        // =========================================================
+
+        private String outlineHoverStyle() {
+
+                return "-fx-background-color:" +
+                                GREEN +
+                                ";" +
+                                "-fx-text-fill:white;" +
+                                "-fx-font-weight:bold;" +
+                                "-fx-border-color:" +
+                                GREEN +
+                                ";" +
+                                "-fx-border-radius:7px;" +
+                                "-fx-background-radius:7px;" +
+                                "-fx-cursor:hand;";
+        }
+
+        // =========================================================
+        // CARD STYLE
+        // =========================================================
+
+        private String cardStyle() {
+
+                return "-fx-background-color:white;" +
+                                "-fx-background-radius:14px;" +
+                                "-fx-border-color:" +
+                                BORDER +
+                                ";" +
+                                "-fx-border-radius:14px;" +
+                                "-fx-effect:dropshadow(" +
+                                "gaussian," +
+                                "rgba(20,80,65,0.08)," +
+                                "10," +
+                                "0.15," +
+                                "0," +
+                                "3" +
+                                ");";
+        }
+
+        // =========================================================
+        // CARD HOVER STYLE
+        // =========================================================
+
+        private String cardHoverStyle() {
+
+                return "-fx-background-color:white;" +
+                                "-fx-background-radius:14px;" +
+                                "-fx-border-color:" +
+                                GREEN +
+                                ";" +
+                                "-fx-border-radius:14px;" +
+                                "-fx-effect:dropshadow(" +
+                                "gaussian," +
+                                "rgba(17,120,100,0.18)," +
+                                "16," +
+                                "0.2," +
+                                "0," +
+                                "4" +
+                                ");" +
+                                "-fx-cursor:hand;";
+        }
 }
