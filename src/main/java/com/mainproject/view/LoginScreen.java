@@ -3,8 +3,9 @@ package com.mainproject.view;
 import com.mainproject.view.buyer.BuyerDashboard;
 import com.mainproject.view.farmer.FarmerDashboard;
 import com.mainproject.controller.AuthController;
-import com.mainproject.dao.UserDAO;
+import com.mainproject.controller.UserController;
 import com.mainproject.model.User;
+
 
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -34,7 +35,7 @@ public class LoginScreen extends Application {
         private Scene HomePageScene;
 
         private AuthController authController;
-        private UserDAO userDAO;
+        private UserController userController;
 
         @Override
         public void start(Stage myStage) {
@@ -43,7 +44,7 @@ public class LoginScreen extends Application {
 
                 authController = new AuthController();
 
-                userDAO = new UserDAO();
+                userController = new UserController();
 
                 // =================================================
                 // LEFT IMAGE
@@ -277,7 +278,7 @@ public class LoginScreen extends Application {
                                         // GET USER FROM FIRESTORE
                                         // =====================================
 
-                                        User user = userDAO.getUserByEmail(
+                                        User user = userController.getUserByEmail(
                                                         email);
 
                                         if (user == null) {
@@ -522,7 +523,18 @@ public class LoginScreen extends Application {
 
         // =====================================================
         // LOGOUT
-        // ====================================================
+        // =====================================================
+
+        public static void logoutToLogin() {
+
+                if (Homestage != null) {
+
+                        new LoginScreen()
+                                        .start(
+                                                        Homestage);
+                }
+        }
+
         // =====================================================
         // BACK TO LOGIN
         // =====================================================

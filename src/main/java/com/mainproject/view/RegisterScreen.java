@@ -1,8 +1,9 @@
 package com.mainproject.view;
 
 import com.mainproject.controller.AuthController;
-import com.mainproject.dao.UserDAO;
+import com.mainproject.controller.UserController;
 import com.mainproject.model.User;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -32,7 +33,7 @@ public class RegisterScreen {
         private Scene registerScreenScene;
 
         private final AuthController authController;
-        private final UserDAO userDAO;
+        private final UserController userController;
 
         // =====================================================
         // CONSTRUCTOR
@@ -42,7 +43,7 @@ public class RegisterScreen {
 
                 authController = new AuthController();
 
-                userDAO = new UserDAO();
+                userController = new UserController();
         }
 
         // =====================================================
@@ -418,7 +419,7 @@ public class RegisterScreen {
                                         // SAVE USER TO FIRESTORE
                                         // =====================================
 
-                                        boolean saved = userDAO.saveUser(
+                                        boolean saved = userController.saveUser(
                                                         user);
 
                                         if (!saved) {

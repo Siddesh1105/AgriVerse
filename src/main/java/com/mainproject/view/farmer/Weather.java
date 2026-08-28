@@ -165,7 +165,7 @@ public class Weather {
                 scrollPane.setStyle(
                                 "-fx-background-color: transparent;");
 
-                return scrollPane;
+        return scrollPane;
         }
 
         private Label createStat(

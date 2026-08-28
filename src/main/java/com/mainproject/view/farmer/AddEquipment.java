@@ -1,13 +1,15 @@
 package com.mainproject.view.farmer;
 
+
 import java.io.File;
 import java.util.Map;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.mainproject.config.CloudinaryConfig;
-import com.mainproject.dao.EquipmentDAO;
+import com.mainproject.controller.EquipmentController;
 import com.mainproject.model.Equipment;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -56,7 +58,7 @@ public class AddEquipment {
     private final String farmerEmail;
     private final String farmerName;
 
-    private final EquipmentDAO equipmentDAO;
+    private final EquipmentController equipmentController;
 
     // SAME CLOUDINARY CONFIG AS AddProduct
     private final Cloudinary cloudinary = CloudinaryConfig.getCloudinary();
@@ -84,7 +86,7 @@ public class AddEquipment {
     this.farmerName = farmerName;
     this.backToEquipmentRental = backToEquipmentRental;
 
-    this.equipmentDAO = new EquipmentDAO();
+    this.equipmentController = new EquipmentController();
 }
 
     // =====================================================
@@ -705,7 +707,7 @@ public class AddEquipment {
             System.out.println(
                     "Saving equipment to Firestore...");
 
-            boolean saved = equipmentDAO.addEquipment(
+            boolean saved = equipmentController.addEquipment(
                     equipment);
 
             if (saved) {
