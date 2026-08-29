@@ -1,6 +1,5 @@
 package com.mainproject.view.admin;
 
-
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -109,7 +108,8 @@ public class OrderManagement {
                 "Product Management", "Order Management", "Live Marketplace",
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
                 "AI & Smart Tools", "Notifications", "Content Management",
-                "Feedback & Reviews", "Reports & Complaints", "Payment Management"
+                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
@@ -140,19 +140,66 @@ public class OrderManagement {
     }
 
     private void handleNavClick(String pageName) {
+        if (pageName.equals("Order Management")) {
+            return; // already on this screen
+        }
         if (pageName.equals("Dashboard")) {
             dashboard.showDashboard();
-        } else if (pageName.equals("User Management")) {
-            new UserManagement(stage, dashboard).show();
-        } else if (pageName.equals("Product Management")) {
-            new ProductManagement(stage, dashboard).show();
-        } else if (pageName.equals("Farmer Verification")) {
-            new FarmerVerification(stage, dashboard).show();
-        } else if (pageName.equals("Order Management")) {
-            // already here
-        } else {
-            showInfoAlert(pageName, "This section isn't built in this demo.");
+            return;
         }
+        if (pageName.equals("User Management")) {
+            new UserManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Farmer Verification")) {
+            new FarmerVerification(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Product Management")) {
+            new ProductManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Live Marketplace")) {
+            new LiveMarketplace(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Equipment Management")) {
+            new EquipmentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Analytics & Reports")) {
+            new AnalyticsReports(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Notifications")) {
+            new NotificationManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Feedback & Reviews")) {
+            new FeedbackReviews(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Reports & Complaints")) {
+            new ReportsComplaints(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Payment Management")) {
+            new PaymentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Audit Logs")) {
+            new AuditLogs(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("System & Data Management")) {
+            new SystemDataManage(stage, dashboard).show();
+            return;
+        }
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     private void styleActiveNav(Button b) {

@@ -100,9 +100,10 @@ public class AdminDashboard extends Application {
                 String[] navItems = {
                                 "Dashboard", "User Management", "Farmer Verification",
                                 "Product Management", "Order Management", "Live Marketplace",
-                                "Equipment Management", "Analytics & Reports", "Notifications", "SystemDataManage",
-                                "Content Management", "AuditLogs",
-                                "Feedback & Reviews", "Reports & Complaints", "Payment Management"
+                                "Equipment Management", "Analytics & Reports", "Crop Price Management",
+                                "Notifications", "Content Management",
+                                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                                "Audit Logs", "System & Data Management"
                 };
 
                 VBox navBox = new VBox(1);
@@ -144,54 +145,20 @@ public class AdminDashboard extends Application {
         }
 
         // swaps whatever is in the center content area and keeps the sidebar highlight
-        // in sync
-        private void switchPage(String pageName, Button clickedButton) {
-                // some nav items are full separate screens, not placeholders inside this one
+        // in sync. Public so sibling screens (e.g. CropPriceManagement) can route back
+        // through here when their own sidebar nav items are clicked.
+        public void switchPage(String pageName, Button clickedButton) {
+                // every nav item that has a real screen hands off to its own class;
+                // only "AI & Smart Tools" has no screen yet and falls through to the
+                // placeholder view below.
                 if (pageName.equals("User Management")) {
                         new UserManagement(primaryStage, this).show();
                         return;
                 }
-
-                if (pageName.equals("Reports & Complaints")) {
-                        new ReportsComplaints(primaryStage, this).show();
-                        return;
-
-                }
-
                 if (pageName.equals("Product Management")) {
                         new ProductManagement(primaryStage, this).show();
                         return;
-
                 }
-
-                if (pageName.equals("Payment Management")) {
-                        new PaymentManagement(primaryStage, this).show();
-                        return;
-
-                }
-
-                if (pageName.equals("Notifications")) {
-                        new NotificationManagement(primaryStage, this).show();
-                        return;
-
-                }
-                if (pageName.equals("AuditLogs")) {
-                        new AuditLogs(primaryStage, this).show();
-                        return;
-
-                }
-                if (pageName.equals("SystemDataManage")) {
-                        new SystemDataManage(primaryStage, this).show();
-                        return;
-
-                }
-
-                if (pageName.equals("Feedback & Reviews")) {
-                        new FeedbackReviews(primaryStage, this).show();
-                        return;
-
-                }
-
                 if (pageName.equals("Farmer Verification")) {
                         new FarmerVerification(primaryStage, this).show();
                         return;
@@ -210,6 +177,38 @@ public class AdminDashboard extends Application {
                 }
                 if (pageName.equals("Equipment Management")) {
                         new EquipmentManagement(primaryStage, this).show();
+                        return;
+                }
+                if (pageName.equals("Analytics & Reports")) {
+                        new AnalyticsReports(primaryStage, this).show();
+                        return;
+                }
+                if (pageName.equals("Crop Price Management")) {
+                        new CropPriceManagement(primaryStage, this).show();
+                        return;
+                }
+                if (pageName.equals("Audit Logs")) {
+                        new AuditLogs(primaryStage, this).show();
+                        return;
+                }
+                if (pageName.equals("System & Data Management")) {
+                        new SystemDataManage(primaryStage, this).show();
+                        return;
+                }
+                if (pageName.equals("Content Management")) {
+                        new ContentManagement(primaryStage, this).show();
+                        return;
+                }
+                if (pageName.equals("Notifications")) {
+                        new NotificationManagement(primaryStage, this).show();
+                        return;
+                }
+                if (pageName.equals("Payment Management")) {
+                        new PaymentManagement(primaryStage, this).show();
+                        return;
+                }
+                if (pageName.equals("Feedback & Reviews")) {
+                        new FeedbackReviews(primaryStage, this).show();
                         return;
                 }
 

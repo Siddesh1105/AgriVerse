@@ -1,6 +1,5 @@
 package com.mainproject.view.admin;
 
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -48,7 +47,8 @@ public class ProductManagement {
     private FilteredList<Product> filteredProducts;
     private SortedList<Product> sortedProducts;
 
-    // what the currently selected tab filters on: "All Products", "Approved", "Pending" or "Rejected"
+    // what the currently selected tab filters on: "All Products", "Approved",
+    // "Pending" or "Rejected"
     private String currentStatusFilter = "All Products";
     private int nextProductNumber = 1008;
 
@@ -90,7 +90,8 @@ public class ProductManagement {
                 "Product Management", "Order Management", "Live Marketplace",
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
                 "AI & Smart Tools", "Notifications", "Content Management",
-                "Feedback & Reviews", "Reports & Complaints", "Payment Management"
+                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
@@ -123,15 +124,66 @@ public class ProductManagement {
     // this if-chain is what actually connects the screens together - as more
     // screens get built, they just get added here the same way
     private void handleNavClick(String pageName) {
+        if (pageName.equals("Product Management")) {
+            return; // already on this screen
+        }
         if (pageName.equals("Dashboard")) {
             dashboard.showDashboard();
-        } else if (pageName.equals("User Management")) {
-            new UserManagement(stage, dashboard).show();
-        } else if (pageName.equals("Product Management")) {
-            // already here
-        } else {
-            showInfoAlert(pageName, "This section isn't built in this demo.");
+            return;
         }
+        if (pageName.equals("User Management")) {
+            new UserManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Farmer Verification")) {
+            new FarmerVerification(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Order Management")) {
+            new OrderManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Live Marketplace")) {
+            new LiveMarketplace(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Equipment Management")) {
+            new EquipmentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Analytics & Reports")) {
+            new AnalyticsReports(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Notifications")) {
+            new NotificationManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Feedback & Reviews")) {
+            new FeedbackReviews(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Reports & Complaints")) {
+            new ReportsComplaints(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Payment Management")) {
+            new PaymentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Audit Logs")) {
+            new AuditLogs(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("System & Data Management")) {
+            new SystemDataManage(stage, dashboard).show();
+            return;
+        }
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     private void styleActiveNav(Button b) {
@@ -228,10 +280,10 @@ public class ProductManagement {
 
         // {filter key, label shown on the button}
         String[][] tabs = {
-                {"All Products", "All Products"},
-                {"Pending", "Pending Approval (21)"},
-                {"Approved", "Approved (24,650)"},
-                {"Rejected", "Rejected (120)"}
+                { "All Products", "All Products" },
+                { "Pending", "Pending Approval (21)" },
+                { "Approved", "Approved (24,650)" },
+                { "Rejected", "Rejected (120)" }
         };
 
         for (String[] tab : tabs) {
@@ -386,13 +438,18 @@ public class ProductManagement {
 
     private void loadSampleProducts() {
         allProducts = FXCollections.observableArrayList(
-                new Product("PRD1001", "\uD83C\uDF45", "Tomato (100 kg)", "Ramesh Patil", "Vegetables", "\u20B928 / kg", "Approved", LocalDate.of(2025, 5, 20)),
-                new Product("PRD1002", "\uD83E\uDD54", "Potato (50 kg)", "Mahesh Jadhav", "Vegetables", "\u20B925 / kg", "Pending", LocalDate.of(2025, 5, 19)),
-                new Product("PRD1003", "\uD83E\uDDC5", "Onion (80 kg)", "Suresh Yadav", "Vegetables", "\u20B920 / kg", "Approved", LocalDate.of(2025, 5, 19)),
-                new Product("PRD1004", "\uD83C\uDF3E", "Wheat (100 kg)", "Vikram Singh", "Grains", "\u20B922 / kg", "Approved", LocalDate.of(2025, 5, 18)),
-                new Product("PRD1005", "\uD83E\uDD6D", "Mango (50 kg)", "Anita Deshmukh", "Fruits", "\u20B940 / kg", "Rejected", LocalDate.of(2025, 5, 17)),
-                new Product("PRD1006", "\uD83E\uDD6C", "Cabbage (60 kg)", "Ramesh Patil", "Vegetables", "\u20B915 / kg", "Approved", LocalDate.of(2025, 5, 16))
-        );
+                new Product("PRD1001", "\uD83C\uDF45", "Tomato (100 kg)", "Ramesh Patil", "Vegetables", "\u20B928 / kg",
+                        "Approved", LocalDate.of(2025, 5, 20)),
+                new Product("PRD1002", "\uD83E\uDD54", "Potato (50 kg)", "Mahesh Jadhav", "Vegetables", "\u20B925 / kg",
+                        "Pending", LocalDate.of(2025, 5, 19)),
+                new Product("PRD1003", "\uD83E\uDDC5", "Onion (80 kg)", "Suresh Yadav", "Vegetables", "\u20B920 / kg",
+                        "Approved", LocalDate.of(2025, 5, 19)),
+                new Product("PRD1004", "\uD83C\uDF3E", "Wheat (100 kg)", "Vikram Singh", "Grains", "\u20B922 / kg",
+                        "Approved", LocalDate.of(2025, 5, 18)),
+                new Product("PRD1005", "\uD83E\uDD6D", "Mango (50 kg)", "Anita Deshmukh", "Fruits", "\u20B940 / kg",
+                        "Rejected", LocalDate.of(2025, 5, 17)),
+                new Product("PRD1006", "\uD83E\uDD6C", "Cabbage (60 kg)", "Ramesh Patil", "Vegetables", "\u20B915 / kg",
+                        "Approved", LocalDate.of(2025, 5, 16)));
 
         filteredProducts = new FilteredList<>(allProducts, product -> true);
         filteredProducts.addListener((javafx.collections.ListChangeListener<Product>) change -> {
@@ -477,11 +534,13 @@ public class ProductManagement {
         nameField.setPromptText("e.g. Tomato (100 kg)");
         TextField farmerField = new TextField();
         farmerField.setPromptText("Farmer name");
-        ComboBox<String> categoryBox = new ComboBox<>(FXCollections.observableArrayList("Vegetables", "Fruits", "Grains", "Other"));
+        ComboBox<String> categoryBox = new ComboBox<>(
+                FXCollections.observableArrayList("Vegetables", "Fruits", "Grains", "Other"));
         categoryBox.setValue("Vegetables");
         TextField priceField = new TextField();
         priceField.setPromptText("e.g. \u20B920 / kg");
-        ComboBox<String> statusBox = new ComboBox<>(FXCollections.observableArrayList("Approved", "Pending", "Rejected"));
+        ComboBox<String> statusBox = new ComboBox<>(
+                FXCollections.observableArrayList("Approved", "Pending", "Rejected"));
         statusBox.setValue("Pending");
 
         GridPane grid = new GridPane();
@@ -547,7 +606,8 @@ public class ProductManagement {
 
         TextField nameField = new TextField(product.getName());
         TextField farmerField = new TextField(product.getFarmer());
-        ComboBox<String> categoryBox = new ComboBox<>(FXCollections.observableArrayList("Vegetables", "Fruits", "Grains", "Other"));
+        ComboBox<String> categoryBox = new ComboBox<>(
+                FXCollections.observableArrayList("Vegetables", "Fruits", "Grains", "Other"));
         categoryBox.setValue(product.getCategory());
         TextField priceField = new TextField(product.getPrice());
 
@@ -612,7 +672,7 @@ public class ProductManagement {
         private final LocalDate listedDate;
 
         public Product(String id, String icon, String name, String farmer, String category,
-                       String price, String status, LocalDate listedDate) {
+                String price, String status, LocalDate listedDate) {
             this.id = id;
             this.icon = icon;
             this.name = name;

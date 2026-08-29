@@ -1,7 +1,5 @@
 package com.mainproject.view.admin;
 
-
-
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -99,7 +97,8 @@ public class UserManagement {
                 "Product Management", "Order Management", "Live Marketplace",
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
                 "AI & Smart Tools", "Notifications", "Content Management",
-                "Feedback & Reviews", "Reports & Complaints", "Payment Management"
+                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
@@ -131,13 +130,66 @@ public class UserManagement {
 
     // this is the important bit that connects the two screens together
     private void handleNavClick(String pageName) {
+        if (pageName.equals("User Management")) {
+            return; // already on this screen
+        }
         if (pageName.equals("Dashboard")) {
             dashboard.showDashboard();
-        } else if (pageName.equals("User Management")) {
-            // already on this screen, nothing to switch
-        } else {
-            showInfoAlert(pageName, "This section isn't built in this demo.");
+            return;
         }
+        if (pageName.equals("Farmer Verification")) {
+            new FarmerVerification(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Product Management")) {
+            new ProductManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Order Management")) {
+            new OrderManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Live Marketplace")) {
+            new LiveMarketplace(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Equipment Management")) {
+            new EquipmentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Analytics & Reports")) {
+            new AnalyticsReports(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Notifications")) {
+            new NotificationManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Feedback & Reviews")) {
+            new FeedbackReviews(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Reports & Complaints")) {
+            new ReportsComplaints(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Payment Management")) {
+            new PaymentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Audit Logs")) {
+            new AuditLogs(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("System & Data Management")) {
+            new SystemDataManage(stage, dashboard).show();
+            return;
+        }
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     private void styleActiveNav(Button b) {
@@ -230,7 +282,7 @@ public class UserManagement {
         bar.setStyle("-fx-background-color: white; -fx-background-radius: 10;"
                 + "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 1);");
 
-        String[] tabs = {"All Users", "Farmers", "Buyers", "Admins"};
+        String[] tabs = { "All Users", "Farmers", "Buyers", "Admins" };
         for (String tabName : tabs) {
             Button tabButton = new Button(tabName);
             tabButton.setPadding(new Insets(8, 18, 8, 18));
@@ -440,8 +492,10 @@ public class UserManagement {
         }
     }
 
-    // recalculates the "Showing X to Y of Z users" text. For "All Users" it uses the
-    // page/total math against the mock 12,450 total; for a role tab it just reflects
+    // recalculates the "Showing X to Y of Z users" text. For "All Users" it uses
+    // the
+    // page/total math against the mock 12,450 total; for a role tab it just
+    // reflects
     // how many rows matched, since there's no real per-role total in this demo.
     private void updateResultsLabel() {
         int shown = filteredUsers.size();
@@ -463,14 +517,20 @@ public class UserManagement {
 
     private void loadSampleUsers() {
         allUsers = FXCollections.observableArrayList(
-                new User("USR1001", "Rajesh Patil", "rajesh@gmail.com", "9876543210", "Farmer", "Active", LocalDate.of(2025, 5, 20)),
-                new User("USR1002", "Suresh Yadav", "suresh@gmail.com", "8765432109", "Farmer", "Active", LocalDate.of(2025, 5, 18)),
-                new User("USR1003", "Green Mart", "greenmart@gmail.com", "9123456780", "Buyer", "Active", LocalDate.of(2025, 5, 15)),
-                new User("USR1004", "Fresh Store", "freshstore@gmail.com", "9234567891", "Buyer", "Active", LocalDate.of(2025, 5, 14)),
-                new User("USR1005", "Anita Deshmukh", "anita@gmail.com", "9012345678", "Buyer", "Inactive", LocalDate.of(2025, 5, 10)),
-                new User("USR1006", "Vikram Singh", "vikram@gmail.com", "9988776655", "Farmer", "Active", LocalDate.of(2025, 5, 9)),
-                new User("USR1007", "Organic Basket", "organic@gmail.com", "8877665544", "Buyer", "Active", LocalDate.of(2025, 5, 8))
-        );
+                new User("USR1001", "Rajesh Patil", "rajesh@gmail.com", "9876543210", "Farmer", "Active",
+                        LocalDate.of(2025, 5, 20)),
+                new User("USR1002", "Suresh Yadav", "suresh@gmail.com", "8765432109", "Farmer", "Active",
+                        LocalDate.of(2025, 5, 18)),
+                new User("USR1003", "Green Mart", "greenmart@gmail.com", "9123456780", "Buyer", "Active",
+                        LocalDate.of(2025, 5, 15)),
+                new User("USR1004", "Fresh Store", "freshstore@gmail.com", "9234567891", "Buyer", "Active",
+                        LocalDate.of(2025, 5, 14)),
+                new User("USR1005", "Anita Deshmukh", "anita@gmail.com", "9012345678", "Buyer", "Inactive",
+                        LocalDate.of(2025, 5, 10)),
+                new User("USR1006", "Vikram Singh", "vikram@gmail.com", "9988776655", "Farmer", "Active",
+                        LocalDate.of(2025, 5, 9)),
+                new User("USR1007", "Organic Basket", "organic@gmail.com", "8877665544", "Buyer", "Active",
+                        LocalDate.of(2025, 5, 8)));
 
         filteredUsers = new FilteredList<>(allUsers, user -> true);
         filteredUsers.addListener((ListChangeListener<User>) change -> updateResultsLabel());
@@ -637,7 +697,8 @@ public class UserManagement {
         private final String status;
         private final LocalDate joinedDate;
 
-        public User(String id, String name, String email, String phone, String role, String status, LocalDate joinedDate) {
+        public User(String id, String name, String email, String phone, String role, String status,
+                LocalDate joinedDate) {
             this.id = id;
             this.name = name;
             this.email = email;

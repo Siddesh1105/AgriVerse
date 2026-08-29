@@ -1,6 +1,5 @@
 package com.mainproject.view.admin;
 
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -113,7 +112,7 @@ public class PaymentManagement {
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
                 "AI & Smart Tools", "Notifications", "Content Management",
                 "Feedback & Reviews", "Reports & Complaints", "Payment Management",
-                "Audit Logs"
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
@@ -158,7 +157,7 @@ public class PaymentManagement {
     // page, everything else falls back to the dashboard's placeholder view
     private void handleNavClick(String pageName) {
         if (pageName.equals("Payment Management")) {
-            return; // already here
+            return; // already on this screen
         }
         if (pageName.equals("Dashboard")) {
             dashboard.showDashboard();
@@ -168,8 +167,20 @@ public class PaymentManagement {
             new UserManagement(primaryStage, dashboard).show();
             return;
         }
+        if (pageName.equals("Farmer Verification")) {
+            new FarmerVerification(primaryStage, dashboard).show();
+            return;
+        }
         if (pageName.equals("Product Management")) {
             new ProductManagement(primaryStage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Order Management")) {
+            new OrderManagement(primaryStage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Live Marketplace")) {
+            new LiveMarketplace(primaryStage, dashboard).show();
             return;
         }
         if (pageName.equals("Equipment Management")) {
@@ -184,11 +195,27 @@ public class PaymentManagement {
             new NotificationManagement(primaryStage, dashboard).show();
             return;
         }
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(primaryStage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Feedback & Reviews")) {
+            new FeedbackReviews(primaryStage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Reports & Complaints")) {
+            new ReportsComplaints(primaryStage, dashboard).show();
+            return;
+        }
         if (pageName.equals("Audit Logs")) {
             new AuditLogs(primaryStage, dashboard).show();
             return;
         }
-        dashboard.showDashboard();
+        if (pageName.equals("System & Data Management")) {
+            new SystemDataManage(primaryStage, dashboard).show();
+            return;
+        }
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     // ------------------------------------------------------------------

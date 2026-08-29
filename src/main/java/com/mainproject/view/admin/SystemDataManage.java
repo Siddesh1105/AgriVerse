@@ -1,6 +1,5 @@
 package com.mainproject.view.admin;
 
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-
 public class SystemDataManage {
 
     // same palette as AdminDashboard so every screen looks like one app
@@ -25,8 +23,8 @@ public class SystemDataManage {
     private static final String GREEN_DARK = "#14532d";
     private static final String BG = "#f4f6f5";
 
-    private static final DateTimeFormatter DISPLAY_FORMAT =
-            DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm a", Locale.ENGLISH);
+    private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm a",
+            Locale.ENGLISH);
 
     private final Stage primaryStage;
     private final AdminDashboard adminDashboard;
@@ -93,14 +91,15 @@ public class SystemDataManage {
                 "Dashboard", "User Management", "Farmer Verification",
                 "Product Management", "Order Management", "Live Marketplace",
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
-                "System & Data manage", "Notifications", "Content Management",
-                "Feedback & Reviews", "Reports & Complaints", "Payment Management", "Audit Logs"
+                "AI & Smart Tools", "Notifications", "Content Management",
+                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
         for (String item : navItems) {
             Button navButton = buildNavButton(item);
-            if (item.equals("System & Data manage")) {
+            if (item.equals("System & Data Management")) {
                 styleActiveButton(navButton);
             } else {
                 styleInactiveButton(navButton);
@@ -137,7 +136,7 @@ public class SystemDataManage {
 
     // sends the admin to whichever screen they clicked in the sidebar
     private void handleNavClick(String pageName) {
-        if (pageName.equals("System & Data manage")) {
+        if (pageName.equals("System & Data Management")) {
             return; // already on this screen
         }
         if (pageName.equals("Dashboard")) {
@@ -148,12 +147,12 @@ public class SystemDataManage {
             new UserManagement(primaryStage, adminDashboard).show();
             return;
         }
-        if (pageName.equals("Product Management")) {
-            new ProductManagement(primaryStage, adminDashboard).show();
-            return;
-        }
         if (pageName.equals("Farmer Verification")) {
             new FarmerVerification(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Product Management")) {
+            new ProductManagement(primaryStage, adminDashboard).show();
             return;
         }
         if (pageName.equals("Order Management")) {
@@ -164,25 +163,39 @@ public class SystemDataManage {
             new LiveMarketplace(primaryStage, adminDashboard).show();
             return;
         }
+        if (pageName.equals("Equipment Management")) {
+            new EquipmentManagement(primaryStage, adminDashboard).show();
+            return;
+        }
         if (pageName.equals("Analytics & Reports")) {
             new AnalyticsReports(primaryStage, adminDashboard).show();
             return;
         }
-        if (pageName.equals("Reports & Complaints")) {
-            new ReportsComplaints(primaryStage, adminDashboard).show();
+        if (pageName.equals("Notifications")) {
+            new NotificationManagement(primaryStage, adminDashboard).show();
             return;
         }
-        if (pageName.equals("Audit Logs")) {
-            new AuditLogs(primaryStage, adminDashboard).show();
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(primaryStage, adminDashboard).show();
             return;
         }
         if (pageName.equals("Feedback & Reviews")) {
             new FeedbackReviews(primaryStage, adminDashboard).show();
             return;
         }
-        // everything else falls back to Equipment Management for now,
-        // the same placeholder pattern AdminDashboard itself uses
-        new EquipmentManagement(primaryStage, adminDashboard).show();
+        if (pageName.equals("Reports & Complaints")) {
+            new ReportsComplaints(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Payment Management")) {
+            new PaymentManagement(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Audit Logs")) {
+            new AuditLogs(primaryStage, adminDashboard).show();
+            return;
+        }
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     // ------------------------------------------------------------------
@@ -204,7 +217,8 @@ public class SystemDataManage {
 
         Button bellButton = new Button("\uD83D\uDD14");
         bellButton.setStyle("-fx-background-color: transparent; -fx-font-size: 15;");
-        bellButton.setOnAction(e -> showInfoAlert("Notifications", "You have 42 pending approvals and 3 new orders today."));
+        bellButton.setOnAction(
+                e -> showInfoAlert("Notifications", "You have 42 pending approvals and 3 new orders today."));
 
         MenuButton profileMenu = new MenuButton("Super Admin");
         profileMenu.setStyle("-fx-background-color: transparent;");
@@ -236,7 +250,8 @@ public class SystemDataManage {
         columns.setPadding(new Insets(20));
 
         VBox leftColumn = new VBox(20);
-        leftColumn.getChildren().addAll(buildSystemStatusSection(), buildDataOverviewSection(), buildSystemActivitySection());
+        leftColumn.getChildren().addAll(buildSystemStatusSection(), buildDataOverviewSection(),
+                buildSystemActivitySection());
         HBox.setHgrow(leftColumn, Priority.ALWAYS);
 
         VBox rightColumn = buildBackupStatusCard();
@@ -289,14 +304,16 @@ public class SystemDataManage {
         MenuItem viewLogs = new MenuItem("View Logs");
         MenuItem restartService = new MenuItem("Restart Service");
         viewDetails.setOnAction(e -> handleViewServiceDetails(service));
-        viewLogs.setOnAction(e -> showInfoAlert(service.getName() + " Logs", "Showing the latest logs for " + service.getName() + "."));
+        viewLogs.setOnAction(e -> showInfoAlert(service.getName() + " Logs",
+                "Showing the latest logs for " + service.getName() + "."));
         restartService.setOnAction(e -> handleRestartService(service));
         menuButton.getItems().addAll(viewDetails, viewLogs, restartService);
 
         HBox card = new HBox(10, icon, textBox, menuButton);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(10, 14, 10, 14));
-        card.setStyle("-fx-background-color: #fafafa; -fx-background-radius: 8; -fx-border-color: #ececec; -fx-border-radius: 8;");
+        card.setStyle(
+                "-fx-background-color: #fafafa; -fx-background-radius: 8; -fx-border-color: #ececec; -fx-border-radius: 8;");
         HBox.setHgrow(card, Priority.ALWAYS);
         return card;
     }
@@ -357,7 +374,8 @@ public class SystemDataManage {
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(12, 10, 12, 10));
         card.setPrefWidth(105);
-        card.setStyle("-fx-background-color: #fafafa; -fx-background-radius: 8; -fx-border-color: #ececec; -fx-border-radius: 8;");
+        card.setStyle(
+                "-fx-background-color: #fafafa; -fx-background-radius: 8; -fx-border-color: #ececec; -fx-border-radius: 8;");
         HBox.setHgrow(card, Priority.ALWAYS);
         return card;
     }
@@ -390,7 +408,8 @@ public class SystemDataManage {
         return section;
     }
 
-    // draws only the first `count` activity entries, matching the compact list in the screenshot
+    // draws only the first `count` activity entries, matching the compact list in
+    // the screenshot
     private void renderActivityRows(int count) {
         activityListBox.getChildren().clear();
         int shown = 0;
@@ -469,7 +488,8 @@ public class SystemDataManage {
 
         Button backupNowButton = new Button("Backup Now");
         backupNowButton.setMaxWidth(Double.MAX_VALUE);
-        backupNowButton.setStyle("-fx-background-color: " + GREEN + "; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10;");
+        backupNowButton.setStyle("-fx-background-color: " + GREEN
+                + "; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 10;");
         backupNowButton.setOnAction(e -> handleBackupNow());
 
         Button viewHistoryButton = new Button("View Backup History \u25BE");
@@ -495,7 +515,8 @@ public class SystemDataManage {
     }
 
     // runs a backup right now: updates the status badge, records history and
-    // pushes the last/next backup timestamps forward, same as a real backup job would
+    // pushes the last/next backup timestamps forward, same as a real backup job
+    // would
     private void handleBackupNow() {
         backupStatus = "Running";
         backupStatusBadge.setText(backupStatus);
@@ -515,7 +536,8 @@ public class SystemDataManage {
 
         backupHistory.add(0, new BackupRecord(lastBackupTime.format(DISPLAY_FORMAT), "Completed", "1.2 GB"));
 
-        activityLog.add(0, new ActivityEntry("\uD83D\uDEE1", "Backup completed successfully", lastBackupTime.format(DISPLAY_FORMAT)));
+        activityLog.add(0, new ActivityEntry("\uD83D\uDEE1", "Backup completed successfully",
+                lastBackupTime.format(DISPLAY_FORMAT)));
         renderActivityRows(4);
 
         showInfoAlert("Backup Complete", "The manual backup finished successfully.");
@@ -525,7 +547,8 @@ public class SystemDataManage {
         VBox historyBox = new VBox(10);
         historyBox.setPadding(new Insets(10));
         for (BackupRecord record : backupHistory) {
-            Label entry = new Label(record.getDate() + "  \u2013  " + record.getStatus() + "  \u2013  " + record.getSize());
+            Label entry = new Label(
+                    record.getDate() + "  \u2013  " + record.getStatus() + "  \u2013  " + record.getSize());
             entry.setFont(Font.font("Segoe UI", 12));
             historyBox.getChildren().add(entry);
         }

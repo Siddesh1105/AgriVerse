@@ -1,4 +1,5 @@
 package com.mainproject.view.admin;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -39,7 +40,8 @@ public class EquipmentManagement {
     private ObservableList<Equipment> allEquipment;
     private FilteredList<Equipment> filteredEquipment;
 
-    // filter key of the active tab: "All Equipment", "Pending", "Approved" or "Rejected"
+    // filter key of the active tab: "All Equipment", "Pending", "Approved" or
+    // "Rejected"
     private String currentStatusFilter = "All Equipment";
     private int nextEquipmentNumber = 1006;
 
@@ -81,7 +83,8 @@ public class EquipmentManagement {
                 "Product Management", "Order Management", "Live Marketplace",
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
                 "AI & Smart Tools", "Notifications", "Content Management",
-                "Feedback & Reviews", "Reports & Complaints", "Payment Management"
+                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
@@ -111,27 +114,69 @@ public class EquipmentManagement {
         return sidebar;
     }
 
-    // grows by one branch every time a new screen gets built - same pattern as the other screens
+    // grows by one branch every time a new screen gets built - same pattern as the
+    // other screens
     private void handleNavClick(String pageName) {
+        if (pageName.equals("Equipment Management")) {
+            return; // already on this screen
+        }
         if (pageName.equals("Dashboard")) {
             dashboard.showDashboard();
-        } else if (pageName.equals("User Management")) {
-            new UserManagement(stage, dashboard).show();
-        } else if (pageName.equals("Product Management")) {
-            new ProductManagement(stage, dashboard).show();
-        } else if (pageName.equals("Farmer Verification")) {
-            new FarmerVerification(stage, dashboard).show();
-        } else if (pageName.equals("Order Management")) {
-            new OrderManagement(stage, dashboard).show();
-        } else if (pageName.equals("Live Marketplace")) {
-            new LiveMarketplace(stage, dashboard).show();
-        } else if (pageName.equals("Reports & Complaints")) {
-            new ReportsComplaints(stage, dashboard).show();
-        } else if (pageName.equals("Equipment Management")) {
-            // already here
-        } else {
-            showInfoAlert(pageName, "This section isn't built in this demo.");
+            return;
         }
+        if (pageName.equals("User Management")) {
+            new UserManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Farmer Verification")) {
+            new FarmerVerification(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Product Management")) {
+            new ProductManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Order Management")) {
+            new OrderManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Live Marketplace")) {
+            new LiveMarketplace(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Analytics & Reports")) {
+            new AnalyticsReports(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Notifications")) {
+            new NotificationManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Feedback & Reviews")) {
+            new FeedbackReviews(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Reports & Complaints")) {
+            new ReportsComplaints(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Payment Management")) {
+            new PaymentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Audit Logs")) {
+            new AuditLogs(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("System & Data Management")) {
+            new SystemDataManage(stage, dashboard).show();
+            return;
+        }
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     private void styleActiveNav(Button b) {
@@ -197,7 +242,8 @@ public class EquipmentManagement {
         return content;
     }
 
-    // tabs on the left, "+ Add Equipment" button on the right - one row, like the screenshot
+    // tabs on the left, "+ Add Equipment" button on the right - one row, like the
+    // screenshot
     private HBox buildTabsBar() {
         HBox bar = new HBox(8);
         bar.setPadding(new Insets(10, 15, 10, 15));
@@ -207,10 +253,10 @@ public class EquipmentManagement {
 
         // {filter key, label shown on the button}
         String[][] tabs = {
-                {"All Equipment", "All Equipment"},
-                {"Pending", "Pending Approval (6)"},
-                {"Approved", "Approved (1,240)"},
-                {"Rejected", "Rejected (18)"}
+                { "All Equipment", "All Equipment" },
+                { "Pending", "Pending Approval (6)" },
+                { "Approved", "Approved (1,240)" },
+                { "Rejected", "Rejected (18)" }
         };
 
         for (String[] tab : tabs) {
@@ -381,12 +427,16 @@ public class EquipmentManagement {
 
     private void loadSampleEquipment() {
         allEquipment = FXCollections.observableArrayList(
-                new Equipment("EQP1001", "\uD83D\uDE9C", "John Deere Tractor", "Ramesh Patil", "Tractor", 2500, "Approved", "Nashik, MH"),
-                new Equipment("EQP1002", "\uD83D\uDE9C", "Rotavator", "Mahesh Jadhav", "Tillage", 800, "Pending", "Pune, MH"),
-                new Equipment("EQP1003", "\uD83D\uDE9C", "Seed Drill", "Suresh Yadav", "Sowing", 700, "Approved", "Solapur, MH"),
-                new Equipment("EQP1004", "\uD83D\uDE9C", "Sprayer Pump", "Anita Deshmukh", "Irrigation", 600, "Approved", "Nagpur, MH"),
-                new Equipment("EQP1005", "\uD83D\uDE9C", "Harvester", "Vikram Singh", "Harvesting", 3500, "Approved", "Amravati, MH")
-        );
+                new Equipment("EQP1001", "\uD83D\uDE9C", "John Deere Tractor", "Ramesh Patil", "Tractor", 2500,
+                        "Approved", "Nashik, MH"),
+                new Equipment("EQP1002", "\uD83D\uDE9C", "Rotavator", "Mahesh Jadhav", "Tillage", 800, "Pending",
+                        "Pune, MH"),
+                new Equipment("EQP1003", "\uD83D\uDE9C", "Seed Drill", "Suresh Yadav", "Sowing", 700, "Approved",
+                        "Solapur, MH"),
+                new Equipment("EQP1004", "\uD83D\uDE9C", "Sprayer Pump", "Anita Deshmukh", "Irrigation", 600,
+                        "Approved", "Nagpur, MH"),
+                new Equipment("EQP1005", "\uD83D\uDE9C", "Harvester", "Vikram Singh", "Harvesting", 3500, "Approved",
+                        "Amravati, MH"));
 
         filteredEquipment = new FilteredList<>(allEquipment, equipment -> true);
         filteredEquipment.addListener((ListChangeListener<Equipment>) change -> {
@@ -399,8 +449,8 @@ public class EquipmentManagement {
     }
 
     private void applyFilters() {
-        filteredEquipment.setPredicate(equipment ->
-                currentStatusFilter.equals("All Equipment") || equipment.getStatus().equals(currentStatusFilter));
+        filteredEquipment.setPredicate(equipment -> currentStatusFilter.equals("All Equipment")
+                || equipment.getStatus().equals(currentStatusFilter));
     }
 
     private String iconForCategory(String category) {
@@ -458,7 +508,8 @@ public class EquipmentManagement {
                 nextEquipmentNumber++;
                 double price = parseOrZero(priceField.getText());
                 return new Equipment(id, iconForCategory(categoryBox.getValue()), nameField.getText().trim(),
-                        ownerField.getText().trim(), categoryBox.getValue(), price, "Pending", locationField.getText().trim());
+                        ownerField.getText().trim(), categoryBox.getValue(), price, "Pending",
+                        locationField.getText().trim());
             }
             return null;
         });
@@ -571,7 +622,7 @@ public class EquipmentManagement {
         private String location;
 
         public Equipment(String id, String icon, String name, String owner, String category,
-                          double pricePerDay, String status, String location) {
+                double pricePerDay, String status, String location) {
             this.id = id;
             this.icon = icon;
             this.name = name;

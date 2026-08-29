@@ -1,6 +1,5 @@
 package com.mainproject.view.admin;
 
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -119,8 +118,9 @@ public class FeedbackReviews {
                 "Dashboard", "User Management", "Farmer Verification",
                 "Product Management", "Order Management", "Live Marketplace",
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
-                "System & Data manage", "Notifications", "Content Management",
-                "Feedback & Reviews", "Reports & Complaints", "Payment Management", "Audit Logs"
+                "AI & Smart Tools", "Notifications", "Content Management",
+                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
@@ -174,12 +174,12 @@ public class FeedbackReviews {
             new UserManagement(primaryStage, adminDashboard).show();
             return;
         }
-        if (pageName.equals("Product Management")) {
-            new ProductManagement(primaryStage, adminDashboard).show();
-            return;
-        }
         if (pageName.equals("Farmer Verification")) {
             new FarmerVerification(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Product Management")) {
+            new ProductManagement(primaryStage, adminDashboard).show();
             return;
         }
         if (pageName.equals("Order Management")) {
@@ -190,25 +190,39 @@ public class FeedbackReviews {
             new LiveMarketplace(primaryStage, adminDashboard).show();
             return;
         }
+        if (pageName.equals("Equipment Management")) {
+            new EquipmentManagement(primaryStage, adminDashboard).show();
+            return;
+        }
         if (pageName.equals("Analytics & Reports")) {
             new AnalyticsReports(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Notifications")) {
+            new NotificationManagement(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(primaryStage, adminDashboard).show();
             return;
         }
         if (pageName.equals("Reports & Complaints")) {
             new ReportsComplaints(primaryStage, adminDashboard).show();
             return;
         }
+        if (pageName.equals("Payment Management")) {
+            new PaymentManagement(primaryStage, adminDashboard).show();
+            return;
+        }
         if (pageName.equals("Audit Logs")) {
             new AuditLogs(primaryStage, adminDashboard).show();
             return;
         }
-        if (pageName.equals("System & Data manage")) {
+        if (pageName.equals("System & Data Management")) {
             new SystemDataManage(primaryStage, adminDashboard).show();
             return;
         }
-        // everything else falls back to Equipment Management for now,
-        // the same placeholder pattern AdminDashboard itself uses
-        new EquipmentManagement(primaryStage, adminDashboard).show();
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     // ------------------------------------------------------------------
@@ -230,7 +244,8 @@ public class FeedbackReviews {
 
         Button bellButton = new Button("\uD83D\uDD14");
         bellButton.setStyle("-fx-background-color: transparent; -fx-font-size: 15;");
-        bellButton.setOnAction(e -> showInfoAlert("Notifications", "You have 42 pending approvals and 3 new orders today."));
+        bellButton.setOnAction(
+                e -> showInfoAlert("Notifications", "You have 42 pending approvals and 3 new orders today."));
 
         MenuButton profileMenu = new MenuButton("Super Admin");
         profileMenu.setStyle("-fx-background-color: transparent;");
@@ -313,7 +328,8 @@ public class FeedbackReviews {
 
     private void styleActiveTab(Button button) {
         button.setStyle("-fx-background-color: #eaf6ec; -fx-text-fill: " + GREEN + "; "
-                + "-fx-background-radius: 20; -fx-border-color: " + GREEN + "; -fx-border-radius: 20; -fx-font-weight: bold;");
+                + "-fx-background-radius: 20; -fx-border-color: " + GREEN
+                + "; -fx-border-radius: 20; -fx-font-weight: bold;");
     }
 
     private void styleInactiveTab(Button button) {
@@ -337,7 +353,10 @@ public class FeedbackReviews {
         searchField = new TextField();
         searchField.setPromptText("Search feedback...");
         searchField.setPrefWidth(220);
-        searchField.setOnAction(e -> { currentPage = 1; refreshFilteredList(); });
+        searchField.setOnAction(e -> {
+            currentPage = 1;
+            refreshFilteredList();
+        });
 
         typeFilter = new ComboBox<>();
         typeFilter.getItems().addAll("All Types", "Product Review", "Farmer Review", "Feedback");
@@ -357,8 +376,12 @@ public class FeedbackReviews {
         dateRangeBox.setAlignment(Pos.CENTER_LEFT);
 
         Button filterButton = new Button("\u25BC Filter");
-        filterButton.setStyle("-fx-background-color: " + GREEN + "; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 18 8 18;");
-        filterButton.setOnAction(e -> { currentPage = 1; refreshFilteredList(); });
+        filterButton.setStyle("-fx-background-color: " + GREEN
+                + "; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 18 8 18;");
+        filterButton.setOnAction(e -> {
+            currentPage = 1;
+            refreshFilteredList();
+        });
 
         HBox filterBar = new HBox(10, searchField, typeFilter, statusFilter, dateRangeBox, filterButton);
         filterBar.setAlignment(Pos.CENTER_LEFT);
@@ -458,7 +481,8 @@ public class FeedbackReviews {
             }
         });
 
-        tableView.getColumns().addAll(idCol, userCol, typeCol, subjectCol, ratingCol, messageCol, dateCol, statusCol, actionCol);
+        tableView.getColumns().addAll(idCol, userCol, typeCol, subjectCol, ratingCol, messageCol, dateCol, statusCol,
+                actionCol);
         return tableView;
     }
 
@@ -521,7 +545,8 @@ public class FeedbackReviews {
         return Math.max(1, (int) Math.ceil(filteredFeedback.size() / (double) PAGE_SIZE));
     }
 
-    // re-applies the tab + search + type/status/date filters, resets the visible page,
+    // re-applies the tab + search + type/status/date filters, resets the visible
+    // page,
     // then repaints the table, pagination and tab counts
     private void refreshFilteredList() {
         String search = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase();
@@ -617,9 +642,11 @@ public class FeedbackReviews {
                 Button pageButton = new Button(String.valueOf(page));
                 pageButton.setMinWidth(32);
                 if (page == currentPage) {
-                    pageButton.setStyle("-fx-background-color: " + GREEN + "; -fx-text-fill: white; -fx-background-radius: 4;");
+                    pageButton.setStyle(
+                            "-fx-background-color: " + GREEN + "; -fx-text-fill: white; -fx-background-radius: 4;");
                 } else {
-                    pageButton.setStyle("-fx-background-color: white; -fx-text-fill: #333; -fx-border-color: #e0e0e0; -fx-background-radius: 4;");
+                    pageButton.setStyle(
+                            "-fx-background-color: white; -fx-text-fill: #333; -fx-border-color: #e0e0e0; -fx-background-radius: 4;");
                 }
                 int pageNumber = page;
                 pageButton.setOnAction(e -> handlePageClick(pageNumber));
@@ -787,8 +814,10 @@ public class FeedbackReviews {
         double productPct = total == 0 ? 0 : (productCount * 100.0 / total);
         double farmerPct = total == 0 ? 0 : (farmerCount * 100.0 / total);
 
-        Label productLegend = buildLegendRow("#3b82f6", "Product Reviews", productCount + " (" + String.format("%.1f", productPct) + "%)");
-        Label farmerLegend = buildLegendRow("#ef4444", "Farmer Reviews", farmerCount + " (" + String.format("%.1f", farmerPct) + "%)");
+        Label productLegend = buildLegendRow("#3b82f6", "Product Reviews",
+                productCount + " (" + String.format("%.1f", productPct) + "%)");
+        Label farmerLegend = buildLegendRow("#ef4444", "Farmer Reviews",
+                farmerCount + " (" + String.format("%.1f", farmerPct) + "%)");
         VBox legendBox = new VBox(8, productLegend, farmerLegend);
 
         HBox chartRow = new HBox(20, donutStack, legendBox);
@@ -980,15 +1009,21 @@ public class FeedbackReviews {
     }
 
     private List<FeedbackEntry> generateBulkFeedback(int startId, int totalCount, int farmerTarget, int productTarget) {
-        String[] buyerNames = {"City Grocers", "Metro Mart", "Sunrise Foods", "Value Bazaar", "Prime Basket", "Local Fresh", "QuickBuy", "Family Store"};
-        String[] farmerNames = {"Ramesh Patil", "Suresh Yadav", "Mahesh Jadhav", "Anita Deshmukh", "Vikram Singh", "Sunita Kale", "Prakash More", "Geeta Pawar"};
-        String[] products = {"Tomato", "Potato", "Onion", "Cabbage", "Carrot", "Spinach", "Brinjal", "Wheat"};
-        String[] appTopics = {"App Experience", "Payment Process", "Feature Request", "Delivery Tracking", "Customer Support", "Search Filters"};
-        String[] productMessages = {"Fresh and good quality.", "Delivered on time.", "Packaging could be better.", "Great value for money.", "Exactly as described."};
-        String[] farmerMessages = {"Smooth deal, would work again.", "Good communication throughout.", "Payment was on time.", "Very cooperative buyer.", "Professional and reliable."};
-        String[] feedbackMessages = {"Works well overall.", "Could use more filters.", "Had a minor issue, resolved quickly.", "Really like the new update.", "Support was helpful."};
-        String[] statuses = {"Approved", "Pending", "Under Review"};
-        int[] ratingPool = {5, 4, 5, 5, 4, 3, 5, 4};
+        String[] buyerNames = { "City Grocers", "Metro Mart", "Sunrise Foods", "Value Bazaar", "Prime Basket",
+                "Local Fresh", "QuickBuy", "Family Store" };
+        String[] farmerNames = { "Ramesh Patil", "Suresh Yadav", "Mahesh Jadhav", "Anita Deshmukh", "Vikram Singh",
+                "Sunita Kale", "Prakash More", "Geeta Pawar" };
+        String[] products = { "Tomato", "Potato", "Onion", "Cabbage", "Carrot", "Spinach", "Brinjal", "Wheat" };
+        String[] appTopics = { "App Experience", "Payment Process", "Feature Request", "Delivery Tracking",
+                "Customer Support", "Search Filters" };
+        String[] productMessages = { "Fresh and good quality.", "Delivered on time.", "Packaging could be better.",
+                "Great value for money.", "Exactly as described." };
+        String[] farmerMessages = { "Smooth deal, would work again.", "Good communication throughout.",
+                "Payment was on time.", "Very cooperative buyer.", "Professional and reliable." };
+        String[] feedbackMessages = { "Works well overall.", "Could use more filters.",
+                "Had a minor issue, resolved quickly.", "Really like the new update.", "Support was helpful." };
+        String[] statuses = { "Approved", "Pending", "Under Review" };
+        int[] ratingPool = { 5, 4, 5, 5, 4, 3, 5, 4 };
 
         List<FeedbackEntry> list = new ArrayList<>(totalCount);
         LocalDate cursorDate = LocalDate.of(2025, 5, 26);
@@ -1051,7 +1086,7 @@ public class FeedbackReviews {
         private String status;
 
         public FeedbackEntry(String id, String userName, String userRole, String type, String subject,
-                              int rating, String message, LocalDate date, String status) {
+                int rating, String message, LocalDate date, String status) {
             this.id = id;
             this.userName = userName;
             this.userRole = userRole;

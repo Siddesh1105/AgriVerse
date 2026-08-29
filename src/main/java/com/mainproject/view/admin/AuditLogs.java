@@ -100,8 +100,9 @@ public class AuditLogs {
                 "Dashboard", "User Management", "Farmer Verification",
                 "Product Management", "Order Management", "Live Marketplace",
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
-                "System & Data manage", "Notifications", "Content Management",
-                "Feedback & Reviews", "Reports & Complaints", "Payment Management", "Audit Logs"
+                "AI & Smart Tools", "Notifications", "Content Management",
+                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
@@ -155,12 +156,12 @@ public class AuditLogs {
             new UserManagement(primaryStage, adminDashboard).show();
             return;
         }
-        if (pageName.equals("Product Management")) {
-            new ProductManagement(primaryStage, adminDashboard).show();
-            return;
-        }
         if (pageName.equals("Farmer Verification")) {
             new FarmerVerification(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Product Management")) {
+            new ProductManagement(primaryStage, adminDashboard).show();
             return;
         }
         if (pageName.equals("Order Management")) {
@@ -171,21 +172,39 @@ public class AuditLogs {
             new LiveMarketplace(primaryStage, adminDashboard).show();
             return;
         }
+        if (pageName.equals("Equipment Management")) {
+            new EquipmentManagement(primaryStage, adminDashboard).show();
+            return;
+        }
         if (pageName.equals("Analytics & Reports")) {
             new AnalyticsReports(primaryStage, adminDashboard).show();
             return;
         }
-        if (pageName.equals("Reports & Complaints")) {
-            new ReportsComplaints(primaryStage, adminDashboard).show();
+        if (pageName.equals("Notifications")) {
+            new NotificationManagement(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(primaryStage, adminDashboard).show();
             return;
         }
         if (pageName.equals("Feedback & Reviews")) {
             new FeedbackReviews(primaryStage, adminDashboard).show();
             return;
         }
-        // everything else falls back to Equipment Management for now,
-        // the same placeholder pattern AdminDashboard itself uses
-        new EquipmentManagement(primaryStage, adminDashboard).show();
+        if (pageName.equals("Reports & Complaints")) {
+            new ReportsComplaints(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Payment Management")) {
+            new PaymentManagement(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("System & Data Management")) {
+            new SystemDataManage(primaryStage, adminDashboard).show();
+            return;
+        }
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     // ------------------------------------------------------------------
@@ -207,7 +226,8 @@ public class AuditLogs {
 
         Button bellButton = new Button("\uD83D\uDD14");
         bellButton.setStyle("-fx-background-color: transparent; -fx-font-size: 15;");
-        bellButton.setOnAction(e -> showInfoAlert("Notifications", "You have 42 pending approvals and 3 new orders today."));
+        bellButton.setOnAction(
+                e -> showInfoAlert("Notifications", "You have 42 pending approvals and 3 new orders today."));
 
         MenuButton profileMenu = new MenuButton("Super Admin");
         profileMenu.setStyle("-fx-background-color: transparent;");
@@ -256,7 +276,8 @@ public class AuditLogs {
         return view;
     }
 
-    // ---- Filter bar: Select Admin / Select Action / date range / Filter / Export Logs ----
+    // ---- Filter bar: Select Admin / Select Action / date range / Filter / Export
+    // Logs ----
 
     private HBox buildFilterBar() {
         adminFilter = new ComboBox<>();
@@ -281,7 +302,8 @@ public class AuditLogs {
         dateRangeBox.setAlignment(Pos.CENTER_LEFT);
 
         Button filterButton = new Button("\u25BC Filter");
-        filterButton.setStyle("-fx-background-color: " + GREEN + "; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 18 8 18;");
+        filterButton.setStyle("-fx-background-color: " + GREEN
+                + "; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 18 8 18;");
         filterButton.setOnAction(e -> handleFilterClick());
 
         Region spacer = new Region();
@@ -289,7 +311,8 @@ public class AuditLogs {
 
         Button exportButton = new Button("\u2B07 Export Logs");
         exportButton.setStyle("-fx-background-color: white; -fx-text-fill: " + GREEN + "; "
-                + "-fx-border-color: " + GREEN + "; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 18 8 18;");
+                + "-fx-border-color: " + GREEN
+                + "; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 18 8 18;");
         exportButton.setOnAction(e -> handleExportLogs());
 
         HBox filterBar = new HBox(10, adminFilter, actionFilter, dateRangeBox, filterButton, spacer, exportButton);
@@ -331,7 +354,8 @@ public class AuditLogs {
     }
 
     private void handleExportLogs() {
-        showInfoAlert("Export Logs", "Exporting " + filteredLogs.size() + " log entr" + (filteredLogs.size() == 1 ? "y" : "ies") + " to CSV.");
+        showInfoAlert("Export Logs", "Exporting " + filteredLogs.size() + " log entr"
+                + (filteredLogs.size() == 1 ? "y" : "ies") + " to CSV.");
     }
 
     // ---- Table ----
@@ -433,7 +457,8 @@ public class AuditLogs {
         return Math.max(1, (int) Math.ceil(filteredLogs.size() / (double) PAGE_SIZE));
     }
 
-    // repaints the table rows, the "Showing X to Y of Z" label and the page-number buttons
+    // repaints the table rows, the "Showing X to Y of Z" label and the page-number
+    // buttons
     // for whatever filteredLogs + currentPage currently are
     private void refreshTable() {
         int total = filteredLogs.size();
@@ -478,9 +503,11 @@ public class AuditLogs {
                 Button pageButton = new Button(String.valueOf(page));
                 pageButton.setMinWidth(32);
                 if (page == currentPage) {
-                    pageButton.setStyle("-fx-background-color: " + GREEN + "; -fx-text-fill: white; -fx-background-radius: 4;");
+                    pageButton.setStyle(
+                            "-fx-background-color: " + GREEN + "; -fx-text-fill: white; -fx-background-radius: 4;");
                 } else {
-                    pageButton.setStyle("-fx-background-color: white; -fx-text-fill: #333; -fx-border-color: #e0e0e0; -fx-background-radius: 4;");
+                    pageButton.setStyle(
+                            "-fx-background-color: white; -fx-text-fill: #333; -fx-border-color: #e0e0e0; -fx-background-radius: 4;");
                 }
                 int pageNumber = page;
                 pageButton.setOnAction(e -> handlePageClick(pageNumber));
@@ -535,20 +562,20 @@ public class AuditLogs {
     // ------------------------------------------------------------------
 
     private List<AuditLog> loadAllLogs() {
-        String[] admins = {"Super Admin", "Admin Priya", "Admin Rahul", "Admin Neha"};
+        String[] admins = { "Super Admin", "Admin Priya", "Admin Rahul", "Admin Neha" };
         String[][] actionModuleRecord = {
-                {"Approved Farmer", "Farmer Verification", "FMR"},
-                {"Approved Product", "Product Management", "PRD"},
-                {"Updated Order Status", "Order Management", "ORD"},
-                {"Ended Live Session", "Live Marketplace", "LIVE"},
-                {"Suspended User", "User Management", "USR"},
-                {"Rejected Farmer", "Farmer Verification", "FMR"},
-                {"Removed Product", "Product Management", "PRD"},
-                {"Cancelled Order", "Order Management", "ORD"},
-                {"Started Live Session", "Live Marketplace", "LIVE"},
-                {"Reactivated User", "User Management", "USR"}
+                { "Approved Farmer", "Farmer Verification", "FMR" },
+                { "Approved Product", "Product Management", "PRD" },
+                { "Updated Order Status", "Order Management", "ORD" },
+                { "Ended Live Session", "Live Marketplace", "LIVE" },
+                { "Suspended User", "User Management", "USR" },
+                { "Rejected Farmer", "Farmer Verification", "FMR" },
+                { "Removed Product", "Product Management", "PRD" },
+                { "Cancelled Order", "Order Management", "ORD" },
+                { "Started Live Session", "Live Marketplace", "LIVE" },
+                { "Reactivated User", "User Management", "USR" }
         };
-        String[] ipPool = {"192.168.1.10", "192.168.1.11", "192.168.1.12"};
+        String[] ipPool = { "192.168.1.10", "192.168.1.11", "192.168.1.12" };
 
         LocalDateTime cursor = LocalDateTime.of(2025, 5, 29, 10, 32);
         int totalLogs = 1542;
@@ -571,8 +598,8 @@ public class AuditLogs {
     // ------------------------------------------------------------------
 
     public static class AuditLog {
-        private static final DateTimeFormatter DISPLAY_FORMAT =
-                DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm a", Locale.ENGLISH);
+        private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("d MMM yyyy, hh:mm a",
+                Locale.ENGLISH);
 
         private final LocalDateTime dateTime;
         private final String admin;
@@ -581,7 +608,8 @@ public class AuditLogs {
         private final String recordId;
         private final String ipAddress;
 
-        public AuditLog(LocalDateTime dateTime, String admin, String action, String module, String recordId, String ipAddress) {
+        public AuditLog(LocalDateTime dateTime, String admin, String action, String module, String recordId,
+                String ipAddress) {
             this.dateTime = dateTime;
             this.admin = admin;
             this.action = action;

@@ -1,7 +1,6 @@
 package com.mainproject.view.admin;
 
- 
- import javafx.collections.FXCollections;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -48,7 +47,8 @@ public class FarmerVerification {
     private ObservableList<FarmerApplication> allApplications;
     private FilteredList<FarmerApplication> filteredApplications;
 
-    // filter key used by the active tab: "Pending", "Approved", "Rejected" or "Information Required"
+    // filter key used by the active tab: "Pending", "Approved", "Rejected" or
+    // "Information Required"
     private String currentStatusFilter = "Pending";
     private int currentPage = 1;
     private int pendingTotalCount = 15;
@@ -91,7 +91,8 @@ public class FarmerVerification {
                 "Product Management", "Order Management", "Live Marketplace",
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
                 "AI & Smart Tools", "Notifications", "Content Management",
-                "Feedback & Reviews", "Reports & Complaints", "Payment Management"
+                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
@@ -121,19 +122,69 @@ public class FarmerVerification {
         return sidebar;
     }
 
-    // grows by one branch every time a new screen gets built - same pattern as the other screens
+    // grows by one branch every time a new screen gets built - same pattern as the
+    // other screens
     private void handleNavClick(String pageName) {
+        if (pageName.equals("Farmer Verification")) {
+            return; // already on this screen
+        }
         if (pageName.equals("Dashboard")) {
             dashboard.showDashboard();
-        } else if (pageName.equals("User Management")) {
-            new UserManagement(stage, dashboard).show();
-        } else if (pageName.equals("Product Management")) {
-            new ProductManagement(stage, dashboard).show();
-        } else if (pageName.equals("Farmer Verification")) {
-            // already here
-        } else {
-            showInfoAlert(pageName, "This section isn't built in this demo.");
+            return;
         }
+        if (pageName.equals("User Management")) {
+            new UserManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Product Management")) {
+            new ProductManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Order Management")) {
+            new OrderManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Live Marketplace")) {
+            new LiveMarketplace(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Equipment Management")) {
+            new EquipmentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Analytics & Reports")) {
+            new AnalyticsReports(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Notifications")) {
+            new NotificationManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Feedback & Reviews")) {
+            new FeedbackReviews(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Reports & Complaints")) {
+            new ReportsComplaints(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Payment Management")) {
+            new PaymentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Audit Logs")) {
+            new AuditLogs(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("System & Data Management")) {
+            new SystemDataManage(stage, dashboard).show();
+            return;
+        }
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     private void styleActiveNav(Button b) {
@@ -153,7 +204,8 @@ public class FarmerVerification {
     }
 
     // ------------------------------------------------------------------
-    // Top bar - just the hamburger and a page title, nothing else was in the screenshot
+    // Top bar - just the hamburger and a page title, nothing else was in the
+    // screenshot
     // ------------------------------------------------------------------
 
     private HBox buildTopBar() {
@@ -205,10 +257,10 @@ public class FarmerVerification {
 
         // {filter key, label shown on the button}
         String[][] tabs = {
-                {"Pending", "Pending (15)"},
-                {"Approved", "Approved (5,236)"},
-                {"Rejected", "Rejected (146)"},
-                {"Information Required", "Information Required (23)"}
+                { "Pending", "Pending (15)" },
+                { "Approved", "Approved (5,236)" },
+                { "Rejected", "Rejected (146)" },
+                { "Information Required", "Information Required (23)" }
         };
 
         for (String[] tab : tabs) {
@@ -405,7 +457,8 @@ public class FarmerVerification {
         }
     }
 
-    // for the Pending tab this uses the mock total of 15 applications; the other tabs
+    // for the Pending tab this uses the mock total of 15 applications; the other
+    // tabs
     // just reflect how many sample rows actually matched, since there's no bigger
     // dataset behind them in this demo
     private void updateResultsLabel() {
@@ -426,12 +479,16 @@ public class FarmerVerification {
 
     private void loadSampleApplications() {
         allApplications = FXCollections.observableArrayList(
-                new FarmerApplication("APP1001", "Ramesh Patil", "5 Acre", "ID Proof, Land Doc, Photo", "Nashik, MH", LocalDate.of(2025, 5, 20), "Pending"),
-                new FarmerApplication("APP1002", "Mahesh Jadhav", "3 Acre", "ID Proof, Land Doc, Photo", "Pune, MH", LocalDate.of(2025, 5, 19), "Pending"),
-                new FarmerApplication("APP1003", "Suresh Yadav", "8 Acre", "ID Proof, Land Doc, Photo", "Solapur, MH", LocalDate.of(2025, 5, 18), "Pending"),
-                new FarmerApplication("APP1004", "Anita Deshmukh", "2 Acre", "ID Proof, Land Doc", "Nagpur, MH", LocalDate.of(2025, 5, 17), "Pending"),
-                new FarmerApplication("APP1005", "Vikram Singh", "6 Acre", "ID Proof, Land Doc, Photo", "Amravati, MH", LocalDate.of(2025, 5, 16), "Pending")
-        );
+                new FarmerApplication("APP1001", "Ramesh Patil", "5 Acre", "ID Proof, Land Doc, Photo", "Nashik, MH",
+                        LocalDate.of(2025, 5, 20), "Pending"),
+                new FarmerApplication("APP1002", "Mahesh Jadhav", "3 Acre", "ID Proof, Land Doc, Photo", "Pune, MH",
+                        LocalDate.of(2025, 5, 19), "Pending"),
+                new FarmerApplication("APP1003", "Suresh Yadav", "8 Acre", "ID Proof, Land Doc, Photo", "Solapur, MH",
+                        LocalDate.of(2025, 5, 18), "Pending"),
+                new FarmerApplication("APP1004", "Anita Deshmukh", "2 Acre", "ID Proof, Land Doc", "Nagpur, MH",
+                        LocalDate.of(2025, 5, 17), "Pending"),
+                new FarmerApplication("APP1005", "Vikram Singh", "6 Acre", "ID Proof, Land Doc, Photo", "Amravati, MH",
+                        LocalDate.of(2025, 5, 16), "Pending"));
 
         filteredApplications = new FilteredList<>(allApplications, application -> true);
         filteredApplications.addListener((ListChangeListener<FarmerApplication>) change -> updateResultsLabel());
@@ -505,7 +562,7 @@ public class FarmerVerification {
         private String status;
 
         public FarmerApplication(String id, String name, String farmDetails, String documents,
-                                  String location, LocalDate appliedDate, String status) {
+                String location, LocalDate appliedDate, String status) {
             this.id = id;
             this.name = name;
             this.farmDetails = farmDetails;

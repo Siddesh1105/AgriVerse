@@ -1,6 +1,5 @@
 package com.mainproject.view.admin;
 
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -88,8 +87,9 @@ public class ReportsComplaints {
                 "Dashboard", "User Management", "Farmer Verification",
                 "Product Management", "Order Management", "Live Marketplace",
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
-                "System & Data manage", "Notifications", "Content Management",
-                "Feedback & Reviews", "Reports & Complaints", "Payment Management", "Audit Logs"
+                "AI & Smart Tools", "Notifications", "Content Management",
+                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
@@ -143,12 +143,12 @@ public class ReportsComplaints {
             new UserManagement(primaryStage, adminDashboard).show();
             return;
         }
-        if (pageName.equals("Product Management")) {
-            new ProductManagement(primaryStage, adminDashboard).show();
-            return;
-        }
         if (pageName.equals("Farmer Verification")) {
             new FarmerVerification(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Product Management")) {
+            new ProductManagement(primaryStage, adminDashboard).show();
             return;
         }
         if (pageName.equals("Order Management")) {
@@ -159,17 +159,39 @@ public class ReportsComplaints {
             new LiveMarketplace(primaryStage, adminDashboard).show();
             return;
         }
+        if (pageName.equals("Equipment Management")) {
+            new EquipmentManagement(primaryStage, adminDashboard).show();
+            return;
+        }
         if (pageName.equals("Analytics & Reports")) {
             new AnalyticsReports(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Notifications")) {
+            new NotificationManagement(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(primaryStage, adminDashboard).show();
             return;
         }
         if (pageName.equals("Feedback & Reviews")) {
             new FeedbackReviews(primaryStage, adminDashboard).show();
             return;
         }
-        // everything else falls back to Equipment Management for now,
-        // the same placeholder pattern AdminDashboard itself uses
-        new EquipmentManagement(primaryStage, adminDashboard).show();
+        if (pageName.equals("Payment Management")) {
+            new PaymentManagement(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("Audit Logs")) {
+            new AuditLogs(primaryStage, adminDashboard).show();
+            return;
+        }
+        if (pageName.equals("System & Data Management")) {
+            new SystemDataManage(primaryStage, adminDashboard).show();
+            return;
+        }
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     // ------------------------------------------------------------------
@@ -191,7 +213,8 @@ public class ReportsComplaints {
 
         Button bellButton = new Button("\uD83D\uDD14");
         bellButton.setStyle("-fx-background-color: transparent; -fx-font-size: 15;");
-        bellButton.setOnAction(e -> showInfoAlert("Notifications", "You have 42 pending approvals and 3 new orders today."));
+        bellButton.setOnAction(
+                e -> showInfoAlert("Notifications", "You have 42 pending approvals and 3 new orders today."));
 
         MenuButton profileMenu = new MenuButton("Super Admin");
         profileMenu.setStyle("-fx-background-color: transparent;");
@@ -289,7 +312,8 @@ public class ReportsComplaints {
 
     private void styleActiveTab(Button button) {
         button.setStyle("-fx-background-color: #eaf6ec; -fx-text-fill: " + GREEN + "; "
-                + "-fx-background-radius: 20; -fx-border-color: " + GREEN + "; -fx-border-radius: 20; -fx-font-weight: bold;");
+                + "-fx-background-radius: 20; -fx-border-color: " + GREEN
+                + "; -fx-border-radius: 20; -fx-font-weight: bold;");
     }
 
     private void styleInactiveTab(Button button) {
@@ -389,7 +413,8 @@ public class ReportsComplaints {
         }
     }
 
-    // rebuilds the visible rows from allComplaints based on the active tab + search text,
+    // rebuilds the visible rows from allComplaints based on the active tab + search
+    // text,
     // then refreshes the tab counts so they always reflect reality
     private void refreshTable() {
         ObservableList<Complaint> filtered = FXCollections.observableArrayList();
@@ -449,7 +474,8 @@ public class ReportsComplaints {
         showInfoAlert("Export", "Exporting " + table.getItems().size() + " report(s) to CSV.");
     }
 
-    // opens a details dialog for the clicked row and lets the admin update its status
+    // opens a details dialog for the clicked row and lets the admin update its
+    // status
     private void handleViewComplaint(Complaint complaint) {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Report Details - " + complaint.getReportId());
@@ -508,7 +534,8 @@ public class ReportsComplaints {
         grid.add(value, 1, row);
     }
 
-    // updates the complaint's status in-place and re-filters the table so tabs/counts stay correct
+    // updates the complaint's status in-place and re-filters the table so
+    // tabs/counts stay correct
     private void handleStatusChange(Complaint complaint, String newStatus) {
         complaint.setStatus(newStatus);
         refreshTable();
@@ -530,13 +557,20 @@ public class ReportsComplaints {
 
     private ObservableList<Complaint> loadComplaints() {
         ObservableList<Complaint> complaints = FXCollections.observableArrayList();
-        complaints.add(new Complaint("REP#1007", "Green Mart", "Ramesh Patil", "Fake Product Information", "29 May 2025", "Pending"));
-        complaints.add(new Complaint("REP#1006", "Fresh Store", "Mahesh Jadhav", "Late Delivery", "28 May 2025", "Under Review"));
-        complaints.add(new Complaint("REP#1005", "Daily Needs", "Suresh Yadav", "Inappropriate Live", "28 May 2025", "Pending"));
-        complaints.add(new Complaint("REP#1004", "Organic Basket", "Anita Deshmukh", "Product Quality Issue", "27 May 2025", "Under Review"));
-        complaints.add(new Complaint("REP#1003", "Green Mart", "Vikram Singh", "Wrong Pricing", "27 May 2025", "Resolved"));
-        complaints.add(new Complaint("REP#1002", "Fresh Store", "Sunita Kale", "Rude Behaviour", "26 May 2025", "Pending"));
-        complaints.add(new Complaint("REP#1001", "Daily Needs", "Ramesh Patil", "Damaged Product", "25 May 2025", "Pending"));
+        complaints.add(new Complaint("REP#1007", "Green Mart", "Ramesh Patil", "Fake Product Information",
+                "29 May 2025", "Pending"));
+        complaints.add(new Complaint("REP#1006", "Fresh Store", "Mahesh Jadhav", "Late Delivery", "28 May 2025",
+                "Under Review"));
+        complaints.add(new Complaint("REP#1005", "Daily Needs", "Suresh Yadav", "Inappropriate Live", "28 May 2025",
+                "Pending"));
+        complaints.add(new Complaint("REP#1004", "Organic Basket", "Anita Deshmukh", "Product Quality Issue",
+                "27 May 2025", "Under Review"));
+        complaints.add(
+                new Complaint("REP#1003", "Green Mart", "Vikram Singh", "Wrong Pricing", "27 May 2025", "Resolved"));
+        complaints.add(
+                new Complaint("REP#1002", "Fresh Store", "Sunita Kale", "Rude Behaviour", "26 May 2025", "Pending"));
+        complaints.add(
+                new Complaint("REP#1001", "Daily Needs", "Ramesh Patil", "Damaged Product", "25 May 2025", "Pending"));
         return complaints;
     }
 
@@ -552,7 +586,8 @@ public class ReportsComplaints {
         private final String date;
         private String status;
 
-        public Complaint(String reportId, String reportedBy, String against, String reason, String date, String status) {
+        public Complaint(String reportId, String reportedBy, String against, String reason, String date,
+                String status) {
             this.reportId = reportId;
             this.reportedBy = reportedBy;
             this.against = against;

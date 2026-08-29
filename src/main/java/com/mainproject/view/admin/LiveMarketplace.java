@@ -1,6 +1,5 @@
 package com.mainproject.view.admin;
 
-
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -86,7 +85,8 @@ public class LiveMarketplace {
                 "Product Management", "Order Management", "Live Marketplace",
                 "Equipment Management", "Analytics & Reports", "Crop Price Management",
                 "AI & Smart Tools", "Notifications", "Content Management",
-                "Feedback & Reviews", "Reports & Complaints", "Payment Management"
+                "Feedback & Reviews", "Reports & Complaints", "Payment Management",
+                "Audit Logs", "System & Data Management"
         };
 
         VBox navBox = new VBox(1);
@@ -116,23 +116,69 @@ public class LiveMarketplace {
         return sidebar;
     }
 
-    // grows by one branch every time a new screen gets built - same pattern as the other screens
+    // grows by one branch every time a new screen gets built - same pattern as the
+    // other screens
     private void handleNavClick(String pageName) {
+        if (pageName.equals("Live Marketplace")) {
+            return; // already on this screen
+        }
         if (pageName.equals("Dashboard")) {
             dashboard.showDashboard();
-        } else if (pageName.equals("User Management")) {
-            new UserManagement(stage, dashboard).show();
-        } else if (pageName.equals("Product Management")) {
-            new ProductManagement(stage, dashboard).show();
-        } else if (pageName.equals("Farmer Verification")) {
-            new FarmerVerification(stage, dashboard).show();
-        } else if (pageName.equals("Order Management")) {
-            new OrderManagement(stage, dashboard).show();
-        } else if (pageName.equals("Live Marketplace")) {
-            // already here
-        } else {
-            showInfoAlert(pageName, "This section isn't built in this demo.");
+            return;
         }
+        if (pageName.equals("User Management")) {
+            new UserManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Farmer Verification")) {
+            new FarmerVerification(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Product Management")) {
+            new ProductManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Order Management")) {
+            new OrderManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Equipment Management")) {
+            new EquipmentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Analytics & Reports")) {
+            new AnalyticsReports(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Notifications")) {
+            new NotificationManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Content Management")) {
+            new ContentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Feedback & Reviews")) {
+            new FeedbackReviews(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Reports & Complaints")) {
+            new ReportsComplaints(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Payment Management")) {
+            new PaymentManagement(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("Audit Logs")) {
+            new AuditLogs(stage, dashboard).show();
+            return;
+        }
+        if (pageName.equals("System & Data Management")) {
+            new SystemDataManage(stage, dashboard).show();
+            return;
+        }
+        showInfoAlert(pageName, "This section hasn't been built yet in this demo.");
     }
 
     private void styleActiveNav(Button b) {
@@ -206,10 +252,10 @@ public class LiveMarketplace {
 
         // {filter key, label shown on the button}
         String[][] tabs = {
-                {"Live Now", "Live Now (18)"},
-                {"Upcoming", "Upcoming (8)"},
-                {"Ended", "Ended (120)"},
-                {"Reported", "Reported (7)"}
+                { "Live Now", "Live Now (18)" },
+                { "Upcoming", "Upcoming (8)" },
+                { "Ended", "Ended (120)" },
+                { "Reported", "Reported (7)" }
         };
 
         for (String[] tab : tabs) {
@@ -269,7 +315,8 @@ public class LiveMarketplace {
                 }
                 LiveStream stream = (LiveStream) getTableRow().getItem();
 
-                Label liveBadge = new Label(stream.getStatus().equals("Live Now") ? "LIVE" : stream.getStatus().toUpperCase());
+                Label liveBadge = new Label(
+                        stream.getStatus().equals("Live Now") ? "LIVE" : stream.getStatus().toUpperCase());
                 liveBadge.setStyle("-fx-background-color: #c62828; -fx-text-fill: white; -fx-font-size: 9;"
                         + "-fx-font-weight: bold; -fx-background-radius: 4; -fx-padding: 2 5 2 5;");
 
@@ -362,12 +409,16 @@ public class LiveMarketplace {
 
     private void loadSampleStreams() {
         allStreams = FXCollections.observableArrayList(
-                new LiveStream("STR1001", "Ramesh Patil", "Fresh Tomato Harvest", 126, "Nashik, MH", LocalDateTime.of(2025, 5, 29, 10, 30), "Live Now"),
-                new LiveStream("STR1002", "Mahesh Jadhav", "Potato Farming Live", 84, "Pune, MH", LocalDateTime.of(2025, 5, 29, 10, 15), "Live Now"),
-                new LiveStream("STR1003", "Suresh Yadav", "Onion Harvesting", 62, "Solapur, MH", LocalDateTime.of(2025, 5, 29, 9, 45), "Live Now"),
-                new LiveStream("STR1004", "Anita Deshmukh", "Mango Farm Live", 98, "Nagpur, MH", LocalDateTime.of(2025, 5, 29, 9, 30), "Live Now"),
-                new LiveStream("STR1005", "Vikram Singh", "Wheat Harvesting", 45, "Amravati, MH", LocalDateTime.of(2025, 5, 29, 9, 10), "Live Now")
-        );
+                new LiveStream("STR1001", "Ramesh Patil", "Fresh Tomato Harvest", 126, "Nashik, MH",
+                        LocalDateTime.of(2025, 5, 29, 10, 30), "Live Now"),
+                new LiveStream("STR1002", "Mahesh Jadhav", "Potato Farming Live", 84, "Pune, MH",
+                        LocalDateTime.of(2025, 5, 29, 10, 15), "Live Now"),
+                new LiveStream("STR1003", "Suresh Yadav", "Onion Harvesting", 62, "Solapur, MH",
+                        LocalDateTime.of(2025, 5, 29, 9, 45), "Live Now"),
+                new LiveStream("STR1004", "Anita Deshmukh", "Mango Farm Live", 98, "Nagpur, MH",
+                        LocalDateTime.of(2025, 5, 29, 9, 30), "Live Now"),
+                new LiveStream("STR1005", "Vikram Singh", "Wheat Harvesting", 45, "Amravati, MH",
+                        LocalDateTime.of(2025, 5, 29, 9, 10), "Live Now"));
 
         filteredStreams = new FilteredList<>(allStreams, stream -> true);
         filteredStreams.addListener((ListChangeListener<LiveStream>) change -> updateResultsLabel());
@@ -437,7 +488,7 @@ public class LiveMarketplace {
         private String status;
 
         public LiveStream(String id, String farmerName, String title, int viewers,
-                           String location, LocalDateTime startedOn, String status) {
+                String location, LocalDateTime startedOn, String status) {
             this.id = id;
             this.farmerName = farmerName;
             this.title = title;
