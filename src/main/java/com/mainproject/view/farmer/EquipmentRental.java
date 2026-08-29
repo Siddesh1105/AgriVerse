@@ -1,6 +1,5 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.util.LanguageManager;
 
 import com.mainproject.controller.EquipmentController;
 import com.mainproject.controller.CartController;
@@ -346,7 +345,7 @@ public class EquipmentRental {
                                 filters,
                                 scroll);
 
-                LanguageManager.apply(root);
+
                 return root;
         }
 

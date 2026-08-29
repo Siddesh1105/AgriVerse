@@ -4,17 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.ListenerRegistration;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.google.cloud.firestore.SetOptions;
 
 import com.mainproject.config.FirebaseConfig;
-import com.mainproject.model.ChatConversation;
 import com.mainproject.model.ChatMessage;
 
 public class ChatDAO {
@@ -27,16 +25,16 @@ public class ChatDAO {
 
     // =====================================================
     // CREATE UNIQUE CHAT ID
-    // SAME FOR BOTH USERS
+    // SAME ID FOR BUYER AND FARMER
     // =====================================================
 
     public String getChatId(
-            String email1,
-            String email2) {
+            String userEmail1,
+            String userEmail2) {
 
         String[] emails = {
-                email1.toLowerCase().trim(),
-                email2.toLowerCase().trim()
+                userEmail1.toLowerCase().trim(),
+                userEmail2.toLowerCase().trim()
         };
 
         Arrays.sort(emails);
@@ -55,27 +53,14 @@ public class ChatDAO {
 
         try {
 
-            senderEmail = senderEmail.trim().toLowerCase();
-            receiverEmail = receiverEmail.trim().toLowerCase();
-
             String chatId = getChatId(
                     senderEmail,
                     receiverEmail
             );
 
-            DocumentReference chatRef =
-                    db.collection("chats")
-                            .document(chatId);
-
-            DocumentReference messageRef =
-                    chatRef.collection("messages")
-                            .document();
-
-            Timestamp now = Timestamp.now();
-
-            // =================================================
-            // CREATE MESSAGE
-            // =================================================
+            DocumentReference chatRef = db
+                    .collection("chats")
+                    .document(chatId);
 
             ChatMessage chatMessage =
                     new ChatMessage(
@@ -84,37 +69,25 @@ public class ChatDAO {
                             message
                     );
 
+            DocumentReference messageRef = chatRef
+                    .collection("messages")
+                    .document();
+
             chatMessage.setMessageId(
                     messageRef.getId()
             );
 
-            chatMessage.setTimestamp(now);
-
-            // =================================================
-            // CREATE / UPDATE CHAT
-            // =================================================
-
-            ChatConversation conversation =
-                    new ChatConversation(
-                            chatId,
-                            Arrays.asList(
-                                    senderEmail,
-                                    receiverEmail
-                            ),
-                            message,
-                            senderEmail,
-                            now
-                    );
-
+            // Save chat information
             chatRef.set(
-                    conversation,
-                    SetOptions.merge()
-            ).get();
+                    new java.util.HashMap<String, Object>() {{
+                        put("chatId", chatId);
+                        put("user1", senderEmail);
+                        put("user2", receiverEmail);
+                    }},
+                    com.google.cloud.firestore.SetOptions.merge()
+            );
 
-            // =================================================
-            // SAVE MESSAGE
-            // =================================================
-
+            // Save message
             messageRef.set(chatMessage).get();
 
             return true;
@@ -122,31 +95,35 @@ public class ChatDAO {
         } catch (Exception e) {
 
             e.printStackTrace();
-
             return false;
         }
     }
 
     // =====================================================
-    // GET MESSAGES
+    // GET ALL MESSAGES
     // =====================================================
 
     public List<ChatMessage> getMessages(
-            String email1,
-            String email2) {
+            String userEmail1,
+            String userEmail2) {
 
         List<ChatMessage> messages =
                 new ArrayList<>();
 
         try {
 
-            String chatId =
-                    getChatId(email1, email2);
+            String chatId = getChatId(
+                    userEmail1,
+                    userEmail2
+            );
 
-            List<QueryDocumentSnapshot> documents =
+            CollectionReference messagesRef =
                     db.collection("chats")
                             .document(chatId)
-                            .collection("messages")
+                            .collection("messages");
+
+            List<QueryDocumentSnapshot> documents =
+                    messagesRef
                             .orderBy(
                                     "timestamp",
                                     Query.Direction.ASCENDING
@@ -155,8 +132,7 @@ public class ChatDAO {
                             .get()
                             .getDocuments();
 
-            for (QueryDocumentSnapshot document
-                    : documents) {
+            for (QueryDocumentSnapshot document : documents) {
 
                 ChatMessage message =
                         document.toObject(
@@ -179,16 +155,18 @@ public class ChatDAO {
     }
 
     // =====================================================
-    // REAL TIME MESSAGE LISTENER
+    // REAL-TIME MESSAGE LISTENER
     // =====================================================
 
     public ListenerRegistration listenForMessages(
-            String email1,
-            String email2,
+            String userEmail1,
+            String userEmail2,
             MessageListener listener) {
 
-        String chatId =
-                getChatId(email1, email2);
+        String chatId = getChatId(
+                userEmail1,
+                userEmail2
+        );
 
         return db.collection("chats")
                 .document(chatId)
@@ -238,128 +216,13 @@ public class ChatDAO {
     }
 
     // =====================================================
-    // GET ALL CHATS OF USER
-    // =====================================================
-
-    public List<ChatConversation> getUserChats(
-            String userEmail) {
-
-        List<ChatConversation> chats =
-                new ArrayList<>();
-
-        try {
-
-            List<QueryDocumentSnapshot> documents =
-                    db.collection("chats")
-                            .whereArrayContains(
-                                    "participants",
-                                    userEmail.toLowerCase().trim()
-                            )
-                            .orderBy(
-                                    "updatedAt",
-                                    Query.Direction.DESCENDING
-                            )
-                            .get()
-                            .get()
-                            .getDocuments();
-
-            for (QueryDocumentSnapshot document
-                    : documents) {
-
-                ChatConversation conversation =
-                        document.toObject(
-                                ChatConversation.class
-                        );
-
-                conversation.setChatId(
-                        document.getId()
-                );
-
-                chats.add(conversation);
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
-
-        return chats;
-    }
-
-    // =====================================================
-    // REAL TIME USER CHAT LIST
-    // =====================================================
-
-    public ListenerRegistration listenForUserChats(
-            String userEmail,
-            ConversationListener listener) {
-
-        return db.collection("chats")
-                .whereArrayContains(
-                        "participants",
-                        userEmail.toLowerCase().trim()
-                )
-                .orderBy(
-                        "updatedAt",
-                        Query.Direction.DESCENDING
-                )
-                .addSnapshotListener(
-                        (snapshots, error) -> {
-
-                            if (error != null) {
-
-                                error.printStackTrace();
-                                return;
-                            }
-
-                            List<ChatConversation> chats =
-                                    new ArrayList<>();
-
-                            if (snapshots != null) {
-
-                                for (DocumentSnapshot document
-                                        : snapshots.getDocuments()) {
-
-                                    ChatConversation conversation =
-                                            document.toObject(
-                                                    ChatConversation.class
-                                            );
-
-                                    if (conversation != null) {
-
-                                        conversation.setChatId(
-                                                document.getId()
-                                        );
-
-                                        chats.add(conversation);
-                                    }
-                                }
-                            }
-
-                            listener.onChatsUpdated(chats);
-                        }
-                );
-    }
-
-    // =====================================================
-    // MESSAGE LISTENER
+    // LISTENER INTERFACE
     // =====================================================
 
     public interface MessageListener {
 
         void onMessagesUpdated(
                 List<ChatMessage> messages
-        );
-    }
-
-    // =====================================================
-    // CONVERSATION LISTENER
-    // =====================================================
-
-    public interface ConversationListener {
-
-        void onChatsUpdated(
-                List<ChatConversation> chats
         );
     }
 }

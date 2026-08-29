@@ -1,6 +1,5 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.util.LanguageManager;
 
 import com.mainproject.controller.NotificationController;
 import com.mainproject.model.Notification;
@@ -202,8 +201,6 @@ public class Notifications {
         // =================================================
 
         loadNotifications();
-
-        LanguageManager.apply(root);
         return root;
     }
 

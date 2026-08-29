@@ -1,17 +1,14 @@
 package com.mainproject.model;
 
-import com.google.cloud.Timestamp;
+import java.util.Date;
 
 public class ChatMessage {
 
     private String messageId;
-
     private String senderEmail;
     private String receiverEmail;
-
     private String message;
-
-    private Timestamp timestamp;
+    private Date timestamp;
 
     // Required by Firestore
     public ChatMessage() {
@@ -25,8 +22,7 @@ public class ChatMessage {
         this.senderEmail = senderEmail;
         this.receiverEmail = receiverEmail;
         this.message = message;
-
-        this.timestamp = Timestamp.now();
+        this.timestamp = new Date();
     }
 
     // =====================================================
@@ -42,7 +38,7 @@ public class ChatMessage {
     }
 
     // =====================================================
-    // SENDER
+    // SENDER EMAIL
     // =====================================================
 
     public String getSenderEmail() {
@@ -54,7 +50,7 @@ public class ChatMessage {
     }
 
     // =====================================================
-    // RECEIVER
+    // RECEIVER EMAIL
     // =====================================================
 
     public String getReceiverEmail() {
@@ -81,11 +77,11 @@ public class ChatMessage {
     // TIMESTAMP
     // =====================================================
 
-    public Timestamp getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 }

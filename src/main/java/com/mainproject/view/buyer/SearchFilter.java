@@ -1,7 +1,6 @@
 package com.mainproject.view.buyer;
 
 import com.mainproject.model.Product;
-import com.mainproject.util.LanguageManager;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -248,7 +247,6 @@ public class SearchFilter {
         // LANGUAGE
         // =====================================================
 
-        LanguageManager.apply(root);
 
         return root;
     }

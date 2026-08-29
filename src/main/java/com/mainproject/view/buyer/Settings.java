@@ -2,7 +2,7 @@ package com.mainproject.view.buyer;
 
 import com.mainproject.controller.UserController;
 import com.mainproject.model.User;
-import com.mainproject.util.LanguageManager;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -205,7 +205,7 @@ public class Settings {
         );
 
 
-        LanguageManager.apply(content);
+     
 
         return scrollPane;
     }
@@ -843,36 +843,6 @@ public class Settings {
         );
 
 
-        language.setValue(
-                LanguageManager.getLanguage()
-        );
-
-
-        Button applyButton =
-                createPrimaryButton(
-                        "Apply Language"
-                );
-
-
-        applyButton.setOnAction(e -> {
-
-            LanguageManager.setLanguage(
-                    language.getValue()
-            );
-
-
-            if (languageChanged != null) {
-
-                languageChanged.run();
-            }
-
-
-            showAlert(
-                    Alert.AlertType.INFORMATION,
-                    "Language Updated",
-                    "Application language preference updated."
-            );
-        });
 
 
         box.getChildren().addAll(
@@ -881,8 +851,7 @@ public class Settings {
                 createField(
                         "Select Language",
                         language
-                ),
-                applyButton
+                )
         );
 
 

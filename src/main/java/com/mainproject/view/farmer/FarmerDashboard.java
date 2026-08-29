@@ -1,7 +1,5 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.util.LanguageManager;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -587,8 +585,6 @@ public class FarmerDashboard {
                 sidebar,
                 "Logout",
                 "🚪");
-
-        LanguageManager.apply(sidebar);
 
         return sidebar;
     }
@@ -1337,10 +1333,5 @@ public class FarmerDashboard {
         }
 
         return value.trim();
-    }
-
-    public void setContent(Node view) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setContent'");
     }
 }

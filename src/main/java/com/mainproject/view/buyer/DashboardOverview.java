@@ -2,7 +2,6 @@ package com.mainproject.view.buyer;
 
 import com.mainproject.controller.DashboardController;
 import com.mainproject.model.Order;
-import com.mainproject.util.LanguageManager;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -449,10 +448,6 @@ public class DashboardOverview {
                         "-fx-background-color:transparent;" +
                         "-fx-border-color:transparent;"
         );
-
-
-        LanguageManager.apply(scrollPane);
-
         return scrollPane;
     }
 

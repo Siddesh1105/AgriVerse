@@ -1,7 +1,5 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.util.LanguageManager;
-
 import com.mainproject.controller.ProductController;
 
 

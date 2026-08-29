@@ -2,7 +2,7 @@ package com.mainproject.view.buyer;
 
 import com.mainproject.controller.CropPriceController;
 import com.mainproject.model.CropPrice;
-import com.mainproject.util.LanguageManager;
+
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -99,7 +99,6 @@ public class CropPrices {
         // Load states automatically
         loadStates();
 
-        LanguageManager.apply(root);
 
         return root;
     }

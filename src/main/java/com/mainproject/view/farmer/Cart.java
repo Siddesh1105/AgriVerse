@@ -1,6 +1,5 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.util.LanguageManager;
 
 import com.mainproject.controller.CartController;
 import com.mainproject.model.CartItem;
@@ -275,8 +274,6 @@ public class Cart {
                         bottom);
 
         refreshView();
-
-        LanguageManager.apply(root);
         return root;
     }
 

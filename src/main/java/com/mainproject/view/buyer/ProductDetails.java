@@ -3,7 +3,7 @@ package com.mainproject.view.buyer;
 import com.mainproject.controller.BuyerCartController;
 import com.mainproject.model.BuyerCartItem;
 import com.mainproject.model.Product;
-import com.mainproject.util.LanguageManager;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -204,7 +204,6 @@ public class ProductDetails {
                 content
         );
 
-        LanguageManager.apply(root);
         return root;
     }
 

@@ -1,6 +1,5 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.util.LanguageManager;
 
 import com.mainproject.controller.EquipmentController;
 import com.mainproject.model.Equipment;
@@ -353,7 +352,7 @@ public class MyEquipment {
                 filters,
                 scroll);
 
-        LanguageManager.apply(root);
+
         return root;
     }
 

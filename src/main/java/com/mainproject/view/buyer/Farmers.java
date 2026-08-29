@@ -2,7 +2,6 @@ package com.mainproject.view.buyer;
 
 import com.mainproject.controller.FarmerController;
 import com.mainproject.model.User;
-import com.mainproject.util.LanguageManager;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -210,7 +209,6 @@ public class Farmers {
         // LANGUAGE
         // =================================================
 
-        LanguageManager.apply(root);
 
         // =================================================
         // SCROLL

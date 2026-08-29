@@ -4,7 +4,7 @@ import com.mainproject.controller.BuyerCartController;
 import com.mainproject.controller.WishlistController;
 import com.mainproject.model.BuyerCartItem;
 import com.mainproject.model.WishlistItem;
-import com.mainproject.util.LanguageManager;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -236,9 +236,7 @@ public class Wishlist {
         // LANGUAGE
         // =================================================
 
-        LanguageManager.apply(
-                scroll
-        );
+   
 
         return scroll;
     }

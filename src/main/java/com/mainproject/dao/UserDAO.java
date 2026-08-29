@@ -648,7 +648,6 @@ public class UserDAO {
             return false;
         }
     }
-    
 
     // =====================================================
     // GET FARMERS EXCLUDING CURRENT USER

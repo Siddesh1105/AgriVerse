@@ -1,6 +1,5 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.util.LanguageManager;
 
 import com.mainproject.controller.AuthController;
 import com.mainproject.controller.UserController;
@@ -380,8 +379,6 @@ public class Settings {
                                                 + "-fx-background:"
                                                 + MAIN_BG
                                                 + ";");
-
-                LanguageManager.apply(scrollPane);
         return scrollPane;
         }
 
@@ -1141,21 +1138,6 @@ public class Settings {
                                 .addAll(
                                                 "English",
                                                 "Marathi");
-
-                language.setValue(
-                                LanguageManager.getLanguage());
-
-                language.setOnAction(e -> {
-
-                        LanguageManager.setLanguage(
-                                        language.getValue());
-
-                        if (languageChanged != null) {
-                                languageChanged.run();
-                        } else {
-                                showLanguage();
-                        }
-                });
 
                 language.setPrefWidth(300);
 

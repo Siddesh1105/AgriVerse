@@ -8,7 +8,6 @@ import com.mainproject.model.Product;
 import com.mainproject.model.BuyerCartItem;
 import com.mainproject.model.WishlistItem;
 
-import com.mainproject.util.LanguageManager;
 
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -208,9 +207,7 @@ public class LiveMarketplace {
         // LANGUAGE
         // =================================================
 
-        LanguageManager.apply(
-                root
-        );
+        
 
         return root;
     }

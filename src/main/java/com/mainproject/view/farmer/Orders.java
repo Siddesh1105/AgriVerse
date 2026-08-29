@@ -5,7 +5,6 @@ import com.mainproject.controller.NotificationController;
 import com.mainproject.model.Order;
 import com.mainproject.model.OrderItem;
 import com.mainproject.model.Notification;
-import com.mainproject.util.LanguageManager;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -152,8 +151,6 @@ public class Orders {
                 "-fx-background:transparent;" +
                 "-fx-background-color:transparent;"
         );
-
-        LanguageManager.apply(scrollPane);
 
         return scrollPane;
     }

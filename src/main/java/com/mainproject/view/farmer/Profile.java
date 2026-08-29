@@ -1,6 +1,5 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.util.LanguageManager;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

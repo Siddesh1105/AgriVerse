@@ -2,7 +2,7 @@ package com.mainproject.view.buyer;
 
 import com.mainproject.controller.EquipmentController;
 import com.mainproject.model.Equipment;
-import com.mainproject.util.LanguageManager;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -166,7 +166,6 @@ public class SearchAndRent {
 
         loadEquipment();
 
-        LanguageManager.apply(root);
 
         return root;
     }

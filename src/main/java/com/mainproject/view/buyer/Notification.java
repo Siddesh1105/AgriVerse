@@ -1,7 +1,7 @@
 package com.mainproject.view.buyer;
 
 import com.mainproject.controller.NotificationController;
-import com.mainproject.util.LanguageManager;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -82,7 +82,7 @@ public class Notification {
 
         loadNotifications();
 
-        LanguageManager.apply(root);
+       
 
         return root;
     }

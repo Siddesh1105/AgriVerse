@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.cloud.firestore.ListenerRegistration;
 
 import com.mainproject.dao.ChatDAO;
-import com.mainproject.model.ChatConversation;
 import com.mainproject.model.ChatMessage;
 
 public class ChatController {
@@ -26,11 +25,7 @@ public class ChatController {
             String receiverEmail,
             String message) {
 
-        if (senderEmail == null ||
-                receiverEmail == null ||
-                message == null ||
-                senderEmail.trim().isEmpty() ||
-                receiverEmail.trim().isEmpty() ||
+        if (message == null ||
                 message.trim().isEmpty()) {
 
             return false;
@@ -48,51 +43,27 @@ public class ChatController {
     // =====================================================
 
     public List<ChatMessage> getMessages(
-            String email1,
-            String email2) {
+            String userEmail1,
+            String userEmail2) {
 
         return chatDAO.getMessages(
-                email1,
-                email2
+                userEmail1,
+                userEmail2
         );
     }
 
     // =====================================================
-    // REAL TIME MESSAGES
+    // REAL-TIME CHAT
     // =====================================================
 
     public ListenerRegistration listenForMessages(
-            String email1,
-            String email2,
+            String userEmail1,
+            String userEmail2,
             ChatDAO.MessageListener listener) {
 
         return chatDAO.listenForMessages(
-                email1,
-                email2,
-                listener
-        );
-    }
-
-    // =====================================================
-    // GET USER CHATS
-    // =====================================================
-
-    public List<ChatConversation> getUserChats(
-            String userEmail) {
-
-        return chatDAO.getUserChats(userEmail);
-    }
-
-    // =====================================================
-    // REAL TIME CHAT LIST
-    // =====================================================
-
-    public ListenerRegistration listenForUserChats(
-            String userEmail,
-            ChatDAO.ConversationListener listener) {
-
-        return chatDAO.listenForUserChats(
-                userEmail,
+                userEmail1,
+                userEmail2,
                 listener
         );
     }

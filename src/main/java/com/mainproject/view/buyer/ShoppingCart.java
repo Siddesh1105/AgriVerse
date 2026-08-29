@@ -2,7 +2,7 @@ package com.mainproject.view.buyer;
 
 import com.mainproject.controller.BuyerCartController;
 import com.mainproject.model.BuyerCartItem;
-import com.mainproject.util.LanguageManager;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -144,7 +144,7 @@ public class ShoppingCart {
 
         loadCart();
 
-        LanguageManager.apply(root);
+      
 
         return root;
     }

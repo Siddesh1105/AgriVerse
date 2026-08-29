@@ -6,7 +6,6 @@ import com.mainproject.controller.NotificationController;
 import com.mainproject.model.BuyerCartItem;
 import com.mainproject.model.Order;
 import com.mainproject.model.OrderItem;
-import com.mainproject.util.LanguageManager;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -207,8 +206,6 @@ public class Checkout {
         // =====================================================
 
         loadOrderItems();
-
-        LanguageManager.apply(root);
 
         return root;
     }

@@ -2,7 +2,6 @@ package com.mainproject.view.buyer;
 
 import com.mainproject.controller.ProductController;
 import com.mainproject.model.Product;
-import com.mainproject.util.LanguageManager;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -232,7 +231,7 @@ public class FarmerProfile {
                 e ->
                         mainController.setView(
                                 new ChatWithFarmer(
-                                        mainController  
+                                        mainController, farmerEmail, farmerName
                                 ).getView()
                         )
         );
@@ -385,11 +384,6 @@ public class FarmerProfile {
         // =================================================
         // LANGUAGE
         // =================================================
-
-        LanguageManager.apply(
-                root
-        );
-
         // =================================================
         // SCROLL
         // =================================================
@@ -410,10 +404,6 @@ public class FarmerProfile {
         scroll.setStyle(
                 "-fx-background-color:transparent;" +
                 "-fx-background:transparent;"
-        );
-
-        LanguageManager.apply(
-                scroll
         );
 
         return scroll;

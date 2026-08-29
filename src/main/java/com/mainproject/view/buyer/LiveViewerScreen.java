@@ -1,6 +1,6 @@
 package com.mainproject.view.buyer;
 
-import com.mainproject.util.LanguageManager;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -76,7 +76,7 @@ public class LiveViewerScreen {
         root.setRight(chatBox);
         BorderPane.setMargin(chatBox, new Insets(0, 0, 0, 15));
 
-        LanguageManager.apply(root);
+        
         return root;
     }
 }

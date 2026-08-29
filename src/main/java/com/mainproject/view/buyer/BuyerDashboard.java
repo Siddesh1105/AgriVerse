@@ -1,7 +1,6 @@
 package com.mainproject.view.buyer;
 
 import com.mainproject.model.User;
-import com.mainproject.util.LanguageManager;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -310,7 +309,7 @@ public String getUserEmail1() {
                 case "Messages":
 
                     viewNode =
-                            new ChatWithFarmer(this)
+                            new ChatWithFarmer(this, buyerEmail, buyerEmail)
                                     .getView();
 
                     break;
@@ -792,7 +791,6 @@ public String getUserEmail1() {
                 btnLogout
         );
 
-        LanguageManager.apply(sidebar);
 
         return sidebar;
     }

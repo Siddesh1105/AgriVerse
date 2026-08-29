@@ -3,7 +3,6 @@ package com.mainproject.view.buyer;
 import com.mainproject.controller.OrderController;
 import com.mainproject.model.Order;
 import com.mainproject.model.OrderItem;
-import com.mainproject.util.LanguageManager;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -174,7 +173,7 @@ public class MyOrders {
 
         loadOrders();
 
-        LanguageManager.apply(mainRoot);
+     
 
         return mainRoot;
     }
