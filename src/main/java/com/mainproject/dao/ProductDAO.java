@@ -245,12 +245,22 @@ public class ProductDAO {
             if (farmerEmail == null
                     || farmerEmail.trim().isEmpty()) {
 
+                System.out.println(
+                        "Farmer email is empty."
+                );
+
                 return products;
             }
 
             String email =
                     farmerEmail.trim();
 
+            System.out.println(
+                    "Loading products for farmer: "
+                            + email
+            );
+
+            // First use the normal Firestore query.
             QuerySnapshot snapshot =
                     db.collection("products")
                             .whereEqualTo(
@@ -280,9 +290,57 @@ public class ProductDAO {
                         );
                     }
 
-                    products.add(
-                            product
-                    );
+                    products.add(product);
+                }
+            }
+
+            /*
+             * Compatibility fallback for older Firestore
+             * documents whose farmerEmail has different
+             * capitalization or accidental spaces.
+             * No other project file needs to be changed.
+             */
+            if (products.isEmpty()) {
+
+                System.out.println(
+                        "Exact farmerEmail query returned 0 products. "
+                                + "Running compatibility fallback."
+                );
+
+                QuerySnapshot allProducts =
+                        db.collection("products")
+                                .get()
+                                .get();
+
+                for (
+                        DocumentSnapshot document
+                        : allProducts.getDocuments()
+                ) {
+
+                    Product product =
+                            document.toObject(
+                                    Product.class
+                            );
+
+                    if (product == null
+                            || product.getFarmerEmail() == null) {
+                        continue;
+                    }
+
+                    if (product.getFarmerEmail()
+                            .trim()
+                            .equalsIgnoreCase(email)) {
+
+                        if (product.getProductId() == null
+                                || product.getProductId().isEmpty()) {
+
+                            product.setProductId(
+                                    document.getId()
+                            );
+                        }
+
+                        products.add(product);
+                    }
                 }
             }
 
@@ -395,6 +453,37 @@ public class ProductDAO {
 
             int count =
                     snapshot.getDocuments().size();
+
+            // Compatibility fallback for older documents.
+            if (count == 0) {
+
+                QuerySnapshot allProducts =
+                        db.collection("products")
+                                .get()
+                                .get();
+
+                for (
+                        DocumentSnapshot document
+                        : allProducts.getDocuments()
+                ) {
+
+                    Product product =
+                            document.toObject(
+                                    Product.class
+                            );
+
+                    if (product == null
+                            || product.getFarmerEmail() == null) {
+                        continue;
+                    }
+
+                    if (product.getFarmerEmail()
+                            .trim()
+                            .equalsIgnoreCase(email)) {
+                        count++;
+                    }
+                }
+            }
 
             System.out.println(
                     "===================================="

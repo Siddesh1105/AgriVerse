@@ -1,68 +1,277 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.controller.BuyerCartController;
+import com.mainproject.model.BuyerCartItem;
+import com.mainproject.model.Product;
 import com.mainproject.util.LanguageManager;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+
+import java.net.URL;
 
 public class ProductDetails {
 
-    private final BuyerDashboard mainController;
+    private final BuyerDashboard navigator;
+    private final Product product;
 
-    public ProductDetails(BuyerDashboard controller) {
-        this.mainController = controller;
+    private final BuyerCartController cartController =
+            new BuyerCartController();
+
+    public ProductDetails(
+            BuyerDashboard navigator,
+            Product product) {
+
+        this.navigator = navigator;
+        this.product = product;
     }
 
     public Node getView() {
-        VBox root = new VBox(20);
-        root.setPadding(new Insets(25, 35, 25, 35));
-        root.setStyle("-fx-background-color: #FFFFFF;");
 
-        Button btnBack = new Button("← Back to Marketplace");
-        btnBack.setStyle("-fx-background-color: transparent; -fx-text-fill: #166534; -fx-cursor: hand; -fx-font-weight: bold;");
-        btnBack.setOnAction(e -> mainController.setView(new LiveMarketplace(mainController).getView()));
+        VBox root = new VBox(20);
+        root.setPadding(new Insets(25));
+
+        Button back =
+                new Button("← Back to Marketplace");
+
+        back.setStyle(
+                "-fx-background-color:transparent;" +
+                "-fx-text-fill:#117864;" +
+                "-fx-font-weight:bold;" +
+                "-fx-cursor:hand;"
+        );
+
+        back.setOnAction(e ->
+                navigator.setView(
+                        new LiveMarketplace(navigator).getView()
+                )
+        );
 
         HBox content = new HBox(30);
+        content.setAlignment(Pos.TOP_LEFT);
 
-        // Product Image Mockup
-        StackPane imageMock = new StackPane();
-        imageMock.setPrefSize(400, 350);
-        imageMock.setStyle("-fx-background-color: #F1F5F9; -fx-border-color: #CBD5E1; -fx-border-radius: 12; -fx-background-radius: 12;");
-        Label lblImg = new Label("🍅\nFresh Tomato Image Mockup");
-        lblImg.setStyle("-fx-font-size: 16px; -fx-text-alignment: center; -fx-text-fill: #64748B;");
-        imageMock.getChildren().add(lblImg);
+        StackPane imageBox = new StackPane();
+        imageBox.setPrefSize(420, 350);
+        imageBox.setStyle(
+                "-fx-background-color:#E9F7EF;" +
+                "-fx-background-radius:14;"
+        );
+
+        ImageView image =
+                createImage(product.getImageUrl());
+
+        if (image != null) {
+            image.setFitWidth(390);
+            image.setFitHeight(330);
+            image.setPreserveRatio(true);
+            imageBox.getChildren().add(image);
+        } else {
+            Label placeholder =
+                    new Label("🌱");
+            placeholder.setStyle("-fx-font-size:80px;");
+            imageBox.getChildren().add(placeholder);
+        }
 
         VBox info = new VBox(12);
-        Label title = new Label("Fresh Organic Tomato");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        info.setPrefWidth(520);
 
-        Label price = new Label("₹28 / kg  ★ 4.6 (128 Reviews)");
-        price.setStyle("-fx-font-size: 18px; -fx-text-fill: #166534; -fx-font-weight: bold;");
+        Label name =
+                new Label(product.getName());
+        name.setStyle(
+                "-fx-font-size:28px;" +
+                "-fx-font-weight:bold;"
+        );
 
-        Label farmer = new Label("Farmer: Ramesh Patil (Nashik, Maharashtra) ✔ Verified");
-        farmer.setStyle("-fx-text-fill: #64748B;");
+        Label price =
+                new Label(
+                        "₹" + format(product.getPrice())
+                                + " / " + safe(product.getUnit())
+                );
+        price.setStyle(
+                "-fx-font-size:20px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#117864;"
+        );
 
-        Label desc = new Label("Description:\nDirectly harvested organic grade-A tomatoes. Carefully packed and quality inspected for freshness.");
-        desc.setWrapText(true);
+        Label category =
+                new Label("Category: " + safe(product.getCategory()));
 
-        HBox actionBtns = new HBox(12);
-        Button btnAdd = new Button("Add to Cart");
-        btnAdd.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: #166534; -fx-text-fill: #166534; -fx-padding: 10 20; -fx-background-radius: 8; -fx-cursor: hand;");
-        btnAdd.setOnAction(e -> mainController.setView(new ShoppingCart(mainController).getView()));
+        Label variety =
+                new Label("Variety: " + safe(product.getVariety()));
 
-        Button btnBuy = new Button("Buy Now");
-        btnBuy.setStyle("-fx-background-color: #166534; -fx-text-fill: white; -fx-padding: 10 24; -fx-background-radius: 8; -fx-cursor: hand;");
-        btnBuy.setOnAction(e -> mainController.setView(new Checkout(mainController).getView()));
+        Label stock =
+                new Label(
+                        "Available: "
+                                + format(product.getStock())
+                                + " "
+                                + safe(product.getUnit())
+                );
 
-        actionBtns.getChildren().addAll(btnAdd, btnBuy);
+        Label farmer =
+                new Label(
+                        "Farmer: "
+                                + safe(product.getFarmerEmail())
+                );
 
-        info.getChildren().addAll(title, price, farmer, desc, actionBtns);
+        Label description =
+                new Label(
+                        "Description:\n"
+                                + safe(product.getDescription())
+                );
+        description.setWrapText(true);
 
-        content.getChildren().addAll(imageMock, info);
-        root.getChildren().addAll(btnBack, content);
+        Spinner<Integer> quantity =
+                new Spinner<>(
+                        1,
+                        Math.max(
+                                1,
+                                (int) Math.floor(product.getStock())
+                        ),
+                        1
+                );
+
+        quantity.setPrefWidth(110);
+
+        HBox actions = new HBox(10);
+
+        Button add =
+                new Button("Add to Cart");
+
+        Button buy =
+                new Button("Buy Now");
+
+        add.setStyle(
+                "-fx-background-color:white;" +
+                "-fx-border-color:#117864;" +
+                "-fx-text-fill:#117864;" +
+                "-fx-font-weight:bold;" +
+                "-fx-padding:10 20;" +
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
+        );
+
+        buy.setStyle(
+                "-fx-background-color:#117864;" +
+                "-fx-text-fill:white;" +
+                "-fx-font-weight:bold;" +
+                "-fx-padding:10 24;" +
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
+        );
+
+        add.setOnAction(e ->
+                addToCart(
+                        quantity.getValue()
+                )
+        );
+
+        buy.setOnAction(e -> {
+
+            if (addToCart(quantity.getValue())) {
+                navigator.setView(
+                        new ShoppingCart(navigator).getView()
+                );
+            }
+        });
+
+        actions.getChildren().addAll(add, buy);
+
+        info.getChildren().addAll(
+                name,
+                price,
+                category,
+                variety,
+                stock,
+                farmer,
+                description,
+                new Label("Quantity"),
+                quantity,
+                actions
+        );
+
+        content.getChildren().addAll(
+                imageBox,
+                info
+        );
+
+        root.getChildren().addAll(
+                back,
+                content
+        );
+
         LanguageManager.apply(root);
         return root;
+    }
+
+    private boolean addToCart(int quantity) {
+
+        BuyerCartItem item =
+                new BuyerCartItem(
+                        null,
+                        navigator.getBuyerEmail(),
+                        product.getProductId(),
+                        product.getName(),
+                        product.getFarmerEmail(),
+                        product.getUnit(),
+                        product.getPrice(),
+                        quantity,
+                        product.getImageUrl()
+                );
+
+        boolean success =
+                cartController.addToCart(item);
+
+        if (!success) {
+            Alert alert =
+                    new Alert(Alert.AlertType.ERROR);
+
+            alert.setHeaderText(null);
+            alert.setContentText(
+                    "Unable to add product to cart."
+            );
+            alert.showAndWait();
+        }
+
+        return success;
+    }
+
+    private ImageView createImage(String url) {
+
+        try {
+            if (url == null || url.trim().isEmpty()) {
+                return null;
+            }
+
+            Image image =
+                    new Image(
+                            new URL(url).openStream()
+                    );
+
+            if (image.isError()) {
+                return null;
+            }
+
+            return new ImageView(image);
+
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
+    }
+
+    private String format(double value) {
+        if (value == Math.rint(value)) {
+            return String.valueOf((long) value);
+        }
+
+        return String.format("%.2f", value);
     }
 }

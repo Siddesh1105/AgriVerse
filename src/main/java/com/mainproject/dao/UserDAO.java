@@ -2,10 +2,13 @@ package com.mainproject.dao;
 
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.mainproject.config.FirebaseConfig;
 import com.mainproject.model.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UserDAO {
@@ -17,7 +20,6 @@ public class UserDAO {
     // =====================================================
 
     public UserDAO() {
-
         db = FirebaseConfig.getFirestore();
     }
 
@@ -38,6 +40,19 @@ public class UserDAO {
                 return false;
             }
 
+            if (user.getEmail() == null ||
+                    user.getEmail().trim().isEmpty()) {
+
+                System.out.println(
+                        "Cannot save user: email is empty."
+                );
+
+                return false;
+            }
+
+            String email =
+                    user.getEmail().trim();
+
             Map<String, Object> userData =
                     new HashMap<>();
 
@@ -53,7 +68,7 @@ public class UserDAO {
 
             userData.put(
                     "email",
-                    user.getEmail()
+                    email
             );
 
             userData.put(
@@ -76,9 +91,12 @@ public class UserDAO {
                     user.getProfileImageUrl()
             );
 
-            // Email is document ID
+            // =================================================
+            // EMAIL = FIRESTORE DOCUMENT ID
+            // =================================================
+
             db.collection("users")
-                    .document(user.getEmail())
+                    .document(email)
                     .set(userData)
                     .get();
 
@@ -102,7 +120,7 @@ public class UserDAO {
 
             System.out.println(
                     "User Email: "
-                            + user.getEmail()
+                            + email
             );
 
             System.out.println(
@@ -147,12 +165,13 @@ public class UserDAO {
     // GET USER BY EMAIL
     // =====================================================
 
-    public User getUserByEmail(String email) {
+    public User getUserByEmail(
+            String email) {
 
         try {
 
-            if (email == null
-                    || email.trim().isEmpty()) {
+            if (email == null ||
+                    email.trim().isEmpty()) {
 
                 System.out.println(
                         "Email is empty."
@@ -161,7 +180,8 @@ public class UserDAO {
                 return null;
             }
 
-            email = email.trim();
+            email =
+                    email.trim();
 
             DocumentSnapshot document =
                     db.collection("users")
@@ -176,15 +196,26 @@ public class UserDAO {
                                 User.class
                         );
 
-                System.out.println(
-                        "===================================="
-                );
-
-                System.out.println(
-                        "User found: " + email
-                );
-
                 if (user != null) {
+
+                    /*
+                     * IMPORTANT:
+                     *
+                     * Always use the Firestore document ID
+                     * as the user's email.
+                     */
+                    user.setEmail(
+                            document.getId()
+                    );
+
+                    System.out.println(
+                            "===================================="
+                    );
+
+                    System.out.println(
+                            "User found: "
+                                    + user.getEmail()
+                    );
 
                     System.out.println(
                             "User UID: "
@@ -220,11 +251,11 @@ public class UserDAO {
                             "Profile Image: "
                                     + user.getProfileImageUrl()
                     );
-                }
 
-                System.out.println(
-                        "===================================="
-                );
+                    System.out.println(
+                            "===================================="
+                    );
+                }
 
                 return user;
             }
@@ -249,21 +280,221 @@ public class UserDAO {
     }
 
     // =====================================================
+    // GET ALL USERS
+    // =====================================================
+
+    public List<User> getAllUsers() {
+
+        List<User> users =
+                new ArrayList<>();
+
+        try {
+
+            List<QueryDocumentSnapshot> documents =
+                    db.collection("users")
+                            .get()
+                            .get()
+                            .getDocuments();
+
+            for (
+                    DocumentSnapshot document :
+                    documents
+            ) {
+
+                if (!document.exists()) {
+                    continue;
+                }
+
+                User user =
+                        document.toObject(
+                                User.class
+                        );
+
+                if (user == null) {
+                    continue;
+                }
+
+                /*
+                 * =================================================
+                 * IMPORTANT FIX
+                 * =================================================
+                 *
+                 * Your Firestore structure uses:
+                 *
+                 * users/
+                 *      farmer@gmail.com
+                 *
+                 * Therefore the document ID is the most reliable
+                 * email value.
+                 *
+                 * Always set it here.
+                 */
+
+                user.setEmail(
+                        document.getId()
+                );
+
+                System.out.println(
+                        "User loaded:"
+                                + " "
+                                + user.getEmail()
+                                + " | Role: "
+                                + user.getRole()
+                );
+
+                users.add(user);
+            }
+
+            System.out.println(
+                    "===================================="
+            );
+
+            System.out.println(
+                    "Total users found: "
+                            + users.size()
+            );
+
+            System.out.println(
+                    "===================================="
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error getting all users:"
+            );
+
+            e.printStackTrace();
+        }
+
+        return users;
+    }
+
+    // =====================================================
+    // GET USERS BY ROLE
+    // =====================================================
+
+    public List<User> getUsersByRole(
+            String role) {
+
+        List<User> users =
+                new ArrayList<>();
+
+        try {
+
+            if (role == null ||
+                    role.trim().isEmpty()) {
+
+                return users;
+            }
+
+            List<QueryDocumentSnapshot> documents =
+                    db.collection("users")
+                            .whereEqualTo(
+                                    "role",
+                                    role.trim()
+                            )
+                            .get()
+                            .get()
+                            .getDocuments();
+
+            for (
+                    DocumentSnapshot document :
+                    documents
+            ) {
+
+                if (!document.exists()) {
+                    continue;
+                }
+
+                User user =
+                        document.toObject(
+                                User.class
+                        );
+
+                if (user == null) {
+                    continue;
+                }
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * Always restore the email from the
+                 * Firestore document ID.
+                 */
+
+                user.setEmail(
+                        document.getId()
+                );
+
+                System.out.println(
+                        "User loaded by role:"
+                                + " "
+                                + user.getEmail()
+                                + " | Role: "
+                                + user.getRole()
+                );
+
+                users.add(user);
+            }
+
+            System.out.println(
+                    "Users with role "
+                            + role
+                            + ": "
+                            + users.size()
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error getting users by role:"
+            );
+
+            e.printStackTrace();
+        }
+
+        return users;
+    }
+
+    // =====================================================
+    // GET ALL FARMERS
+    // =====================================================
+
+    public List<User> getAllFarmers() {
+
+        return getUsersByRole(
+                "Farmer"
+        );
+    }
+
+    // =====================================================
+    // GET ALL BUYERS
+    // =====================================================
+
+    public List<User> getAllBuyers() {
+
+        return getUsersByRole(
+                "Buyer"
+        );
+    }
+
+    // =====================================================
     // UPDATE PROFILE
     // Only name and mobile are changed
     // =====================================================
 
-    public boolean updateProfile(User user) {
+    public boolean updateProfile(
+            User user) {
 
         try {
 
             if (user == null) {
-
                 return false;
             }
 
-            if (user.getEmail() == null
-                    || user.getEmail()
+            if (user.getEmail() == null ||
+                    user.getEmail()
                             .trim()
                             .isEmpty()) {
 
@@ -287,25 +518,21 @@ public class UserDAO {
                     user.getMobileNumber()
             );
 
+            updates.put(
+                    "gender",
+                    user.getGender()
+            );
+
             db.collection("users")
                     .document(
                             user.getEmail()
+                                    .trim()
                     )
                     .update(updates)
                     .get();
 
             System.out.println(
                     "Profile updated successfully!"
-            );
-
-            System.out.println(
-                    "Name: "
-                            + user.getFullName()
-            );
-
-            System.out.println(
-                    "Mobile: "
-                            + user.getMobileNumber()
             );
 
             return true;
@@ -332,8 +559,8 @@ public class UserDAO {
 
         try {
 
-            if (email == null
-                    || email.trim().isEmpty()) {
+            if (email == null ||
+                    email.trim().isEmpty()) {
 
                 System.out.println(
                         "Cannot update image: email is empty."
@@ -342,8 +569,8 @@ public class UserDAO {
                 return false;
             }
 
-            if (imageUrl == null
-                    || imageUrl.trim().isEmpty()) {
+            if (imageUrl == null ||
+                    imageUrl.trim().isEmpty()) {
 
                 System.out.println(
                         "Cannot update image: URL is empty."
@@ -357,11 +584,13 @@ public class UserDAO {
 
             updates.put(
                     "profileImageUrl",
-                    imageUrl
+                    imageUrl.trim()
             );
 
             db.collection("users")
-                    .document(email.trim())
+                    .document(
+                            email.trim()
+                    )
                     .update(updates)
                     .get();
 
@@ -387,19 +616,22 @@ public class UserDAO {
     // CHECK USER EXISTS
     // =====================================================
 
-    public boolean userExists(String email) {
+    public boolean userExists(
+            String email) {
 
         try {
 
-            if (email == null
-                    || email.trim().isEmpty()) {
+            if (email == null ||
+                    email.trim().isEmpty()) {
 
                 return false;
             }
 
             DocumentSnapshot document =
                     db.collection("users")
-                            .document(email.trim())
+                            .document(
+                                    email.trim()
+                            )
                             .get()
                             .get();
 
@@ -415,5 +647,39 @@ public class UserDAO {
 
             return false;
         }
+    }
+    
+
+    // =====================================================
+    // GET FARMERS EXCLUDING CURRENT USER
+    // Useful for BUYER DASHBOARD
+    // =====================================================
+
+    public List<User> getFarmersExcept(
+            String email) {
+
+        List<User> farmers =
+                getAllFarmers();
+
+        if (email == null ||
+                email.trim().isEmpty()) {
+
+            return farmers;
+        }
+
+        String currentEmail =
+                email.trim();
+
+        farmers.removeIf(
+                user ->
+                        user != null &&
+                        user.getEmail() != null &&
+                        user.getEmail()
+                                .equalsIgnoreCase(
+                                        currentEmail
+                                )
+        );
+
+        return farmers;
     }
 }

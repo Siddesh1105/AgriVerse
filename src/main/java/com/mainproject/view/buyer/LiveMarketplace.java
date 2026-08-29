@@ -1,27 +1,23 @@
 package com.mainproject.view.buyer;
 
+import com.mainproject.controller.ProductController;
+import com.mainproject.controller.BuyerCartController;
+import com.mainproject.controller.WishlistController;
+
+import com.mainproject.model.Product;
+import com.mainproject.model.BuyerCartItem;
+import com.mainproject.model.WishlistItem;
+
 import com.mainproject.util.LanguageManager;
 
-import com.mainproject.controller.ProductController;
-import com.mainproject.model.Product;
-
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,17 +25,30 @@ public class LiveMarketplace {
 
     private final BuyerDashboard navigator;
 
+    // =====================================================
+    // CONTROLLERS
+    // =====================================================
+
     private final ProductController productController =
             new ProductController();
 
-    private final List<Product> allProducts =
+    private final BuyerCartController cartController =
+            new BuyerCartController();
+
+    private final WishlistController wishlistController =
+            new WishlistController();
+
+    // =====================================================
+    // PRODUCTS
+    // =====================================================
+
+    private final List<Product> products =
             new ArrayList<>();
 
-    private final VBox productList =
+    private final VBox grid =
             new VBox(12);
 
     private TextField searchField;
-
 
     // =====================================================
     // CONSTRUCTOR
@@ -51,7 +60,6 @@ public class LiveMarketplace {
         this.navigator = navigator;
     }
 
-
     // =====================================================
     // GET VIEW
     // =====================================================
@@ -59,40 +67,24 @@ public class LiveMarketplace {
     public Node getView() {
 
         VBox root =
-                new VBox(16);
+                new VBox(18);
 
         root.setPadding(
-                new Insets(20)
+                new Insets(25)
         );
 
-
         // =================================================
-        // HEADER
+        // TITLE
         // =================================================
-
-        HBox header =
-                new HBox();
-
-        header.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-
-        VBox titles =
-                new VBox(3);
-
 
         Label title =
-                new Label(
-                        "Marketplace"
-                );
+                new Label("Marketplace");
 
         title.setStyle(
-                "-fx-font-size:22px;" +
-                "-fx-font-weight:800;" +
-                "-fx-text-fill:#1B2631;"
+                "-fx-font-size:26px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#1E293B;"
         );
-
 
         Label subtitle =
                 new Label(
@@ -100,72 +92,12 @@ public class LiveMarketplace {
                 );
 
         subtitle.setStyle(
-                "-fx-font-size:13px;" +
-                "-fx-text-fill:#566573;"
+                "-fx-text-fill:#64748B;"
         );
-
-
-        titles.getChildren().addAll(
-                title,
-                subtitle
-        );
-
-
-        Region spacer =
-                new Region();
-
-        HBox.setHgrow(
-                spacer,
-                Priority.ALWAYS
-        );
-
-
-        // =================================================
-        // CART BUTTON
-        // =================================================
-
-        Button cartButton =
-                new Button(
-                        "🛒 My Cart"
-                );
-
-        cartButton.setStyle(
-                "-fx-background-color:#117864;" +
-                "-fx-text-fill:white;" +
-                "-fx-font-weight:bold;" +
-                "-fx-background-radius:8px;" +
-                "-fx-padding:8 16;" +
-                "-fx-cursor:hand;"
-        );
-
-
-        cartButton.setOnAction(
-                e -> navigator.setView(
-                        new ShoppingCart(
-                                navigator
-                        ).getView()
-                )
-        );
-
-
-        header.getChildren().addAll(
-                titles,
-                spacer,
-                cartButton
-        );
-
 
         // =================================================
         // SEARCH
         // =================================================
-
-        HBox searchRow =
-                new HBox(10);
-
-        searchRow.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
 
         searchField =
                 new TextField();
@@ -175,101 +107,75 @@ public class LiveMarketplace {
         );
 
         searchField.setPrefHeight(
-                42
+                46
         );
 
-        searchField.setStyle(
-                "-fx-background-color:white;" +
-                "-fx-background-radius:8px;" +
-                "-fx-border-color:#A2D9CE;" +
-                "-fx-border-radius:8px;" +
-                "-fx-padding:8 12;"
+        searchField.textProperty().addListener(
+                (obs, oldValue, newValue) ->
+                        filterProducts(newValue)
         );
 
+        // =================================================
+        // HEADER
+        // =================================================
+
+        HBox header =
+                new HBox();
+
+        VBox heading =
+                new VBox(4);
+
+        heading.getChildren().addAll(
+                title,
+                subtitle
+        );
 
         HBox.setHgrow(
-                searchField,
+                heading,
                 Priority.ALWAYS
         );
 
+        // =================================================
+        // CART BUTTON
+        // =================================================
 
-        searchField.textProperty()
-                .addListener(
-                        (obs, oldValue, newValue)
-                                -> refreshProducts()
-                );
+        Button cartButton =
+                new Button("🛒 My Cart");
 
-
-        searchRow.getChildren().add(
-                searchField
+        cartButton.setStyle(
+                "-fx-background-color:#117864;" +
+                "-fx-text-fill:white;" +
+                "-fx-font-weight:bold;" +
+                "-fx-padding:10 18;" +
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
         );
 
-
-        // =================================================
-        // PRODUCT GRID
-        // =================================================
-
-        GridPane grid =
-                new GridPane();
-
-        grid.setHgap(16);
-
-        grid.setVgap(16);
-
-        grid.setPadding(
-                new Insets(
-                        5,
-                        0,
-                        20,
-                        0
-                )
+        cartButton.setOnAction(
+                e ->
+                        navigator.setView(
+                                new ShoppingCart(
+                                        navigator
+                                ).getView()
+                        )
         );
 
-
-        // =================================================
-        // LOAD PRODUCTS
-        // =================================================
-
-        loadProducts();
-
-
-        // =================================================
-        // ROOT
-        // =================================================
-
-        root.getChildren().addAll(
-                header,
-                searchRow,
-                grid
+        header.getChildren().addAll(
+                heading,
+                cartButton
         );
 
-
         // =================================================
-        // STORE GRID REFERENCE
-        // =================================================
-
-        this.productGrid =
-                grid;
-
-
-        refreshProducts();
-
-
-        // =================================================
-        // SCROLL
+        // PRODUCT SCROLL
         // =================================================
 
         ScrollPane scroll =
                 new ScrollPane(
-                        root
+                        grid
                 );
 
         scroll.setFitToWidth(
                 true
-        );
-
-        scroll.setHbarPolicy(
-                ScrollPane.ScrollBarPolicy.NEVER
         );
 
         scroll.setStyle(
@@ -277,164 +183,202 @@ public class LiveMarketplace {
                 "-fx-background:transparent;"
         );
 
+        VBox.setVgrow(
+                scroll,
+                Priority.ALWAYS
+        );
 
-        return scroll;
+        // =================================================
+        // ROOT
+        // =================================================
+
+        root.getChildren().addAll(
+                header,
+                searchField,
+                scroll
+        );
+
+        // =================================================
+        // LOAD PRODUCTS
+        // =================================================
+
+        loadProducts();
+
+        // =================================================
+        // LANGUAGE
+        // =================================================
+
+        LanguageManager.apply(
+                root
+        );
+
+        return root;
     }
 
-
-    private GridPane productGrid;
-
-
     // =====================================================
-    // LOAD PRODUCTS FROM FIRESTORE
+    // LOAD PRODUCTS
     // =====================================================
 
     private void loadProducts() {
 
-        allProducts.clear();
+        products.clear();
 
-        try {
+        List<Product> loaded =
+                productController.getAllProducts();
 
-            System.out.println(
-                    "Loading buyer marketplace products..."
-            );
+        if (loaded != null) {
 
+            for (Product product : loaded) {
 
-            List<Product> products =
-                    productController.getAllProducts();
+                if (product == null) {
+                    continue;
+                }
 
+                String status =
+                        product.getStatus();
 
-            if (products != null) {
+                /*
+                 * Only show products that:
+                 *
+                 * 1. Have stock
+                 * 2. Are Active / Available
+                 */
 
-                allProducts.addAll(
-                        products
-                );
+                if (product.getStock() > 0 &&
+                        (
+                                status == null ||
+                                status.equalsIgnoreCase(
+                                        "active"
+                                ) ||
+                                status.equalsIgnoreCase(
+                                        "available"
+                                )
+                        )) {
+
+                    products.add(
+                            product
+                    );
+                }
             }
-
-
-            System.out.println(
-                    "Buyer marketplace products loaded: "
-                            + allProducts.size()
-            );
-
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Error loading marketplace products:"
-            );
-
-            e.printStackTrace();
         }
+
+        renderProducts(
+                products
+        );
     }
 
-
     // =====================================================
-    // REFRESH PRODUCTS
+    // SEARCH / FILTER PRODUCTS
     // =====================================================
 
-    private void refreshProducts() {
+    private void filterProducts(
+            String text) {
 
-        if (productGrid == null) {
+        String query =
+                text == null
+                        ? ""
+                        : text.trim()
+                        .toLowerCase();
+
+        if (query.isEmpty()) {
+
+            renderProducts(
+                    products
+            );
+
             return;
         }
 
+        List<Product> filtered =
+                new ArrayList<>();
 
-        productGrid.getChildren()
-                .clear();
+        for (Product product : products) {
 
-
-        String search =
-                searchField == null
-                        ? ""
-                        : searchField
-                                .getText()
-                                .trim()
-                                .toLowerCase();
-
-
-        int column = 0;
-
-        int row = 0;
-
-        int count = 0;
-
-
-        for (Product product :
-                allProducts) {
-
-
-            if (product == null) {
-                continue;
-            }
-
-
-            // =================================================
-            // ONLY AVAILABLE PRODUCTS
-            // =================================================
-
-            if (product.getStock() <= 0) {
-                continue;
-            }
-
-
-            String status =
+            String name =
                     safe(
-                            product.getStatus()
+                            product.getName()
+                    ).toLowerCase();
+
+            String category =
+                    safe(
+                            product.getCategory()
+                    ).toLowerCase();
+
+            String farmer =
+                    safe(
+                            product.getFarmerEmail()
+                    ).toLowerCase();
+
+            String variety =
+                    safe(
+                            product.getVariety()
+                    ).toLowerCase();
+
+            if (name.contains(query) ||
+                    category.contains(query) ||
+                    farmer.contains(query) ||
+                    variety.contains(query)) {
+
+                filtered.add(
+                        product
+                );
+            }
+        }
+
+        renderProducts(
+                filtered
+        );
+    }
+
+    // =====================================================
+    // RENDER PRODUCTS
+    // =====================================================
+
+    private void renderProducts(
+            List<Product> list) {
+
+        grid.getChildren().clear();
+
+        if (list == null ||
+                list.isEmpty()) {
+
+            Label empty =
+                    new Label(
+                            "No products found."
                     );
 
+            empty.setStyle(
+                    "-fx-font-size:16px;" +
+                    "-fx-text-fill:#64748B;"
+            );
 
-            if (!status.isEmpty()
-                    && status.equalsIgnoreCase(
-                            "Inactive"
-                    )) {
+            grid.getChildren().add(
+                    empty
+            );
 
-                continue;
-            }
+            return;
+        }
 
+        GridPane productGrid =
+                new GridPane();
 
-            // =================================================
-            // SEARCH
-            // =================================================
+        productGrid.setHgap(
+                18
+        );
 
-            if (!search.isEmpty()) {
+        productGrid.setVgap(
+                18
+        );
 
-                String name =
-                        safe(
-                                product.getName()
-                        ).toLowerCase();
+        int column = 0;
+        int row = 0;
 
-
-                String category =
-                        safe(
-                                product.getCategory()
-                        ).toLowerCase();
-
-
-                String farmer =
-                        safe(
-                                product.getFarmerEmail()
-                        ).toLowerCase();
-
-
-                if (!name.contains(search)
-                        && !category.contains(search)
-                        && !farmer.contains(search)) {
-
-                    continue;
-                }
-            }
-
-
-            // =================================================
-            // CREATE CARD
-            // =================================================
+        for (Product product : list) {
 
             VBox card =
                     createProductCard(
                             product
                     );
-
 
             productGrid.add(
                     card,
@@ -442,52 +386,22 @@ public class LiveMarketplace {
                     row
             );
 
-
             column++;
-
-            count++;
-
 
             if (column == 4) {
 
                 column = 0;
-
                 row++;
             }
         }
 
-
-        // =================================================
-        // EMPTY
-        // =================================================
-
-        if (count == 0) {
-
-            Label empty =
-                    new Label(
-                            "No products available."
-                    );
-
-            empty.setStyle(
-                    "-fx-font-size:15px;" +
-                    "-fx-text-fill:#566573;" +
-                    "-fx-padding:40px;"
-            );
-
-
-            productGrid.add(
-                    empty,
-                    0,
-                    0,
-                    4,
-                    1
-            );
-        }
+        grid.getChildren().add(
+                productGrid
+        );
     }
 
-
     // =====================================================
-    // PRODUCT CARD
+    // CREATE PRODUCT CARD
     // =====================================================
 
     private VBox createProductCard(
@@ -496,108 +410,73 @@ public class LiveMarketplace {
         VBox card =
                 new VBox(9);
 
+        card.setPrefWidth(
+                300
+        );
+
         card.setPadding(
                 new Insets(12)
         );
 
-        card.setPrefWidth(
-                250
-        );
-
-        card.setPrefHeight(
-                330
-        );
-
-
         card.setStyle(
                 "-fx-background-color:white;" +
-                "-fx-background-radius:12px;" +
                 "-fx-border-color:#A2D9CE;" +
-                "-fx-border-radius:12px;" +
-                "-fx-effect:dropshadow(" +
-                "gaussian," +
-                "rgba(0,0,0,0.08)," +
-                "8,0,0,2);"
+                "-fx-border-radius:14;" +
+                "-fx-background-radius:14;"
         );
 
-
         // =================================================
-        // IMAGE
+        // PRODUCT IMAGE
         // =================================================
 
         StackPane imageBox =
                 new StackPane();
 
         imageBox.setPrefHeight(
-                135
+                165
         );
 
         imageBox.setStyle(
                 "-fx-background-color:#E9F7EF;" +
-                "-fx-background-radius:10px;"
+                "-fx-background-radius:12;"
         );
 
-
-        String imageUrl =
-                safe(
+        ImageView imageView =
+                createImage(
                         product.getImageUrl()
                 );
 
+        if (imageView != null) {
 
-        if (!imageUrl.isEmpty()) {
+            imageView.setFitWidth(
+                    270
+            );
 
-            try {
+            imageView.setFitHeight(
+                    160
+            );
 
-                Image image =
-                        new Image(
-                                imageUrl,
-                                220,
-                                130,
-                                true,
-                                true,
-                                true
-                        );
+            imageView.setPreserveRatio(
+                    true
+            );
 
-
-                ImageView imageView =
-                        new ImageView(
-                                image
-                        );
-
-
-                imageView.setFitWidth(
-                        220
-                );
-
-                imageView.setFitHeight(
-                        130
-                );
-
-                imageView.setPreserveRatio(
-                        true
-                );
-
-
-                imageBox.getChildren()
-                        .add(
-                                imageView
-                        );
-
-
-            } catch (Exception e) {
-
-                addPlaceholder(
-                        imageBox
-                );
-            }
+            imageBox.getChildren().add(
+                    imageView
+            );
 
         } else {
 
-            addPlaceholder(
-                    imageBox
+            Label imageLabel =
+                    new Label("🌱");
+
+            imageLabel.setStyle(
+                    "-fx-font-size:55px;"
+            );
+
+            imageBox.getChildren().add(
+                    imageLabel
             );
         }
-
 
         // =================================================
         // PRODUCT NAME
@@ -611,11 +490,9 @@ public class LiveMarketplace {
                 );
 
         name.setStyle(
-                "-fx-font-size:16px;" +
-                "-fx-font-weight:bold;" +
-                "-fx-text-fill:#1B2631;"
+                "-fx-font-size:18px;" +
+                "-fx-font-weight:bold;"
         );
-
 
         // =================================================
         // CATEGORY
@@ -629,10 +506,8 @@ public class LiveMarketplace {
                 );
 
         category.setStyle(
-                "-fx-font-size:12px;" +
-                "-fx-text-fill:#566573;"
+                "-fx-text-fill:#64748B;"
         );
-
 
         // =================================================
         // PRICE
@@ -641,13 +516,13 @@ public class LiveMarketplace {
         Label price =
                 new Label(
                         "₹"
-                                + formatNumber(
-                                        product.getPrice()
-                                )
+                                + format(
+                                product.getPrice()
+                        )
                                 + " / "
                                 + safe(
-                                        product.getUnit()
-                                )
+                                product.getUnit()
+                        )
                 );
 
         price.setStyle(
@@ -656,7 +531,6 @@ public class LiveMarketplace {
                 "-fx-text-fill:#117864;"
         );
 
-
         // =================================================
         // STOCK
         // =================================================
@@ -664,20 +538,14 @@ public class LiveMarketplace {
         Label stock =
                 new Label(
                         "Available: "
-                                + formatNumber(
-                                        product.getStock()
-                                )
+                                + format(
+                                product.getStock()
+                        )
                                 + " "
                                 + safe(
-                                        product.getUnit()
-                                )
+                                product.getUnit()
+                        )
                 );
-
-        stock.setStyle(
-                "-fx-font-size:12px;" +
-                "-fx-text-fill:#566573;"
-        );
-
 
         // =================================================
         // FARMER
@@ -687,19 +555,14 @@ public class LiveMarketplace {
                 new Label(
                         "Farmer: "
                                 + safe(
-                                        product.getFarmerEmail()
-                                )
+                                product.getFarmerEmail()
+                        )
                 );
 
         farmer.setStyle(
-                "-fx-font-size:11px;" +
-                "-fx-text-fill:#64748B;"
+                "-fx-text-fill:#64748B;" +
+                "-fx-font-size:12px;"
         );
-
-        farmer.setWrapText(
-                true
-        );
-
 
         // =================================================
         // BUTTONS
@@ -708,11 +571,9 @@ public class LiveMarketplace {
         HBox buttons =
                 new HBox(8);
 
-        HBox.setHgrow(
-                buttons,
-                Priority.ALWAYS
-        );
-
+        // -------------------------------------------------
+        // VIEW BUTTON
+        // -------------------------------------------------
 
         Button view =
                 new Button(
@@ -722,57 +583,97 @@ public class LiveMarketplace {
         view.setStyle(
                 "-fx-background-color:white;" +
                 "-fx-border-color:#A2D9CE;" +
-                "-fx-border-radius:7px;" +
-                "-fx-background-radius:7px;" +
                 "-fx-text-fill:#117864;" +
                 "-fx-font-weight:bold;" +
+                "-fx-background-radius:8;" +
                 "-fx-cursor:hand;"
         );
 
+        // -------------------------------------------------
+        // ADD TO CART BUTTON
+        // -------------------------------------------------
 
-        view.setOnAction(
-                e -> showProductDetails(
-                        product
-                )
-        );
-
-
-        Button cart =
+        Button add =
                 new Button(
                         "Add to Cart"
                 );
 
-        cart.setStyle(
+        add.setStyle(
                 "-fx-background-color:#117864;" +
                 "-fx-text-fill:white;" +
                 "-fx-font-weight:bold;" +
-                "-fx-background-radius:7px;" +
-                "-fx-padding:7 12;" +
+                "-fx-background-radius:8;" +
                 "-fx-cursor:hand;"
         );
 
+        // -------------------------------------------------
+        // WISHLIST BUTTON
+        // -------------------------------------------------
 
-        cart.setOnAction(
-                e -> addToCart(
-                        product
-                )
+        Button wishlist =
+                new Button(
+                        "♡"
+                );
+
+        wishlist.setStyle(
+                "-fx-background-color:white;" +
+                "-fx-border-color:#A2D9CE;" +
+                "-fx-text-fill:#117864;" +
+                "-fx-font-size:18px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
         );
 
+        // =================================================
+        // VIEW PRODUCT
+        // =================================================
 
-        HBox.setHgrow(
-                cart,
-                Priority.ALWAYS
+        view.setOnAction(
+                e ->
+                        navigator.setView(
+                                new ProductDetails(
+                                        navigator,
+                                        product
+                                ).getView()
+                        )
         );
 
+        // =================================================
+        // ADD TO CART
+        // =================================================
+
+        add.setOnAction(
+                e ->
+                        addProductToCart(
+                                product
+                        )
+        );
+
+        // =================================================
+        // ADD TO WISHLIST
+        // =================================================
+
+        wishlist.setOnAction(
+                e ->
+                        addProductToWishlist(
+                                product,
+                                wishlist
+                        )
+        );
+
+        // =================================================
+        // BUTTONS
+        // =================================================
 
         buttons.getChildren().addAll(
                 view,
-                cart
+                add,
+                wishlist
         );
 
-
         // =================================================
-        // CARD
+        // CARD CONTENT
         // =================================================
 
         card.getChildren().addAll(
@@ -785,154 +686,206 @@ public class LiveMarketplace {
                 buttons
         );
 
-
         return card;
     }
 
-
     // =====================================================
-    // ADD TO CART
+    // ADD PRODUCT TO CART
     // =====================================================
 
-    private void addToCart(
+    private void addProductToCart(
             Product product) {
 
-        /*
-         * We will connect your existing CartController here.
-         *
-         * For now this confirms the selected product.
-         */
+        if (product == null) {
+            return;
+        }
+
+        BuyerCartItem item =
+                new BuyerCartItem(
+                        null,
+                        navigator.getBuyerEmail(),
+                        product.getProductId(),
+                        product.getName(),
+                        product.getFarmerEmail(),
+                        product.getUnit(),
+                        product.getPrice(),
+                        1,
+                        product.getImageUrl()
+                );
+
+        boolean success =
+                cartController.addToCart(
+                        item
+                );
 
         Alert alert =
                 new Alert(
-                        Alert.AlertType.INFORMATION
+                        success
+                                ? Alert.AlertType.INFORMATION
+                                : Alert.AlertType.ERROR
                 );
 
-
-        alert.setTitle(
-                "Add to Cart"
-        );
-
-
         alert.setHeaderText(
-                product.getName()
+                null
         );
-
 
         alert.setContentText(
-                "Product selected successfully."
-                        + "\n\nPrice: ₹"
-                        + formatNumber(
-                                product.getPrice()
-                        )
-                        + " / "
-                        + safe(
-                                product.getUnit()
-                        )
+                success
+                        ? product.getName()
+                                + " added to cart."
+                        : "Unable to add product to cart."
         );
-
 
         alert.showAndWait();
     }
 
-
     // =====================================================
-    // PRODUCT DETAILS
+    // ADD PRODUCT TO WISHLIST
     // =====================================================
 
-    private void showProductDetails(
-            Product product) {
+    private void addProductToWishlist(
+            Product product,
+            Button wishlistButton) {
+
+        if (product == null) {
+            return;
+        }
+
+        String buyerEmail =
+                navigator.getBuyerEmail();
+
+        // =================================================
+        // CHECK ALREADY IN WISHLIST
+        // =================================================
+
+        boolean alreadyExists =
+                wishlistController.isInWishlist(
+                        buyerEmail,
+                        product.getProductId()
+                );
+
+        if (alreadyExists) {
+
+            Alert alert =
+                    new Alert(
+                            Alert.AlertType.INFORMATION
+                    );
+
+            alert.setHeaderText(
+                    null
+            );
+
+            alert.setContentText(
+                    product.getName()
+                            + " is already in your wishlist."
+            );
+
+            alert.showAndWait();
+
+            return;
+        }
+
+        // =================================================
+        // CREATE WISHLIST MODEL
+        // =================================================
+
+        WishlistItem item =
+                new WishlistItem(
+                        buyerEmail,
+                        product
+                );
+
+        // =================================================
+        // CONTROLLER
+        // =================================================
+
+        boolean success =
+                wishlistController.addToWishlist(
+                        item
+                );
+
+        // =================================================
+        // RESULT
+        // =================================================
 
         Alert alert =
                 new Alert(
-                        Alert.AlertType.INFORMATION
+                        success
+                                ? Alert.AlertType.INFORMATION
+                                : Alert.AlertType.ERROR
                 );
-
-
-        alert.setTitle(
-                "Product Details"
-        );
-
 
         alert.setHeaderText(
-                safe(
-                        product.getName()
-                )
+                null
         );
-
 
         alert.setContentText(
-
-                "Category: "
-                        + safe(
-                                product.getCategory()
-                        )
-
-                        + "\n\nPrice: ₹"
-                        + formatNumber(
-                                product.getPrice()
-                        )
-                        + " / "
-                        + safe(
-                                product.getUnit()
-                        )
-
-                        + "\n\nAvailable Stock: "
-                        + formatNumber(
-                                product.getStock()
-                        )
-                        + " "
-                        + safe(
-                                product.getUnit()
-                        )
-
-                        + "\n\nFarmer: "
-                        + safe(
-                                product.getFarmerEmail()
-                        )
-
-                        + "\n\nVariety: "
-                        + safe(
-                                product.getVariety()
-                        )
-
-                        + "\n\nHarvest Date: "
-                        + safe(
-                                product.getHarvestDate()
-                        )
-
-                        + "\n\nDescription:\n"
-                        + safe(
-                                product.getDescription()
-                        )
+                success
+                        ? product.getName()
+                                + " added to wishlist."
+                        : "Unable to add product to wishlist."
         );
-
 
         alert.showAndWait();
+
+        // =================================================
+        // CHANGE HEART
+        // =================================================
+
+        if (success) {
+
+            wishlistButton.setText(
+                    "♥"
+            );
+
+            wishlistButton.setStyle(
+                    "-fx-background-color:#FEE2E2;" +
+                    "-fx-border-color:#FCA5A5;" +
+                    "-fx-text-fill:#DC2626;" +
+                    "-fx-font-size:18px;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-background-radius:8;" +
+                    "-fx-cursor:hand;"
+            );
+        }
     }
 
-
     // =====================================================
-    // IMAGE PLACEHOLDER
+    // CREATE IMAGE
     // =====================================================
 
-    private void addPlaceholder(
-            StackPane imageBox) {
+    private ImageView createImage(
+            String url) {
 
-        Label placeholder =
-                new Label("🌱");
+        try {
 
-        placeholder.setStyle(
-                "-fx-font-size:35px;"
-        );
+            if (url == null ||
+                    url.trim().isEmpty()) {
 
+                return null;
+            }
 
-        imageBox.getChildren()
-                .add(
-                        placeholder
-                );
+            Image image =
+                    new Image(
+                            new URL(
+                                    url
+                            ).openStream()
+                    );
+
+            if (image.isError()) {
+
+                return null;
+            }
+
+            return new ImageView(
+                    image
+            );
+
+        } catch (Exception e) {
+
+            return null;
+        }
     }
-
 
     // =====================================================
     // SAFE STRING
@@ -946,22 +899,19 @@ public class LiveMarketplace {
                 : value;
     }
 
-
     // =====================================================
     // FORMAT NUMBER
     // =====================================================
 
-    private String formatNumber(
+    private String format(
             double value) {
 
-        if (value == Math.floor(value)) {
+        if (value == Math.rint(value)) {
 
-            return String.format(
-                    "%.0f",
-                    value
+            return String.valueOf(
+                    (long) value
             );
         }
-
 
         return String.format(
                 "%.2f",

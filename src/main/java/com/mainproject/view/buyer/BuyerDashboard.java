@@ -1,8 +1,7 @@
 package com.mainproject.view.buyer;
 
-import com.mainproject.util.LanguageManager;
-
 import com.mainproject.model.User;
+import com.mainproject.util.LanguageManager;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,7 +14,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-
 public class BuyerDashboard {
 
     private final User currentUser;
@@ -24,25 +22,43 @@ public class BuyerDashboard {
     private BorderPane mainLayout;
 
     private String currentPage = "Dashboard";
+    private String buyerEmail;
 
     // =====================================================
     // CONSTRUCTOR
     // =====================================================
 
     public BuyerDashboard(User user) {
+
         this.currentUser = user;
 
         System.out.println("====================================");
         System.out.println("Opening Buyer Dashboard");
 
         if (user != null) {
-            System.out.println("Buyer Name  : " + user.getFullName());
-            System.out.println("Buyer Email : " + user.getEmail());
-            System.out.println("Buyer Role  : " + user.getRole());
+
+            System.out.println(
+                    "Buyer Name  : " + user.getFullName()
+            );
+
+            System.out.println(
+                    "Buyer Email : " + user.getEmail()
+            );
+
+            System.out.println(
+                    "Buyer Role  : " + user.getRole()
+            );
         }
 
         System.out.println("====================================");
     }
+    // =====================================================
+// GET LOGGED-IN BUYER EMAIL
+// =====================================================
+
+public String getUserEmail1() {
+    return buyerEmail;
+}
 
     // =====================================================
     // GET CURRENT USER
@@ -59,10 +75,21 @@ public class BuyerDashboard {
     public String getBuyerEmail() {
 
         if (currentUser == null) {
-            return null;
+            return "";
         }
 
-        return currentUser.getEmail();
+        String email = currentUser.getEmail();
+
+        return email == null ? "" : email;
+    }
+
+    // =====================================================
+    // GET USER EMAIL
+    // FIX FOR NOTIFICATION.JAVA
+    // =====================================================
+
+    public String getUserEmail() {
+        return getBuyerEmail();
     }
 
     // =====================================================
@@ -95,24 +122,11 @@ public class BuyerDashboard {
             mainLayout = new BorderPane();
 
             mainLayout.setStyle(
-                    "-fx-background-color: #F8FAFC;"
+                    "-fx-background-color:#F8FAFC;"
             );
-
-            // =================================================
-            // SIDEBAR
-            // =================================================
 
             mainLayout.setLeft(
                     createSidebar()
-            );
-
-            // =================================================
-            // DEFAULT PAGE
-            // =================================================
-
-            setView(
-                    new DashboardOverview(this)
-                            .getView()
             );
 
             scene = new Scene(
@@ -120,6 +134,8 @@ public class BuyerDashboard {
                     1400,
                     900
             );
+
+            navigateTo("Dashboard");
         }
 
         return scene;
@@ -139,34 +155,347 @@ public class BuyerDashboard {
 
     public void setView(Node viewNode) {
 
-        if (mainLayout == null) {
+        if (mainLayout == null || viewNode == null) {
             return;
         }
 
         mainLayout.setCenter(viewNode);
     }
 
+    // =====================================================
+    // CURRENT PAGE
+    // =====================================================
+
     public void setCurrentPage(String page) {
-        currentPage = page;
+
+        if (page != null && !page.trim().isEmpty()) {
+            currentPage = page;
+        }
     }
 
-    public void refreshLanguage() {
-        if (mainLayout == null) return;
-        mainLayout.setLeft(createSidebar());
-        switch (currentPage) {
-            case "Marketplace": setView(new LiveMarketplace(this).getView()); break;
-            case "My Orders": setView(new MyOrders(this).getView()); break;
-            case "Wishlist": setView(new Wishlist(this).getView()); break;
-            case "Farmers": setView(new FarmerProfile(this).getView()); break;
-            case "Search & Rent": setView(new SearchFilter(this).getView()); break;
-            case "Crop Prices": setView(new CropPrices(this).getView()); break;
-            case "AI Recommendations": setView(new AiRecommendations(this).getView()); break;
-            case "Messages": setView(new ChatWithFarmer(this).getView()); break;
-            case "Notifications": setView(new Notification(this).getView()); break;
-            case "Voice Assistant": setView(new VoiceAssistant(this).getView()); break;
-            case "Settings": setView(new Settings(this, new Runnable() { @Override public void run() { setCurrentPage("Settings"); refreshLanguage(); } }).getView()); break;
-            default: currentPage = "Dashboard"; setView(new DashboardOverview(this).getView()); break;
+    public String getCurrentPage() {
+        return currentPage;
+    }
+
+    // =====================================================
+    // NAVIGATION
+    // =====================================================
+
+    public void navigateTo(String page) {
+
+        if (page == null || page.trim().isEmpty()) {
+            page = "Dashboard";
         }
+
+        currentPage = page;
+
+        try {
+
+            Node viewNode;
+
+            switch (page) {
+
+                // =============================================
+                // DASHBOARD
+                // =============================================
+
+                case "Dashboard":
+
+                    viewNode =
+                            new DashboardOverview(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // LIVE NOW
+                // =============================================
+
+                case "Live Now":
+
+                    viewNode =
+                            new LiveViewerScreen(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // MARKETPLACE
+                // =============================================
+
+                case "Marketplace":
+
+                    viewNode =
+                            new LiveMarketplace(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // MY ORDERS
+                // =============================================
+
+                case "My Orders":
+
+                    viewNode =
+                            new MyOrders(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // WISHLIST
+                // =============================================
+
+                case "Wishlist":
+
+                    viewNode =
+                            new Wishlist(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // FARMERS
+                // =============================================
+
+                case "Farmers":
+
+                    viewNode =
+                            new FarmerProfile(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // SEARCH & RENT
+                // =============================================
+
+                case "Search & Rent":
+
+                    viewNode =
+                            new SearchAndRent(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // CROP PRICES
+                // =============================================
+
+                case "Crop Prices":
+
+                    viewNode =
+                            new CropPrices(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // AI RECOMMENDATIONS
+                // =============================================
+
+                case "AI Recommendations":
+
+                    viewNode =
+                            new AiRecommendations(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // MESSAGES
+                // =============================================
+
+                case "Messages":
+
+                    viewNode =
+                            new ChatWithFarmer(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // NOTIFICATIONS
+                // =============================================
+
+                case "Notifications":
+
+                    viewNode =
+                            new Notification(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // VOICE ASSISTANT
+                // =============================================
+
+                case "Voice Assistant":
+
+                    viewNode =
+                            new VoiceAssistant(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
+                // SETTINGS
+                // =============================================
+
+                case "Settings":
+
+                    viewNode =
+                            new Settings(
+                                    this,
+                                    new Runnable() {
+
+                                        @Override
+                                        public void run() {
+
+                                            setCurrentPage(
+                                                    "Settings"
+                                            );
+
+                                            refreshLanguage();
+                                        }
+                                    }
+                            ).getView();
+
+                    break;
+
+                // =============================================
+                // DEFAULT
+                // =============================================
+
+                default:
+
+                    currentPage = "Dashboard";
+
+                    viewNode =
+                            new DashboardOverview(this)
+                                    .getView();
+
+                    break;
+            }
+
+            // =============================================
+            // SET CENTER VIEW
+            // =============================================
+
+            setView(viewNode);
+
+            // =============================================
+            // REFRESH SIDEBAR
+            // =============================================
+
+            if (mainLayout != null) {
+
+                mainLayout.setLeft(
+                        createSidebar()
+                );
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "===================================="
+            );
+
+            System.out.println(
+                    "Error opening page: " + page
+            );
+
+            e.printStackTrace();
+
+            System.out.println(
+                    "===================================="
+            );
+
+            showErrorPage(
+                    "Unable to open " + page,
+                    "Please check the page class and try again."
+            );
+        }
+    }
+
+    // =====================================================
+    // REFRESH LANGUAGE
+    // =====================================================
+
+    public void refreshLanguage() {
+
+        if (mainLayout == null) {
+            return;
+        }
+
+        String page = currentPage;
+
+        mainLayout.setLeft(
+                createSidebar()
+        );
+
+        navigateTo(page);
+    }
+
+    // =====================================================
+    // ERROR PAGE
+    // =====================================================
+
+    private void showErrorPage(
+            String titleText,
+            String messageText) {
+
+        VBox root = new VBox(12);
+
+        root.setPadding(
+                new Insets(40)
+        );
+
+        root.setAlignment(
+                Pos.CENTER
+        );
+
+        Label title =
+                new Label(titleText);
+
+        title.setStyle(
+                "-fx-font-size:22px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#B91C1C;"
+        );
+
+        Label message =
+                new Label(messageText);
+
+        message.setStyle(
+                "-fx-font-size:14px;" +
+                "-fx-text-fill:#64748B;"
+        );
+
+        Button retry =
+                new Button("← Back to Dashboard");
+
+        retry.setStyle(
+                "-fx-background-color:#166534;" +
+                "-fx-text-fill:white;" +
+                "-fx-font-weight:bold;" +
+                "-fx-padding:10 18;" +
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
+        );
+
+        retry.setOnAction(
+                e -> navigateTo("Dashboard")
+        );
+
+        root.getChildren().addAll(
+                title,
+                message,
+                retry
+        );
+
+        setView(root);
     }
 
     // =====================================================
@@ -175,23 +504,26 @@ public class BuyerDashboard {
 
     private VBox createSidebar() {
 
-        VBox sidebar = new VBox(8);
+        VBox sidebar =
+                new VBox(10);
 
-        sidebar.setPrefWidth(240);
+        sidebar.setPrefWidth(260);
+        sidebar.setMinWidth(260);
+        sidebar.setMaxWidth(260);
 
         sidebar.setPadding(
                 new Insets(
                         20,
                         12,
-                        20,
+                        18,
                         12
                 )
         );
 
         sidebar.setStyle(
-                "-fx-background-color: #FFFFFF;" +
-                "-fx-border-color: #E2E8F0;" +
-                "-fx-border-width: 0 1 0 0;"
+                "-fx-background-color:#FFFFFF;" +
+                "-fx-border-color:#E2E8F0;" +
+                "-fx-border-width:0 1 0 0;"
         );
 
         // =================================================
@@ -199,133 +531,178 @@ public class BuyerDashboard {
         // =================================================
 
         Label brandLabel =
-                new Label("🌿 AgriLink");
+                new Label("🌿 AgriVerse");
 
         brandLabel.setStyle(
-                "-fx-font-size: 22px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: #166534;"
+                "-fx-font-size:25px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#166534;"
         );
 
         brandLabel.setPadding(
                 new Insets(
-                        0,
-                        0,
-                        15,
-                        10
+                        4,
+                        8,
+                        12,
+                        8
                 )
         );
 
+        Label accountType =
+                new Label("BUYER PORTAL");
+
+        accountType.setStyle(
+                "-fx-font-size:10px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#94A3B8;" +
+                "-fx-padding:0 8 8 8;"
+        );
+
         // =================================================
-        // NAVIGATION
+        // USER CARD
         // =================================================
 
-        VBox navItems = new VBox(4);
+        VBox userCard =
+                new VBox(3);
+
+        userCard.setPadding(
+                new Insets(12)
+        );
+
+        userCard.setStyle(
+                "-fx-background-color:#F0FDF4;" +
+                "-fx-background-radius:10;" +
+                "-fx-border-color:#DCFCE7;" +
+                "-fx-border-radius:10;"
+        );
+
+        Label welcome =
+                new Label("Welcome back,");
+
+        welcome.setStyle(
+                "-fx-font-size:11px;" +
+                "-fx-text-fill:#64748B;"
+        );
+
+        Label buyerName =
+                new Label(getBuyerName());
+
+        buyerName.setStyle(
+                "-fx-font-size:14px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#166534;"
+        );
+
+        userCard.getChildren().addAll(
+                welcome,
+                buyerName
+        );
+
+        // =================================================
+        // NAVIGATION ITEMS
+        // =================================================
+
+        VBox navItems =
+                new VBox(4);
+
+        // =================================================
+        // OVERVIEW
+        // =================================================
+
+        addSectionLabel(
+                navItems,
+                "OVERVIEW"
+        );
 
         navItems.getChildren().addAll(
 
                 createNavButton(
-                        "📊 Dashboard",
-                        () -> setView(
-                                new DashboardOverview(this)
-                                        .getView()
-                        )
+                        "📊",
+                        "Dashboard"
                 ),
 
                 createNavButton(
-                        "🔴 Live Now",
-                        () -> setView(
-                                new LiveViewerScreen(this)
-                                        .getView()
-                        )
+                        "🔴",
+                        "Live Now"
                 ),
 
                 createNavButton(
-                        "🏪 Marketplace",
-                        () -> setView(
-                                new LiveMarketplace(this)
-                                        .getView()
-                        )
+                        "🏪",
+                        "Marketplace"
                 ),
 
                 createNavButton(
-                        "📦 My Orders",
-                        () -> setView(
-                                new MyOrders(this)
-                                        .getView()
-                        )
+                        "📦",
+                        "My Orders"
                 ),
 
                 createNavButton(
-                        "❤️ Wishlist",
-                        () -> setView(
-                                new Wishlist(this)
-                                        .getView()
-                        )
+                        "❤️",
+                        "Wishlist"
+                )
+        );
+
+        // =================================================
+        // EXPLORE
+        // =================================================
+
+        addSectionLabel(
+                navItems,
+                "EXPLORE"
+        );
+
+        navItems.getChildren().addAll(
+
+                createNavButton(
+                        "👨‍🌾",
+                        "Farmers"
                 ),
 
                 createNavButton(
-                        "👨‍🌾 Farmers",
-                        () -> setView(
-                                new FarmerProfile(this)
-                                        .getView()
-                        )
+                        "🚜",
+                        "Search & Rent"
                 ),
 
                 createNavButton(
-                        "🚜 Search & Rent",
-                        () -> setView(
-                                new SearchFilter(this)
-                                        .getView()
-                        )
+                        "📈",
+                        "Crop Prices"
                 ),
 
                 createNavButton(
-                        "📈 Crop Prices",
-                        () -> setView(
-                                new CropPrices(this)
-                                        .getView()
-                        )
+                        "✨",
+                        "AI Recommendations"
+                )
+        );
+
+        // =================================================
+        // ACCOUNT
+        // =================================================
+
+        addSectionLabel(
+                navItems,
+                "ACCOUNT"
+        );
+
+        navItems.getChildren().addAll(
+
+                createNavButton(
+                        "💬",
+                        "Messages"
                 ),
 
                 createNavButton(
-                        "✨ AI Recommendations",
-                        () -> setView(
-                                new AiRecommendations(this)
-                                        .getView()
-                        )
+                        "🔔",
+                        "Notifications"
                 ),
 
                 createNavButton(
-                        "💬 Messages",
-                        () -> setView(
-                                new ChatWithFarmer(this)
-                                        .getView()
-                        )
+                        "🎙️",
+                        "Voice Assistant"
                 ),
 
                 createNavButton(
-                        "🔔 Notifications",
-                        () -> setView(
-                                new Notification(this)
-                                        .getView()
-                        )
-                ),
-
-                createNavButton(
-                        "🎙️ Voice Assistant",
-                        () -> setView(
-                                new VoiceAssistant(this)
-                                        .getView()
-                        )
-                ),
-
-                createNavButton(
-                        "⚙️ Settings",
-                        () -> setView(
-                                new Settings(this, new Runnable() { @Override public void run() { setCurrentPage("Settings"); refreshLanguage(); } })
-                                        .getView()
-                        )
+                        "⚙️",
+                        "Settings"
                 )
         );
 
@@ -338,10 +715,15 @@ public class BuyerDashboard {
 
         navScroll.setFitToWidth(true);
 
+        navScroll.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+
         navScroll.setStyle(
-                "-fx-background-color: transparent;" +
-                "-fx-background: transparent;" +
-                "-fx-border-color: transparent;"
+                "-fx-background-color:transparent;" +
+                "-fx-background:transparent;" +
+                "-fx-border-color:transparent;" +
+                "-fx-padding:0;"
         );
 
         VBox.setVgrow(
@@ -354,39 +736,86 @@ public class BuyerDashboard {
         // =================================================
 
         Button btnLogout =
-                new Button("🚪 Logout");
+                new Button("🚪   Logout");
 
         btnLogout.setMaxWidth(
                 Double.MAX_VALUE
         );
 
-        btnLogout.setStyle(
-                "-fx-background-color: #FEE2E2;" +
-                "-fx-text-fill: #DC2626;" +
-                "-fx-font-weight: bold;" +
-                "-fx-padding: 10;" +
-                "-fx-background-radius: 8;" +
-                "-fx-cursor: hand;"
+        btnLogout.setAlignment(
+                Pos.CENTER
         );
 
-        // Keep your existing logout logic here
+        applyLogoutStyle(
+                btnLogout,
+                false
+        );
+
+        btnLogout.setOnMouseEntered(
+                e -> applyLogoutStyle(
+                        btnLogout,
+                        true
+                )
+        );
+
+        btnLogout.setOnMouseExited(
+                e -> applyLogoutStyle(
+                        btnLogout,
+                        false
+                )
+        );
+
         btnLogout.setOnAction(e -> {
 
             System.out.println(
                     "Buyer logout clicked."
             );
 
-            // Add your existing logout code here.
+            /*
+             * Keep your existing logout logic here.
+             *
+             * Example:
+             *
+             * LoginScreen.Homestage.setScene(...);
+             */
         });
+
+        // =================================================
+        // ADD ALL
+        // =================================================
 
         sidebar.getChildren().addAll(
                 brandLabel,
+                accountType,
+                userCard,
                 navScroll,
                 btnLogout
         );
 
         LanguageManager.apply(sidebar);
+
         return sidebar;
+    }
+
+    // =====================================================
+    // SECTION LABEL
+    // =====================================================
+
+    private void addSectionLabel(
+            VBox container,
+            String text) {
+
+        Label label =
+                new Label(text);
+
+        label.setStyle(
+                "-fx-font-size:10px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#94A3B8;" +
+                "-fx-padding:12 10 5 10;"
+        );
+
+        container.getChildren().add(label);
     }
 
     // =====================================================
@@ -394,11 +823,13 @@ public class BuyerDashboard {
     // =====================================================
 
     private Button createNavButton(
-            String title,
-            Runnable action) {
+            String icon,
+            String title) {
 
         Button btn =
-                new Button(title);
+                new Button(
+                        icon + "   " + title
+                );
 
         btn.setMaxWidth(
                 Double.MAX_VALUE
@@ -408,41 +839,125 @@ public class BuyerDashboard {
                 Pos.CENTER_LEFT
         );
 
-        btn.setStyle(
-                "-fx-background-color: transparent;" +
-                "-fx-text-fill: #1E293B;" +
-                "-fx-font-size: 13px;" +
-                "-fx-padding: 10 14;" +
-                "-fx-background-radius: 8;" +
-                "-fx-cursor: hand;"
+        boolean active =
+                title.equalsIgnoreCase(
+                        currentPage
+                );
+
+        applyNavButtonStyle(
+                btn,
+                active
         );
 
-        btn.setOnMouseEntered(e ->
-                btn.setStyle(
-                        "-fx-background-color: #F1F5F9;" +
-                        "-fx-text-fill: #166534;" +
-                        "-fx-font-size: 13px;" +
-                        "-fx-padding: 10 14;" +
-                        "-fx-background-radius: 8;" +
-                        "-fx-cursor: hand;"
-                )
-        );
+        btn.setOnMouseEntered(e -> {
 
-        btn.setOnMouseExited(e ->
-                btn.setStyle(
-                        "-fx-background-color: transparent;" +
-                        "-fx-text-fill: #1E293B;" +
-                        "-fx-font-size: 13px;" +
-                        "-fx-padding: 10 14;" +
-                        "-fx-background-radius: 8;" +
-                        "-fx-cursor: hand;"
-                )
-        );
+            if (!title.equalsIgnoreCase(currentPage)) {
+
+                applyNavHoverStyle(
+                        btn
+                );
+            }
+        });
+
+        btn.setOnMouseExited(e -> {
+
+            if (!title.equalsIgnoreCase(currentPage)) {
+
+                applyNavButtonStyle(
+                        btn,
+                        false
+                );
+            }
+        });
 
         btn.setOnAction(
-                e -> action.run()
+                e -> navigateTo(title)
         );
 
         return btn;
+    }
+
+    // =====================================================
+    // NAV BUTTON STYLE
+    // =====================================================
+
+    private void applyNavButtonStyle(
+            Button button,
+            boolean active) {
+
+        if (active) {
+
+            button.setStyle(
+                    "-fx-background-color:#DCFCE7;" +
+                    "-fx-text-fill:#166534;" +
+                    "-fx-font-size:13px;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-padding:10 14;" +
+                    "-fx-background-radius:8;" +
+                    "-fx-cursor:hand;"
+            );
+
+        } else {
+
+            button.setStyle(
+                    "-fx-background-color:transparent;" +
+                    "-fx-text-fill:#334155;" +
+                    "-fx-font-size:13px;" +
+                    "-fx-padding:10 14;" +
+                    "-fx-background-radius:8;" +
+                    "-fx-cursor:hand;"
+            );
+        }
+    }
+
+    // =====================================================
+    // NAV HOVER STYLE
+    // =====================================================
+
+    private void applyNavHoverStyle(
+            Button button) {
+
+        button.setStyle(
+                "-fx-background-color:#F1F5F9;" +
+                "-fx-text-fill:#166534;" +
+                "-fx-font-size:13px;" +
+                "-fx-padding:10 14;" +
+                "-fx-background-radius:8;" +
+                "-fx-cursor:hand;"
+        );
+    }
+
+    // =====================================================
+    // LOGOUT STYLE
+    // =====================================================
+
+    private void applyLogoutStyle(
+            Button button,
+            boolean hover) {
+
+        if (hover) {
+
+            button.setStyle(
+                    "-fx-background-color:#FEE2E2;" +
+                    "-fx-text-fill:#B91C1C;" +
+                    "-fx-font-size:13px;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-padding:11 14;" +
+                    "-fx-background-radius:9;" +
+                    "-fx-cursor:hand;"
+            );
+
+        } else {
+
+            button.setStyle(
+                    "-fx-background-color:#FEF2F2;" +
+                    "-fx-text-fill:#DC2626;" +
+                    "-fx-font-size:13px;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-padding:11 14;" +
+                    "-fx-background-radius:9;" +
+                    "-fx-cursor:hand;"
+            );
+        }
     }
 }

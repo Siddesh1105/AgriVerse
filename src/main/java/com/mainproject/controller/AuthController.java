@@ -4,16 +4,21 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 
 import org.json.JSONObject;
 
 public class AuthController {
 
-    private final String API_KEY =
+    private static final String API_KEY =
             "AIzaSyA3HO6Q9q5H6CT2LFrazZL28nmfLo8Vd1M";
 
     private final HttpClient client =
-            HttpClient.newHttpClient();
+            HttpClient.newBuilder()
+                    .connectTimeout(
+                            Duration.ofSeconds(15)
+                    )
+                    .build();
 
     // =====================================================
     // SIGN UP
@@ -31,30 +36,14 @@ public class AuthController {
 
         try {
 
-            URI uri = URI.create(
+            String url =
                     "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key="
-                            + API_KEY
-            );
-
-            HttpRequest request =
-                    HttpRequest.newBuilder()
-                            .uri(uri)
-                            .header(
-                                    "Content-Type",
-                                    "application/json"
-                            )
-                            .POST(
-                                    HttpRequest.BodyPublishers
-                                            .ofString(
-                                                    payload.toString()
-                                            )
-                            )
-                            .build();
+                            + API_KEY;
 
             HttpResponse<String> response =
-                    client.send(
-                            request,
-                            HttpResponse.BodyHandlers.ofString()
+                    sendPostRequest(
+                            url,
+                            payload
                     );
 
             System.out.println(
@@ -71,7 +60,7 @@ public class AuthController {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            printNetworkError(e);
 
             return false;
         }
@@ -93,30 +82,14 @@ public class AuthController {
 
         try {
 
-            URI uri = URI.create(
+            String url =
                     "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key="
-                            + API_KEY
-            );
-
-            HttpRequest request =
-                    HttpRequest.newBuilder()
-                            .uri(uri)
-                            .header(
-                                    "Content-Type",
-                                    "application/json"
-                            )
-                            .POST(
-                                    HttpRequest.BodyPublishers
-                                            .ofString(
-                                                    payload.toString()
-                                            )
-                            )
-                            .build();
+                            + API_KEY;
 
             HttpResponse<String> response =
-                    client.send(
-                            request,
-                            HttpResponse.BodyHandlers.ofString()
+                    sendPostRequest(
+                            url,
+                            payload
                     );
 
             System.out.println(
@@ -142,7 +115,8 @@ public class AuthController {
                         );
 
                 System.out.println(
-                        "Firebase UID: " + uid
+                        "Firebase UID: "
+                                + uid
                 );
 
                 return uid;
@@ -152,7 +126,7 @@ public class AuthController {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            printNetworkError(e);
 
             return null;
         }
@@ -166,13 +140,31 @@ public class AuthController {
             String email,
             String password) {
 
+        System.out.println(
+                "Login attempt for: "
+                        + email
+        );
+
         String idToken =
                 authenticateAndGetToken(
                         email,
                         password
                 );
 
-        return idToken != null;
+        if (idToken != null) {
+
+            System.out.println(
+                    "Firebase Login Successful!"
+            );
+
+            return true;
+        }
+
+        System.out.println(
+                "Firebase Login Failed!"
+        );
+
+        return false;
     }
 
     // =====================================================
@@ -191,30 +183,14 @@ public class AuthController {
 
         try {
 
-            URI uri = URI.create(
+            String url =
                     "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
-                            + API_KEY
-            );
-
-            HttpRequest request =
-                    HttpRequest.newBuilder()
-                            .uri(uri)
-                            .header(
-                                    "Content-Type",
-                                    "application/json"
-                            )
-                            .POST(
-                                    HttpRequest.BodyPublishers
-                                            .ofString(
-                                                    payload.toString()
-                                            )
-                            )
-                            .build();
+                            + API_KEY;
 
             HttpResponse<String> response =
-                    client.send(
-                            request,
-                            HttpResponse.BodyHandlers.ofString()
+                    sendPostRequest(
+                            url,
+                            payload
                     );
 
             System.out.println(
@@ -256,7 +232,7 @@ public class AuthController {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            printNetworkError(e);
 
             return null;
         }
@@ -265,12 +241,6 @@ public class AuthController {
     // =====================================================
     // CHANGE PASSWORD
     // =====================================================
-    //
-    // 1. Verify current password
-    // 2. Get Firebase ID token
-    // 3. Update password using Firebase
-    //
-    // =====================================================
 
     public boolean changePassword(
             String email,
@@ -278,10 +248,6 @@ public class AuthController {
             String newPassword) {
 
         try {
-
-            // -------------------------------------------------
-            // VALIDATION
-            // -------------------------------------------------
 
             if (email == null
                     || email.trim().isEmpty()
@@ -297,10 +263,6 @@ public class AuthController {
                 return false;
             }
 
-            // -------------------------------------------------
-            // VERIFY CURRENT PASSWORD
-            // -------------------------------------------------
-
             System.out.println(
                     "Verifying current password for: "
                             + email
@@ -312,7 +274,6 @@ public class AuthController {
                             currentPassword
                     );
 
-            // Current password is incorrect
             if (idToken == null) {
 
                 System.out.println(
@@ -325,10 +286,6 @@ public class AuthController {
             System.out.println(
                     "Current password verified successfully."
             );
-
-            // -------------------------------------------------
-            // UPDATE PASSWORD IN FIREBASE
-            // -------------------------------------------------
 
             JSONObject payload =
                     new JSONObject()
@@ -345,30 +302,14 @@ public class AuthController {
                                     true
                             );
 
-            URI uri = URI.create(
+            String url =
                     "https://identitytoolkit.googleapis.com/v1/accounts:update?key="
-                            + API_KEY
-            );
-
-            HttpRequest request =
-                    HttpRequest.newBuilder()
-                            .uri(uri)
-                            .header(
-                                    "Content-Type",
-                                    "application/json"
-                            )
-                            .POST(
-                                    HttpRequest.BodyPublishers
-                                            .ofString(
-                                                    payload.toString()
-                                            )
-                            )
-                            .build();
+                            + API_KEY;
 
             HttpResponse<String> response =
-                    client.send(
-                            request,
-                            HttpResponse.BodyHandlers.ofString()
+                    sendPostRequest(
+                            url,
+                            payload
                     );
 
             System.out.println(
@@ -381,10 +322,6 @@ public class AuthController {
                             + response.body()
             );
 
-            // -------------------------------------------------
-            // SUCCESS
-            // -------------------------------------------------
-
             if (response.statusCode() == 200) {
 
                 System.out.println(
@@ -394,10 +331,6 @@ public class AuthController {
                 return true;
             }
 
-            // -------------------------------------------------
-            // FAILED
-            // -------------------------------------------------
-
             System.out.println(
                     "Firebase password change failed."
             );
@@ -406,7 +339,7 @@ public class AuthController {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            printNetworkError(e);
 
             return false;
         }
@@ -432,30 +365,14 @@ public class AuthController {
 
         try {
 
-            URI uri = URI.create(
+            String url =
                     "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key="
-                            + API_KEY
-            );
-
-            HttpRequest request =
-                    HttpRequest.newBuilder()
-                            .uri(uri)
-                            .header(
-                                    "Content-Type",
-                                    "application/json"
-                            )
-                            .POST(
-                                    HttpRequest.BodyPublishers
-                                            .ofString(
-                                                    payload.toString()
-                                            )
-                            )
-                            .build();
+                            + API_KEY;
 
             HttpResponse<String> response =
-                    client.send(
-                            request,
-                            HttpResponse.BodyHandlers.ofString()
+                    sendPostRequest(
+                            url,
+                            payload
                     );
 
             System.out.println(
@@ -472,9 +389,100 @@ public class AuthController {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            printNetworkError(e);
 
             return false;
         }
+    }
+
+    // =====================================================
+    // COMMON POST REQUEST
+    // =====================================================
+
+    private HttpResponse<String> sendPostRequest(
+            String url,
+            JSONObject payload)
+            throws Exception {
+
+        HttpRequest request =
+                HttpRequest.newBuilder()
+                        .uri(
+                                URI.create(url)
+                        )
+                        .timeout(
+                                Duration.ofSeconds(20)
+                        )
+                        .header(
+                                "Content-Type",
+                                "application/json"
+                        )
+                        .POST(
+                                HttpRequest.BodyPublishers
+                                        .ofString(
+                                                payload.toString()
+                                        )
+                        )
+                        .build();
+
+        return client.send(
+                request,
+                HttpResponse.BodyHandlers
+                        .ofString()
+        );
+    }
+
+    // =====================================================
+    // NETWORK ERROR
+    // =====================================================
+
+    private void printNetworkError(
+            Exception e) {
+
+        System.out.println(
+                "========================================"
+        );
+
+        System.out.println(
+                "Firebase Network Error"
+        );
+
+        System.out.println(
+                "========================================"
+        );
+
+        System.out.println(
+                "Message: "
+                        + e.getMessage()
+        );
+
+        System.out.println(
+                "Please check:"
+        );
+
+        System.out.println(
+                "1. Internet connection"
+        );
+
+        System.out.println(
+                "2. DNS connection"
+        );
+
+        System.out.println(
+                "3. Firewall / antivirus"
+        );
+
+        System.out.println(
+                "4. VPN / proxy settings"
+        );
+
+        System.out.println(
+                "5. Firebase API availability"
+        );
+
+        System.out.println(
+                "========================================"
+        );
+
+        e.printStackTrace();
     }
 }
