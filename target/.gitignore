@@ -1,6 +1,0 @@
-# Maven build output
-target/
-
-# Google Cloud / service account credentials
-src/main/resources/agrilink.json
-*.json
