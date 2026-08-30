@@ -345,4 +345,27 @@ public class EquipmentDAO {
             return false;
         }
     }
+    // =========================================================
+    // GET ALL EQUIPMENT (ADMIN - includes unavailable records)
+    // =========================================================
+
+    public List<Equipment> getAllEquipmentForAdmin() {
+        List<Equipment> list = new ArrayList<>();
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            QuerySnapshot snapshot = db.collection(COLLECTION).get().get(10, TimeUnit.SECONDS);
+            for (QueryDocumentSnapshot document : snapshot.getDocuments()) {
+                Equipment equipment = document.toObject(Equipment.class);
+                if (equipment != null) {
+                    equipment.setEquipmentId(document.getId());
+                    if (equipment.getStatus() == null || equipment.getStatus().isBlank()) {
+                        equipment.setStatus(equipment.isAvailable() ? "Approved" : "Pending");
+                    }
+                    list.add(equipment);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
 }

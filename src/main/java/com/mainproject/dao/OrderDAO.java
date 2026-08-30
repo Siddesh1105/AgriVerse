@@ -536,4 +536,26 @@ public class OrderDAO {
                 )
         );
     }
+    // =====================================================
+    // GET ALL ORDERS (ADMIN)
+    // =====================================================
+
+    public List<Order> getAllOrders() {
+        List<Order> list = new ArrayList<>();
+        try {
+            QuerySnapshot snapshot = db.collection(COLLECTION).get().get();
+            for (QueryDocumentSnapshot document : snapshot.getDocuments()) {
+                Order order = document.toObject(Order.class);
+                if (order != null) {
+                    order.setOrderId(document.getId());
+                    list.add(order);
+                }
+            }
+            list.sort(Comparator.comparing(Order::getOrderDate, Comparator.nullsLast(Comparator.reverseOrder())));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 }

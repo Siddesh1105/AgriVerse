@@ -1,26 +1,23 @@
 package com.mainproject.dao;
 
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.mainproject.config.FirebaseConfig;
-import com.mainproject.model.User;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QuerySnapshot;
+import com.mainproject.config.FirebaseConfig;
+import com.mainproject.model.User;
+
 public class UserDAO {
 
-    private Firestore db;
-
-    // =====================================================
-    // CONSTRUCTOR
-    // =====================================================
+    private final Firestore db;
 
     public UserDAO() {
-        db = FirebaseConfig.getFirestore();
+        this.db = FirebaseConfig.getFirestore();
     }
 
     // =====================================================
@@ -32,119 +29,56 @@ public class UserDAO {
         try {
 
             if (user == null) {
-
-                System.out.println(
-                        "Cannot save null user."
-                );
-
                 return false;
             }
 
             if (user.getEmail() == null ||
                     user.getEmail().trim().isEmpty()) {
 
-                System.out.println(
-                        "Cannot save user: email is empty."
-                );
-
                 return false;
             }
 
-            String email =
-                    user.getEmail().trim();
+            if (user.getUid() == null ||
+                    user.getUid().trim().isEmpty()) {
 
-            Map<String, Object> userData =
-                    new HashMap<>();
+                user.setUid(
+                        user.getEmail().trim()
+                );
+            }
 
-            userData.put(
-                    "uid",
-                    user.getUid()
-            );
+            /*
+             * Every new Farmer is Pending unless a
+             * verification status has already been set.
+             */
+            if ("Farmer".equalsIgnoreCase(
+                    user.getRole())) {
 
-            userData.put(
-                    "fullName",
-                    user.getFullName()
-            );
+                if (user.getVerificationStatus() == null ||
+                        user.getVerificationStatus()
+                                .trim()
+                                .isEmpty()) {
 
-            userData.put(
-                    "email",
-                    email
-            );
+                    user.setVerificationStatus(
+                            "Pending"
+                    );
+                }
 
-            userData.put(
-                    "mobileNumber",
-                    user.getMobileNumber()
-            );
+                if (user.getRejectionReason() == null) {
+                    user.setRejectionReason("");
+                }
+            }
 
-            userData.put(
-                    "gender",
-                    user.getGender()
-            );
+            DocumentReference ref =
+                    db.collection("users")
+                            .document(
+                                    user.getEmail().trim()
+                            );
 
-            userData.put(
-                    "role",
-                    user.getRole()
-            );
-
-            userData.put(
-                    "profileImageUrl",
-                    user.getProfileImageUrl()
-            );
-
-            // =================================================
-            // EMAIL = FIRESTORE DOCUMENT ID
-            // =================================================
-
-            db.collection("users")
-                    .document(email)
-                    .set(userData)
-                    .get();
+            ref.set(user).get();
 
             System.out.println(
-                    "===================================="
-            );
-
-            System.out.println(
-                    "User saved successfully in Firestore"
-            );
-
-            System.out.println(
-                    "Firebase UID: "
-                            + user.getUid()
-            );
-
-            System.out.println(
-                    "User Name: "
-                            + user.getFullName()
-            );
-
-            System.out.println(
-                    "User Email: "
-                            + email
-            );
-
-            System.out.println(
-                    "Mobile Number: "
-                            + user.getMobileNumber()
-            );
-
-            System.out.println(
-                    "Gender: "
-                            + user.getGender()
-            );
-
-            System.out.println(
-                    "Role: "
-                            + user.getRole()
-            );
-
-            System.out.println(
-                    "Profile Image: "
-                            + user.getProfileImageUrl()
-            );
-
-            System.out.println(
-                    "===================================="
+                    "User saved successfully: "
+                            + user.getEmail()
             );
 
             return true;
@@ -152,7 +86,8 @@ public class UserDAO {
         } catch (Exception e) {
 
             System.out.println(
-                    "Error saving user to Firestore:"
+                    "Error saving user: "
+                            + e.getMessage()
             );
 
             e.printStackTrace();
@@ -173,315 +108,42 @@ public class UserDAO {
             if (email == null ||
                     email.trim().isEmpty()) {
 
-                System.out.println(
-                        "Email is empty."
-                );
+                return null;
+            }
+
+            DocumentSnapshot snapshot =
+                    db.collection("users")
+                            .document(
+                                    email.trim()
+                            )
+                            .get()
+                            .get();
+
+            if (snapshot == null ||
+                    !snapshot.exists()) {
 
                 return null;
             }
 
-            email =
-                    email.trim();
-
-            DocumentSnapshot document =
-                    db.collection("users")
-                            .document(email)
-                            .get()
-                            .get();
-
-            if (document.exists()) {
-
-                User user =
-                        document.toObject(
-                                User.class
-                        );
-
-                if (user != null) {
-
-                    /*
-                     * IMPORTANT:
-                     *
-                     * Always use the Firestore document ID
-                     * as the user's email.
-                     */
-                    user.setEmail(
-                            document.getId()
-                    );
-
-                    System.out.println(
-                            "===================================="
-                    );
-
-                    System.out.println(
-                            "User found: "
-                                    + user.getEmail()
-                    );
-
-                    System.out.println(
-                            "User UID: "
-                                    + user.getUid()
-                    );
-
-                    System.out.println(
-                            "User Name: "
-                                    + user.getFullName()
-                    );
-
-                    System.out.println(
-                            "User Email: "
-                                    + user.getEmail()
-                    );
-
-                    System.out.println(
-                            "User Mobile: "
-                                    + user.getMobileNumber()
-                    );
-
-                    System.out.println(
-                            "User Gender: "
-                                    + user.getGender()
-                    );
-
-                    System.out.println(
-                            "User Role: "
-                                    + user.getRole()
-                    );
-
-                    System.out.println(
-                            "Profile Image: "
-                                    + user.getProfileImageUrl()
-                    );
-
-                    System.out.println(
-                            "===================================="
-                    );
-                }
-
-                return user;
-            }
-
-            System.out.println(
-                    "User not found: "
-                            + email
+            return snapshot.toObject(
+                    User.class
             );
-
-            return null;
 
         } catch (Exception e) {
 
             System.out.println(
-                    "Error getting user from Firestore:"
+                    "Error fetching user by email: "
+                            + e.getMessage()
             );
 
             e.printStackTrace();
 
             return null;
         }
-    }
-
-    // =====================================================
-    // GET ALL USERS
-    // =====================================================
-
-    public List<User> getAllUsers() {
-
-        List<User> users =
-                new ArrayList<>();
-
-        try {
-
-            List<QueryDocumentSnapshot> documents =
-                    db.collection("users")
-                            .get()
-                            .get()
-                            .getDocuments();
-
-            for (
-                    DocumentSnapshot document :
-                    documents
-            ) {
-
-                if (!document.exists()) {
-                    continue;
-                }
-
-                User user =
-                        document.toObject(
-                                User.class
-                        );
-
-                if (user == null) {
-                    continue;
-                }
-
-                /*
-                 * =================================================
-                 * IMPORTANT FIX
-                 * =================================================
-                 *
-                 * Your Firestore structure uses:
-                 *
-                 * users/
-                 *      farmer@gmail.com
-                 *
-                 * Therefore the document ID is the most reliable
-                 * email value.
-                 *
-                 * Always set it here.
-                 */
-
-                user.setEmail(
-                        document.getId()
-                );
-
-                System.out.println(
-                        "User loaded:"
-                                + " "
-                                + user.getEmail()
-                                + " | Role: "
-                                + user.getRole()
-                );
-
-                users.add(user);
-            }
-
-            System.out.println(
-                    "===================================="
-            );
-
-            System.out.println(
-                    "Total users found: "
-                            + users.size()
-            );
-
-            System.out.println(
-                    "===================================="
-            );
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Error getting all users:"
-            );
-
-            e.printStackTrace();
-        }
-
-        return users;
-    }
-
-    // =====================================================
-    // GET USERS BY ROLE
-    // =====================================================
-
-    public List<User> getUsersByRole(
-            String role) {
-
-        List<User> users =
-                new ArrayList<>();
-
-        try {
-
-            if (role == null ||
-                    role.trim().isEmpty()) {
-
-                return users;
-            }
-
-            List<QueryDocumentSnapshot> documents =
-                    db.collection("users")
-                            .whereEqualTo(
-                                    "role",
-                                    role.trim()
-                            )
-                            .get()
-                            .get()
-                            .getDocuments();
-
-            for (
-                    DocumentSnapshot document :
-                    documents
-            ) {
-
-                if (!document.exists()) {
-                    continue;
-                }
-
-                User user =
-                        document.toObject(
-                                User.class
-                        );
-
-                if (user == null) {
-                    continue;
-                }
-
-                /*
-                 * IMPORTANT:
-                 *
-                 * Always restore the email from the
-                 * Firestore document ID.
-                 */
-
-                user.setEmail(
-                        document.getId()
-                );
-
-                System.out.println(
-                        "User loaded by role:"
-                                + " "
-                                + user.getEmail()
-                                + " | Role: "
-                                + user.getRole()
-                );
-
-                users.add(user);
-            }
-
-            System.out.println(
-                    "Users with role "
-                            + role
-                            + ": "
-                            + users.size()
-            );
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "Error getting users by role:"
-            );
-
-            e.printStackTrace();
-        }
-
-        return users;
-    }
-
-    // =====================================================
-    // GET ALL FARMERS
-    // =====================================================
-
-    public List<User> getAllFarmers() {
-
-        return getUsersByRole(
-                "Farmer"
-        );
-    }
-
-    // =====================================================
-    // GET ALL BUYERS
-    // =====================================================
-
-    public List<User> getAllBuyers() {
-
-        return getUsersByRole(
-                "Buyer"
-        );
     }
 
     // =====================================================
     // UPDATE PROFILE
-    // Only name and mobile are changed
     // =====================================================
 
     public boolean updateProfile(
@@ -489,18 +151,11 @@ public class UserDAO {
 
         try {
 
-            if (user == null) {
-                return false;
-            }
-
-            if (user.getEmail() == null ||
+            if (user == null ||
+                    user.getEmail() == null ||
                     user.getEmail()
                             .trim()
                             .isEmpty()) {
-
-                System.out.println(
-                        "Cannot update profile: email is empty."
-                );
 
                 return false;
             }
@@ -509,8 +164,18 @@ public class UserDAO {
                     new HashMap<>();
 
             updates.put(
+                    "uid",
+                    user.getUid()
+            );
+
+            updates.put(
                     "fullName",
                     user.getFullName()
+            );
+
+            updates.put(
+                    "email",
+                    user.getEmail()
             );
 
             updates.put(
@@ -523,24 +188,59 @@ public class UserDAO {
                     user.getGender()
             );
 
+            updates.put(
+                    "role",
+                    user.getRole()
+            );
+
+            updates.put(
+                    "profileImageUrl",
+                    user.getProfileImageUrl() == null
+                            ? ""
+                            : user.getProfileImageUrl()
+            );
+
+            /*
+             * Do NOT overwrite an existing verification
+             * status with Pending when a user updates
+             * their profile.
+             */
+            if ("Farmer".equalsIgnoreCase(
+                    user.getRole())) {
+
+                if (user.getVerificationStatus() != null &&
+                        !user.getVerificationStatus()
+                                .trim()
+                                .isEmpty()) {
+
+                    updates.put(
+                            "verificationStatus",
+                            user.getVerificationStatus()
+                    );
+                }
+
+                updates.put(
+                        "rejectionReason",
+                        user.getRejectionReason() == null
+                                ? ""
+                                : user.getRejectionReason()
+                );
+            }
+
             db.collection("users")
                     .document(
-                            user.getEmail()
-                                    .trim()
+                            user.getEmail().trim()
                     )
                     .update(updates)
                     .get();
-
-            System.out.println(
-                    "Profile updated successfully!"
-            );
 
             return true;
 
         } catch (Exception e) {
 
             System.out.println(
-                    "Error updating profile:"
+                    "Error updating profile: "
+                            + e.getMessage()
             );
 
             e.printStackTrace();
@@ -562,48 +262,28 @@ public class UserDAO {
             if (email == null ||
                     email.trim().isEmpty()) {
 
-                System.out.println(
-                        "Cannot update image: email is empty."
-                );
-
                 return false;
             }
-
-            if (imageUrl == null ||
-                    imageUrl.trim().isEmpty()) {
-
-                System.out.println(
-                        "Cannot update image: URL is empty."
-                );
-
-                return false;
-            }
-
-            Map<String, Object> updates =
-                    new HashMap<>();
-
-            updates.put(
-                    "profileImageUrl",
-                    imageUrl.trim()
-            );
 
             db.collection("users")
                     .document(
                             email.trim()
                     )
-                    .update(updates)
+                    .update(
+                            "profileImageUrl",
+                            imageUrl == null
+                                    ? ""
+                                    : imageUrl
+                    )
                     .get();
-
-            System.out.println(
-                    "Profile image URL saved to Firestore."
-            );
 
             return true;
 
         } catch (Exception e) {
 
             System.out.println(
-                    "Error saving profile image:"
+                    "Error updating profile image: "
+                            + e.getMessage()
             );
 
             e.printStackTrace();
@@ -613,7 +293,7 @@ public class UserDAO {
     }
 
     // =====================================================
-    // CHECK USER EXISTS
+    // USER EXISTS
     // =====================================================
 
     public boolean userExists(
@@ -627,20 +307,19 @@ public class UserDAO {
                 return false;
             }
 
-            DocumentSnapshot document =
-                    db.collection("users")
-                            .document(
-                                    email.trim()
-                            )
-                            .get()
-                            .get();
-
-            return document.exists();
+            return db.collection("users")
+                    .document(
+                            email.trim()
+                    )
+                    .get()
+                    .get()
+                    .exists();
 
         } catch (Exception e) {
 
             System.out.println(
-                    "Error checking user:"
+                    "Error checking user existence: "
+                            + e.getMessage()
             );
 
             e.printStackTrace();
@@ -650,35 +329,329 @@ public class UserDAO {
     }
 
     // =====================================================
-    // GET FARMERS EXCLUDING CURRENT USER
-    // Useful for BUYER DASHBOARD
+    // GET ALL USERS
     // =====================================================
 
-    public List<User> getFarmersExcept(
-            String email) {
+    public List<User> getAllUsers() {
+
+        try {
+
+            QuerySnapshot snapshot =
+                    db.collection("users")
+                            .get()
+                            .get();
+
+            List<User> users =
+                    new ArrayList<>();
+
+            for (DocumentSnapshot document :
+                    snapshot.getDocuments()) {
+
+                if (document == null ||
+                        !document.exists()) {
+
+                    continue;
+                }
+
+                User user =
+                        document.toObject(
+                                User.class
+                        );
+
+                if (user != null) {
+                    users.add(user);
+                }
+            }
+
+            return users;
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error fetching all users: "
+                            + e.getMessage()
+            );
+
+            e.printStackTrace();
+
+            return new ArrayList<>();
+        }
+    }
+
+    // =====================================================
+    // GET ALL FARMERS
+    // =====================================================
+
+    public List<User> getAllFarmers() {
+
+        List<User> allUsers =
+                getAllUsers();
 
         List<User> farmers =
-                getAllFarmers();
+                new ArrayList<>();
 
-        if (email == null ||
-                email.trim().isEmpty()) {
+        for (User user : allUsers) {
 
-            return farmers;
+            if (user != null &&
+                    "Farmer".equalsIgnoreCase(
+                            user.getRole())) {
+
+                /*
+                 * Existing farmers created before the
+                 * verification system was added may not
+                 * have verificationStatus in Firestore.
+                 *
+                 * Treat them as Pending.
+                 */
+                if (user.getVerificationStatus() == null ||
+                        user.getVerificationStatus()
+                                .trim()
+                                .isEmpty()) {
+
+                    user.setVerificationStatus(
+                            "Pending"
+                    );
+                }
+
+                if (user.getRejectionReason() == null) {
+                    user.setRejectionReason("");
+                }
+
+                farmers.add(user);
+            }
         }
 
-        String currentEmail =
-                email.trim();
-
-        farmers.removeIf(
-                user ->
-                        user != null &&
-                        user.getEmail() != null &&
-                        user.getEmail()
-                                .equalsIgnoreCase(
-                                        currentEmail
-                                )
-        );
-
         return farmers;
+    }
+
+    // =====================================================
+    // UPDATE FARMER VERIFICATION
+    // =====================================================
+
+    public boolean updateFarmerVerification(
+            String email,
+            String status,
+            String rejectionReason) {
+
+        try {
+
+            // ---------------------------------------------
+            // VALIDATE EMAIL
+            // ---------------------------------------------
+
+            if (email == null ||
+                    email.trim().isEmpty()) {
+
+                System.out.println(
+                        "Verification update failed:"
+                                + " email is empty."
+                );
+
+                return false;
+            }
+
+            // ---------------------------------------------
+            // VALIDATE STATUS
+            // ---------------------------------------------
+
+            if (status == null ||
+                    status.trim().isEmpty()) {
+
+                System.out.println(
+                        "Verification update failed:"
+                                + " status is empty."
+                );
+
+                return false;
+            }
+
+            String cleanEmail =
+                    email.trim();
+
+            String cleanStatus =
+                    status.trim();
+
+            String cleanReason =
+                    rejectionReason == null
+                            ? ""
+                            : rejectionReason.trim();
+
+            // ---------------------------------------------
+            // GET FARMER DOCUMENT
+            // ---------------------------------------------
+
+            DocumentReference farmerRef =
+                    db.collection("users")
+                            .document(
+                                    cleanEmail
+                            );
+
+            DocumentSnapshot existing =
+                    farmerRef
+                            .get()
+                            .get();
+
+            if (existing == null ||
+                    !existing.exists()) {
+
+                System.out.println(
+                        "Verification update failed:"
+                                + " farmer document does not exist."
+                );
+
+                return false;
+            }
+
+            // ---------------------------------------------
+            // MAKE SURE THIS IS A FARMER
+            // ---------------------------------------------
+
+            String role =
+                    existing.getString("role");
+
+            if (role == null ||
+                    !"Farmer".equalsIgnoreCase(
+                            role.trim()
+                    )) {
+
+                System.out.println(
+                        "Verification update failed:"
+                                + " user is not a Farmer."
+                );
+
+                return false;
+            }
+
+            // ---------------------------------------------
+            // PREPARE UPDATE
+            // ---------------------------------------------
+
+            Map<String, Object> updates =
+                    new HashMap<>();
+
+            updates.put(
+                    "verificationStatus",
+                    cleanStatus
+            );
+
+            updates.put(
+                    "rejectionReason",
+                    cleanReason
+            );
+
+            // ---------------------------------------------
+            // UPDATE FIRESTORE
+            // ---------------------------------------------
+
+            farmerRef
+                    .update(updates)
+                    .get();
+
+            // ---------------------------------------------
+            // READ AGAIN FROM FIRESTORE
+            // ---------------------------------------------
+
+            DocumentSnapshot savedSnapshot =
+                    farmerRef
+                            .get()
+                            .get();
+
+            if (savedSnapshot == null ||
+                    !savedSnapshot.exists()) {
+
+                System.out.println(
+                        "Verification update failed:"
+                                + " document could not be read after update."
+                );
+
+                return false;
+            }
+
+            String savedStatus =
+                    savedSnapshot.getString(
+                            "verificationStatus"
+                    );
+
+            String savedReason =
+                    savedSnapshot.getString(
+                            "rejectionReason"
+                    );
+
+            // ---------------------------------------------
+            // CONSOLE DEBUG
+            // ---------------------------------------------
+
+            System.out.println(
+                    "=========================================="
+            );
+
+            System.out.println(
+                    "       FARMER VERIFICATION UPDATE"
+            );
+
+            System.out.println(
+                    "Email: "
+                            + cleanEmail
+            );
+
+            System.out.println(
+                    "Requested Status: "
+                            + cleanStatus
+            );
+
+            System.out.println(
+                    "Saved Status: "
+                            + savedStatus
+            );
+
+            System.out.println(
+                    "Saved Reason: "
+                            + savedReason
+            );
+
+            System.out.println(
+                    "=========================================="
+            );
+
+            // ---------------------------------------------
+            // VERIFY STATUS
+            // ---------------------------------------------
+
+            if (savedStatus == null ||
+                    !cleanStatus.equalsIgnoreCase(
+                            savedStatus.trim()
+                    )) {
+
+                System.out.println(
+                        "ERROR: Firestore status verification failed."
+                );
+
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "=========================================="
+            );
+
+            System.out.println(
+                    "ERROR UPDATING FARMER VERIFICATION"
+            );
+
+            System.out.println(
+                    e.getMessage()
+            );
+
+            System.out.println(
+                    "=========================================="
+            );
+
+            e.printStackTrace();
+
+            return false;
+        }
     }
 }

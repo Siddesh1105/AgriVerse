@@ -2,6 +2,7 @@ package com.mainproject.dao;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
@@ -473,4 +474,28 @@ public class NotificationDAO {
         return deleteAllNotifications(
                 farmerEmail);
     }
+    // =====================================================
+    // GET ALL NOTIFICATIONS (ADMIN)
+    // =====================================================
+
+    public List<Notification> getAllNotifications() {
+        List<Notification> list = new ArrayList<>();
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            QuerySnapshot snapshot = db.collection(COLLECTION).get().get();
+            for (DocumentSnapshot document : snapshot.getDocuments()) {
+                Notification n = document.toObject(Notification.class);
+                if (n != null) {
+                    n.setNotificationId(document.getId());
+                    list.add(n);
+                }
+            }
+            list.sort((a,b) -> {
+                Date ad=a.getCreatedAt(), bd=b.getCreatedAt();
+                if(ad==null&&bd==null)return 0; if(ad==null)return 1; if(bd==null)return -1; return bd.compareTo(ad);
+            });
+        } catch(Exception e){ e.printStackTrace(); }
+        return list;
+    }
+
 }

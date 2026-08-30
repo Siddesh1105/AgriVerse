@@ -42,4 +42,8 @@ public class EquipmentController {
         return equipmentDAO.deleteEquipment(equipmentId);
     }
 
+    public List<Equipment> getAllEquipmentForAdmin() {
+        return equipmentDAO.getAllEquipmentForAdmin();
+    }
+
 }
