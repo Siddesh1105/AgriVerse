@@ -545,6 +545,41 @@ public class Farmers {
         });
 
         // =================================================
+        // MESSAGE FARMER
+        // =================================================
+
+        Button message = new Button("💬 Message Farmer");
+
+        message.setMaxWidth(Double.MAX_VALUE);
+
+        message.setStyle(
+                "-fx-background-color:#117864;" +
+                "-fx-text-fill:white;" +
+                "-fx-font-weight:bold;" +
+                "-fx-background-radius:8;" +
+                "-fx-padding:9;" +
+                "-fx-cursor:hand;"
+        );
+
+        message.setOnAction(e -> {
+
+            if (farmerEmail.isEmpty()) {
+                new Alert(Alert.AlertType.ERROR,
+                        "This farmer does not have a valid email address for chat.")
+                        .showAndWait();
+                return;
+            }
+
+            mainController.setView(
+                    new ChatWithFarmer(
+                            mainController,
+                            farmerName,
+                            farmerEmail
+                    ).getView()
+            );
+        });
+
+        // =================================================
         // CARD CONTENT
         // =================================================
 
@@ -554,7 +589,8 @@ public class Farmers {
                 email,
                 phone,
                 role,
-                view
+                view,
+                message
         );
 
         return card;

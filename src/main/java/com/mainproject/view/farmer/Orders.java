@@ -5,6 +5,7 @@ import com.mainproject.controller.NotificationController;
 import com.mainproject.model.Order;
 import com.mainproject.model.OrderItem;
 import com.mainproject.model.Notification;
+import com.mainproject.view.common.ReviewDialog;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -627,6 +628,12 @@ public class Orders {
         }
 
         // =================================================
+        // PAYMENT INFORMATION
+        // =================================================
+
+        VBox paymentBox = createPaymentBox(order);
+
+        // =================================================
         // FARMER TOTAL
         // =================================================
 
@@ -655,10 +662,106 @@ public class Orders {
                 productsTitle,
                 productsBox,
                 new Separator(),
+                paymentBox,
+                new Separator(),
                 total
         );
 
         return card;
+    }
+
+
+    // =====================================================
+    // PAYMENT INFORMATION
+    // =====================================================
+
+    private VBox createPaymentBox(Order order) {
+
+        VBox paymentBox = new VBox(6);
+        paymentBox.setPadding(new Insets(12));
+        paymentBox.setStyle(
+                "-fx-background-color:#F8FAFC;" +
+                "-fx-background-radius:8;"
+        );
+
+        Label paymentTitle = new Label("💳 Payment Details");
+        paymentTitle.setStyle(
+                "-fx-font-size:15px;" +
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:#334155;"
+        );
+
+        String paymentStatus = safe(order.getPaymentStatus());
+        String paymentMethod = safe(order.getPaymentMethod());
+        String paymentId = safe(order.getPaymentId());
+
+        if (paymentStatus.isEmpty()) {
+            paymentStatus = "Pending";
+        }
+
+        Label statusLabel = new Label(
+                "Payment Status: " + formatPaymentStatus(paymentStatus)
+        );
+
+        boolean paid = paymentStatus.equalsIgnoreCase("paid")
+                || paymentStatus.equalsIgnoreCase("completed")
+                || paymentStatus.equalsIgnoreCase("success");
+
+        statusLabel.setStyle(
+                "-fx-font-weight:bold;" +
+                "-fx-text-fill:" + (paid ? "#117864;" : "#D68910;")
+        );
+
+        Label methodLabel = new Label(
+                "Payment Method: " +
+                        (paymentMethod.isEmpty() ? "Not selected" : paymentMethod)
+        );
+        methodLabel.setStyle("-fx-text-fill:#475569;");
+
+        paymentBox.getChildren().addAll(
+                paymentTitle,
+                statusLabel,
+                methodLabel
+        );
+
+        if (!paymentId.isEmpty()) {
+            Label paymentIdLabel = new Label(
+                    "Payment ID: " + paymentId
+            );
+            paymentIdLabel.setStyle("-fx-text-fill:#64748B;");
+            paymentBox.getChildren().add(paymentIdLabel);
+        }
+
+        if (order.getPaymentDate() != null) {
+            String paidDate = new SimpleDateFormat(
+                    "dd MMM yyyy, hh:mm a"
+            ).format(order.getPaymentDate());
+
+            Label paymentDateLabel = new Label(
+                    "Payment Date: " + paidDate
+            );
+            paymentDateLabel.setStyle("-fx-text-fill:#64748B;");
+            paymentBox.getChildren().add(paymentDateLabel);
+        }
+
+        return paymentBox;
+    }
+
+    private String formatPaymentStatus(String status) {
+        if (status.equalsIgnoreCase("paid")) {
+            return "PAID ✅";
+        }
+        if (status.equalsIgnoreCase("pending")) {
+            return "PENDING ⏳";
+        }
+        if (status.equalsIgnoreCase("cash on delivery")
+                || status.equalsIgnoreCase("pending_cod")) {
+            return "CASH ON DELIVERY";
+        }
+        if (status.equalsIgnoreCase("failed")) {
+            return "FAILED ❌";
+        }
+        return status.toUpperCase();
     }
 
     // =====================================================
@@ -905,6 +1008,18 @@ public class Orders {
             actions.getChildren().add(
                     completed
             );
+
+            Button reviewBuyer = createActionButton(
+                    "⭐ Review Buyer",
+                    "#117864"
+            );
+            reviewBuyer.setOnAction(e -> ReviewDialog.show(
+                    farmerEmail, farmerEmail, "FARMER",
+                    safe(order.getBuyerEmail()), safe(order.getBuyerName()), "BUYER",
+                    safe(order.getOrderId()) + "_" + safe(item.getProductId()),
+                    "PRODUCT_ORDER"
+            ));
+            actions.getChildren().add(reviewBuyer);
 
         } else if (currentStatus.equalsIgnoreCase(
                 "Rejected")) {

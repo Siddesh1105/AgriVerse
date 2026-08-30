@@ -434,6 +434,9 @@ public class BuyProductsScreen {
 
                 quantityField.clear();
 
+                // Open real Razorpay payment for this newly created product order.
+                new ProductPaymentScreen(order).show();
+
             } else {
 
                 showAlert(

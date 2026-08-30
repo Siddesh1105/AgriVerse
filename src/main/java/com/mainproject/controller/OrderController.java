@@ -28,6 +28,24 @@ public class OrderController {
     }
 
     // =====================================================
+    // COMPLETE VERIFIED RAZORPAY PAYMENT
+    // =====================================================
+
+    public boolean completePayment(
+            String orderId,
+            String paymentId,
+            String razorpayOrderId,
+            String paymentMethod) {
+
+        return orderDAO.completePayment(
+                orderId,
+                paymentId,
+                razorpayOrderId,
+                paymentMethod
+        );
+    }
+
+    // =====================================================
     // GET BUYER ORDERS
     // =====================================================
 

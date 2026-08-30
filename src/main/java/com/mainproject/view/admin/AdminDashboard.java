@@ -3,9 +3,11 @@ package com.mainproject.view.admin;
 import com.mainproject.dao.UserDAO;
 import com.mainproject.dao.ProductDAO;
 import com.mainproject.dao.OrderDAO;
+import com.mainproject.controller.ReviewController;
 import com.mainproject.model.User;
 import com.mainproject.model.Product;
 import com.mainproject.model.Order;
+import com.mainproject.model.Review;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -121,8 +123,20 @@ public class AdminDashboard extends Application {
                 new Insets(20)
         );
 
+        // Make the complete Dashboard Overview scrollable. This keeps the
+        // existing dashboard content unchanged while allowing the lower
+        // sections to remain accessible on smaller screens.
+        ScrollPane dashboardScrollPane = new ScrollPane(buildDashboardView());
+        dashboardScrollPane.setFitToWidth(true);
+        dashboardScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        dashboardScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        dashboardScrollPane.setStyle(
+                "-fx-background-color: transparent;" +
+                "-fx-background: transparent;"
+        );
+
         contentArea.getChildren().add(
-                buildDashboardView()
+                dashboardScrollPane
         );
 
         rootLayout.setCenter(
@@ -213,27 +227,15 @@ public class AdminDashboard extends Application {
 
                 "Order Management",
 
-                "Live Marketplace",
-
                 "Equipment Management",
 
                 "Analytics & Reports",
 
                 "Crop Price Management",
 
-                "AI & Smart Tools",
-
                 "Notifications",
 
-                "SystemDataManage",
-
-                "Content Management",
-
-                "AuditLogs",
-
                 "Feedback & Reviews",
-
-                "Reports & Complaints",
 
                 "Payment Management"
         };
@@ -400,14 +402,6 @@ public class AdminDashboard extends Application {
 
         String page = pageName.trim();
 
-        // Normalize labels used by some older admin screens.
-        if (page.equalsIgnoreCase("System & Data manage")
-                || page.equalsIgnoreCase("System & Data Management")) {
-            page = "SystemDataManage";
-        } else if (page.equalsIgnoreCase("Audit Logs")) {
-            page = "AuditLogs";
-        }
-
         if (page.equals("Dashboard")) {
             showDashboard();
             return;
@@ -433,11 +427,6 @@ public class AdminDashboard extends Application {
             return;
         }
 
-        if (page.equals("Live Marketplace")) {
-            new LiveMarketplace(primaryStage, this).show();
-            return;
-        }
-
         if (page.equals("Equipment Management")) {
             new EquipmentManagement(primaryStage, this).show();
             return;
@@ -458,33 +447,8 @@ public class AdminDashboard extends Application {
             return;
         }
 
-        if (page.equals("AI & Smart Tools")) {
-            new AISmartTools(primaryStage, this).show();
-            return;
-        }
-
-        if (page.equals("Content Management")) {
-            new ContentManagement(primaryStage, this).show();
-            return;
-        }
-
-        if (page.equals("SystemDataManage")) {
-            new SystemDataManage(primaryStage, this).show();
-            return;
-        }
-
-        if (page.equals("AuditLogs")) {
-            new AuditLogs(primaryStage, this).show();
-            return;
-        }
-
         if (page.equals("Feedback & Reviews")) {
             new FeedbackReviews(primaryStage, this).show();
-            return;
-        }
-
-        if (page.equals("Reports & Complaints")) {
-            new ReportsComplaints(primaryStage, this).show();
             return;
         }
 
@@ -1002,6 +966,13 @@ public class AdminDashboard extends Application {
 
         double revenue = orders.stream().mapToDouble(Order::getTotalAmount).sum();
 
+        // Review analytics are loaded through the Review MVC flow and do not affect existing stats.
+        List<Review> reviews = new ReviewController().getAllReviews();
+        long activeReviews = reviews.stream().filter(r -> r != null && "ACTIVE".equalsIgnoreCase(r.getStatus())).count();
+        double averageRating = reviews.stream()
+                .filter(r -> r != null && "ACTIVE".equalsIgnoreCase(r.getStatus()))
+                .mapToInt(Review::getRating).average().orElse(0.0);
+
         grid.add(createStatCard("👥", "Total Users", String.valueOf(users.size()), "Live Firestore data", true), 0, 0);
         grid.add(createStatCard("🌾", "Total Farmers", String.valueOf(farmers.size()), "Live Firestore data", true), 1, 0);
         grid.add(createStatCard("🛒", "Total Buyers", String.valueOf(buyers), "Live Firestore data", true), 2, 0);
@@ -1010,6 +981,8 @@ public class AdminDashboard extends Application {
         grid.add(createStatCard("₹", "Total Revenue", "₹" + String.format("%.2f", revenue), "Calculated from orders", true), 1, 1);
         grid.add(createStatCard("🔴", "Pending Farmers", String.valueOf(pendingFarmers), "Needs verification", false), 2, 1);
         grid.add(createStatCard("⏳", "Pending Products", String.valueOf(pendingProducts), "Needs approval", false), 3, 1);
+        grid.add(createStatCard("⭐", "Active Reviews", String.valueOf(activeReviews), "Buyer & farmer feedback", true), 0, 2);
+        grid.add(createStatCard("🌟", "Average Rating", String.format("%.1f / 5", averageRating), "From active reviews", true), 1, 2);
 
         for (int i = 0; i < 4; i++) {
             ColumnConstraints cc = new ColumnConstraints();

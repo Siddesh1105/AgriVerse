@@ -70,6 +70,14 @@ public class Profile {
     private TextField roleField;
 
     // =====================================================
+    // FARMER LOCATION
+    // =====================================================
+
+    private TextField cityField;
+    private TextField districtField;
+    private TextField stateField;
+
+    // =====================================================
     // IMAGE
     // =====================================================
 
@@ -90,6 +98,9 @@ public class Profile {
     private String originalName;
 
     private String originalPhone;
+    private String originalCity;
+    private String originalDistrict;
+    private String originalState;
 
     // =====================================================
     // CONSTRUCTOR
@@ -178,6 +189,21 @@ public class Profile {
             originalPhone =
                     safe(
                             currentUser.getMobileNumber()
+                    );
+
+            originalCity =
+                    safe(
+                            currentUser.getCity()
+                    );
+
+            originalDistrict =
+                    safe(
+                            currentUser.getDistrict()
+                    );
+
+            originalState =
+                    safe(
+                            currentUser.getState()
                     );
 
             System.out.println(
@@ -435,6 +461,34 @@ public class Profile {
                 );
 
         // =================================================
+        // FARMER LOCATION
+        // =================================================
+
+        cityField =
+                createTextField(
+                        currentUser == null
+                                ? null
+                                : currentUser.getCity(),
+                        "City / Village"
+                );
+
+        districtField =
+                createTextField(
+                        currentUser == null
+                                ? null
+                                : currentUser.getDistrict(),
+                        "District"
+                );
+
+        stateField =
+                createTextField(
+                        currentUser == null
+                                ? null
+                                : currentUser.getState(),
+                        "State"
+                );
+
+        // =================================================
         // READ ONLY
         // =================================================
 
@@ -447,6 +501,10 @@ public class Profile {
         genderField.setEditable(false);
 
         roleField.setEditable(false);
+
+        cityField.setEditable(false);
+        districtField.setEditable(false);
+        stateField.setEditable(false);
 
         // =================================================
         // GRID
@@ -495,6 +553,62 @@ public class Profile {
                 ),
                 0,
                 2
+        );
+
+        // =================================================
+        // FARM LOCATION
+        // =================================================
+
+        Label locationTitle =
+                new Label("Farm Location");
+
+        locationTitle.setStyle(
+                "-fx-font-size: 16px;"
+                        + "-fx-font-weight: bold;"
+                        + "-fx-text-fill: #117864;"
+        );
+
+        Label locationDescription =
+                new Label(
+                        "Save your farm location for local weather information."
+                );
+
+        locationDescription.setStyle(
+                "-fx-font-size: 12px;"
+                        + "-fx-text-fill: #566573;"
+        );
+
+        GridPane locationGrid =
+                new GridPane();
+
+        locationGrid.setHgap(30);
+        locationGrid.setVgap(16);
+
+        locationGrid.add(
+                createFieldBox(
+                        "City / Village",
+                        cityField
+                ),
+                0,
+                0
+        );
+
+        locationGrid.add(
+                createFieldBox(
+                        "District",
+                        districtField
+                ),
+                1,
+                0
+        );
+
+        locationGrid.add(
+                createFieldBox(
+                        "State",
+                        stateField
+                ),
+                0,
+                1
         );
 
         // =================================================
@@ -568,6 +682,9 @@ public class Profile {
         information.getChildren()
                 .addAll(
                         grid,
+                        locationTitle,
+                        locationDescription,
+                        locationGrid,
                         buttons
                 );
 
@@ -766,6 +883,10 @@ public class Profile {
                 true
         );
 
+        cityField.setEditable(true);
+        districtField.setEditable(true);
+        stateField.setEditable(true);
+
         updateBtn.setText(
                 "Save Changes"
         );
@@ -795,6 +916,15 @@ public class Profile {
                         .getText()
                         .trim();
 
+        String city =
+                cityField.getText().trim();
+
+        String district =
+                districtField.getText().trim();
+
+        String state =
+                stateField.getText().trim();
+
         if (name.isEmpty()) {
 
             showAlert(
@@ -823,6 +953,10 @@ public class Profile {
                 phone
         );
 
+        currentUser.setCity(city);
+        currentUser.setDistrict(district);
+        currentUser.setState(state);
+
         boolean saved =
                 userController.updateProfile(
                         currentUser
@@ -844,6 +978,10 @@ public class Profile {
         originalPhone =
                 phone;
 
+        originalCity = city;
+        originalDistrict = district;
+        originalState = state;
+
         nameField.setEditable(
                 false
         );
@@ -851,6 +989,10 @@ public class Profile {
         phoneField.setEditable(
                 false
         );
+
+        cityField.setEditable(false);
+        districtField.setEditable(false);
+        stateField.setEditable(false);
 
         updateBtn.setText(
                 "Update Profile"
@@ -884,6 +1026,10 @@ public class Profile {
                 originalPhone
         );
 
+        cityField.setText(originalCity);
+        districtField.setText(originalDistrict);
+        stateField.setText(originalState);
+
         nameField.setEditable(
                 false
         );
@@ -891,6 +1037,10 @@ public class Profile {
         phoneField.setEditable(
                 false
         );
+
+        cityField.setEditable(false);
+        districtField.setEditable(false);
+        stateField.setEditable(false);
 
         updateBtn.setText(
                 "Update Profile"

@@ -22,6 +22,10 @@ public class EquipmentController {
         return equipmentDAO.getAllEquipment();
     }
 
+    public List<Equipment> getAllEquipmentForAdmin() {
+        return equipmentDAO.getAllEquipment();
+    }
+
     public Equipment getEquipmentById(
             String equipmentId) {
         return equipmentDAO.getEquipmentById(equipmentId);
@@ -40,10 +44,6 @@ public class EquipmentController {
     public boolean deleteEquipment(
             String equipmentId) {
         return equipmentDAO.deleteEquipment(equipmentId);
-    }
-
-    public List<Equipment> getAllEquipmentForAdmin() {
-        return equipmentDAO.getAllEquipmentForAdmin();
     }
 
 }

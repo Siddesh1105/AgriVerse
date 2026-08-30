@@ -1,6 +1,7 @@
 package com.mainproject.controller;
 
 import java.util.*;
+import com.google.cloud.firestore.ListenerRegistration;
 import com.mainproject.model.Notification;
 import com.mainproject.dao.NotificationDAO;
 
@@ -17,6 +18,8 @@ public class NotificationController {
             Notification notification) {
         return notificationDAO.addNotification(notification);
     }
+
+    public List<Notification> getAllNotifications() { return notificationDAO.getAllNotifications(); }
 
     public List<Notification> getNotificationsByUser(
             String userEmail) {
@@ -63,8 +66,11 @@ public class NotificationController {
         return notificationDAO.deleteAll(farmerEmail);
     }
 
-    public List<Notification> getAllNotifications() {
-        return notificationDAO.getAllNotifications();
+    public ListenerRegistration listenForNotifications(
+            String userEmail,
+            NotificationDAO.NotificationListener listener) {
+
+        return notificationDAO.listenForNotifications(userEmail, listener);
     }
 
 }

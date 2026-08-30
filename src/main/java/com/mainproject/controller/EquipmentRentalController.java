@@ -40,8 +40,12 @@ public class EquipmentRentalController {
         return rentalDAO.updateRentalStatus(rentalId, "completed");
     }
 
-    public boolean completePayment(String rentalId, String paymentMethod) {
-        return rentalDAO.completePayment(rentalId, paymentMethod);
+    public boolean completePayment(String rentalId, String paymentId, String razorpayOrderId, String paymentMethod) {
+        return rentalDAO.completePayment(rentalId, paymentId, razorpayOrderId, paymentMethod);
+    }
+
+    public boolean completePayment(String rentalId, String paymentId, String paymentMethod) {
+        return rentalDAO.completePayment(rentalId, paymentId, paymentMethod);
     }
 
     public boolean updateRentalStatus(String rentalId, String status) {

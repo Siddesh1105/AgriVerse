@@ -40,6 +40,12 @@ public class ProductOrder {
     // pending / accepted / rejected / shipped / delivered
     private String status;
 
+    private String paymentStatus; // pending / paid / failed
+    private String paymentId;
+    private String razorpayOrderId;
+    private String paymentMethod;
+    private Date paymentDate;
+
     private Date createdAt;
 
     // =====================================================
@@ -205,6 +211,18 @@ public class ProductOrder {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+    public String getPaymentId() { return paymentId; }
+    public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
+
+    public String getRazorpayOrderId() { return razorpayOrderId; }
+    public void setRazorpayOrderId(String razorpayOrderId) { this.razorpayOrderId = razorpayOrderId; }
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public Date getPaymentDate() { return paymentDate; }
+    public void setPaymentDate(Date paymentDate) { this.paymentDate = paymentDate; }
 
     // =====================================================
     // CREATED AT

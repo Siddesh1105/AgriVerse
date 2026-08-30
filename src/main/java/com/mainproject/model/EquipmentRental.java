@@ -27,6 +27,7 @@ public class EquipmentRental {
     // pending / paid / failed
     private String paymentStatus;
     private String paymentId;
+    private String razorpayOrderId;
     private String paymentMethod; // UPI / CARD / NET_BANKING
     private Date paymentDate;
 

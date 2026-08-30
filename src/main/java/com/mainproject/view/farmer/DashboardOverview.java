@@ -1,6 +1,15 @@
 package com.mainproject.view.farmer;
 
 import com.mainproject.controller.ProductController;
+import com.mainproject.controller.OrderController;
+import com.mainproject.controller.EquipmentRentalController;
+import com.mainproject.model.Order;
+import com.mainproject.model.OrderItem;
+import com.mainproject.model.EquipmentRental;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 
 import javafx.geometry.Insets;
@@ -19,6 +28,8 @@ public class DashboardOverview {
     private final FarmerDashboard navigator;
 
     private final ProductController productController;
+    private final OrderController orderController;
+    private final EquipmentRentalController equipmentRentalController;
 
     // =====================================================
     // CONSTRUCTOR
@@ -30,6 +41,8 @@ public class DashboardOverview {
         this.navigator = navigator;
 
         this.productController = new ProductController();
+        this.orderController = new OrderController();
+        this.equipmentRentalController = new EquipmentRentalController();
     }
 
     // =====================================================
@@ -171,23 +184,48 @@ public class DashboardOverview {
                         "0"));
 
         // =================================================
-        // EARNINGS
+        // ACTIVE EARNINGS
         // =================================================
         /*
-         * Orders/payment integration is not yet connected,
-         * so earnings remain 0 until the order/payment
-         * module is connected.
+         * Earnings are calculated from real successful payments:
+         *
+         * 1. Product orders:
+         *    Only PAID orders are counted and only the logged-in
+         *    farmer's own product items are included.
+         *
+         * 2. Equipment rentals:
+         *    Only PAID rentals are counted where the logged-in
+         *    farmer is the equipment owner.
+         *
+         * The values are loaded fresh whenever the dashboard opens,
+         * so no existing order or rental functionality is changed.
          */
+
+        double totalEarnings = 0;
+        double monthlyEarnings = 0;
+
+        try {
+
+            totalEarnings = getTotalEarnings(farmerEmail);
+            monthlyEarnings = getMonthlyEarnings(farmerEmail);
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error loading farmer earnings:");
+
+            e.printStackTrace();
+        }
 
         HBox earningsRow = new HBox(14);
 
         VBox earnMonth = createEarningCard(
                 "Earnings (This Month)",
-                "₹0");
+                formatCurrency(monthlyEarnings));
 
         VBox earnTotal = createEarningCard(
                 "Total Earnings",
-                "₹0");
+                formatCurrency(totalEarnings));
 
         HBox.setHgrow(
                 earnMonth,
@@ -288,6 +326,243 @@ public class DashboardOverview {
                         "-fx-background: transparent;");
 
         return scroll;
+    }
+
+    // =====================================================
+    // ACTIVE EARNINGS CALCULATION
+    // =====================================================
+
+    private double getTotalEarnings(
+            String farmerEmail) {
+
+        return getProductEarnings(
+                farmerEmail,
+                false)
+                + getRentalEarnings(
+                        farmerEmail,
+                        false);
+    }
+
+    private double getMonthlyEarnings(
+            String farmerEmail) {
+
+        return getProductEarnings(
+                farmerEmail,
+                true)
+                + getRentalEarnings(
+                        farmerEmail,
+                        true);
+    }
+
+    /**
+     * Calculates earnings from marketplace product payments.
+     *
+     * A single order can contain products from multiple farmers,
+     * so only items owned by the logged-in farmer are counted.
+     * Delivery charges are intentionally not added to farmer earnings.
+     */
+    private double getProductEarnings(
+            String farmerEmail,
+            boolean currentMonthOnly) {
+
+        if (farmerEmail == null
+                || farmerEmail.trim().isEmpty()) {
+
+            return 0;
+        }
+
+        double earnings = 0;
+
+        try {
+
+            List<Order> orders =
+                    orderController.getFarmerOrders(
+                            farmerEmail.trim());
+
+            for (Order order : orders) {
+
+                if (order == null
+                        || !"paid".equalsIgnoreCase(
+                                safe(order.getPaymentStatus()))) {
+
+                    continue;
+                }
+
+                Date paymentDate =
+                        order.getPaymentDate() != null
+                                ? order.getPaymentDate()
+                                : order.getOrderDate();
+
+                if (currentMonthOnly
+                        && !isInCurrentMonth(paymentDate)) {
+
+                    continue;
+                }
+
+                List<OrderItem> items =
+                        order.getItems();
+
+                if (items == null) {
+                    continue;
+                }
+
+                for (OrderItem item : items) {
+
+                    if (item == null
+                            || item.getFarmerEmail() == null
+                            || !item.getFarmerEmail()
+                                    .trim()
+                                    .equalsIgnoreCase(
+                                            farmerEmail.trim())) {
+
+                        continue;
+                    }
+
+                    /*
+                     * Rejected items are not treated as earnings.
+                     * All other paid items are included so the
+                     * existing order workflow remains unchanged.
+                     */
+                    if ("rejected".equalsIgnoreCase(
+                            safe(item.getStatus()))) {
+
+                        continue;
+                    }
+
+                    double itemAmount =
+                            item.getTotalPrice();
+
+                    /*
+                     * Older Firestore records may not have
+                     * totalPrice saved. Calculate it safely.
+                     */
+                    if (itemAmount <= 0) {
+
+                        itemAmount =
+                                item.getPrice()
+                                        * item.getQuantity();
+                    }
+
+                    earnings +=
+                            Math.max(0, itemAmount);
+                }
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error calculating product earnings:");
+
+            e.printStackTrace();
+        }
+
+        return earnings;
+    }
+
+    /**
+     * Calculates earnings from successful equipment rental payments
+     * where this farmer owns the equipment.
+     */
+    private double getRentalEarnings(
+            String farmerEmail,
+            boolean currentMonthOnly) {
+
+        if (farmerEmail == null
+                || farmerEmail.trim().isEmpty()) {
+
+            return 0;
+        }
+
+        double earnings = 0;
+
+        try {
+
+            List<EquipmentRental> rentals =
+                    equipmentRentalController
+                            .getRentalsByFarmer(
+                                    farmerEmail.trim());
+
+            for (EquipmentRental rental : rentals) {
+
+                if (rental == null
+                        || !"paid".equalsIgnoreCase(
+                                safe(rental.getPaymentStatus()))) {
+
+                    continue;
+                }
+
+                Date paymentDate =
+                        rental.getPaymentDate() != null
+                                ? rental.getPaymentDate()
+                                : rental.getCreatedAt();
+
+                if (currentMonthOnly
+                        && !isInCurrentMonth(paymentDate)) {
+
+                    continue;
+                }
+
+                earnings +=
+                        Math.max(
+                                0,
+                                rental.getTotalAmount());
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error calculating rental earnings:");
+
+            e.printStackTrace();
+        }
+
+        return earnings;
+    }
+
+    private boolean isInCurrentMonth(
+            Date date) {
+
+        if (date == null) {
+            return false;
+        }
+
+        Calendar now =
+                Calendar.getInstance();
+
+        Calendar value =
+                Calendar.getInstance();
+
+        value.setTime(date);
+
+        return now.get(Calendar.YEAR)
+                == value.get(Calendar.YEAR)
+                && now.get(Calendar.MONTH)
+                == value.get(Calendar.MONTH);
+    }
+
+    private String safe(String value) {
+
+        return value == null
+                ? ""
+                : value.trim();
+    }
+
+    private String formatCurrency(
+            double amount) {
+
+        if (Math.abs(amount
+                - Math.rint(amount)) < 0.000001) {
+
+            return "₹"
+                    + String.format(
+                            "%,.0f",
+                            amount);
+        }
+
+        return "₹"
+                + String.format(
+                        "%,.2f",
+                        amount);
     }
 
     // =====================================================

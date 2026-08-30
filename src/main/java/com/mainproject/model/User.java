@@ -9,10 +9,16 @@ public class User {
     private String gender;
     private String role;
     private String profileImageUrl;
-
-    // Farmer verification fields
     private String verificationStatus;
     private String rejectionReason;
+
+    // =====================================================
+    // FARMER LOCATION
+    // =====================================================
+
+    private String city;
+    private String district;
+    private String state;
 
     // =====================================================
     // EMPTY CONSTRUCTOR
@@ -40,11 +46,6 @@ public class User {
         this.mobileNumber = mobileNumber;
         this.gender = gender;
         this.role = role;
-
-        // Every new farmer starts as Pending.
-        if ("Farmer".equalsIgnoreCase(role)) {
-            this.verificationStatus = "Pending";
-        }
     }
 
     // =====================================================
@@ -84,7 +85,7 @@ public class User {
     }
 
     // =====================================================
-    // MOBILE
+    // MOBILE NUMBER
     // =====================================================
 
     public String getMobileNumber() {
@@ -131,32 +132,46 @@ public class User {
         this.profileImageUrl = profileImageUrl;
     }
 
+
+    public String getVerificationStatus() { return verificationStatus; }
+    public void setVerificationStatus(String verificationStatus) { this.verificationStatus = verificationStatus; }
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
+
     // =====================================================
-    // VERIFICATION STATUS
+    // CITY
     // =====================================================
 
-    public String getVerificationStatus() {
-        return verificationStatus;
+    public String getCity() {
+        return city;
     }
 
-    public void setVerificationStatus(
-            String verificationStatus) {
-
-        this.verificationStatus = verificationStatus;
+    public void setCity(String city) {
+        this.city = city;
     }
 
     // =====================================================
-    // REJECTION REASON
+    // DISTRICT
     // =====================================================
 
-    public String getRejectionReason() {
-        return rejectionReason;
+    public String getDistrict() {
+        return district;
     }
 
-    public void setRejectionReason(
-            String rejectionReason) {
+    public void setDistrict(String district) {
+        this.district = district;
+    }
 
-        this.rejectionReason = rejectionReason;
+    // =====================================================
+    // STATE
+    // =====================================================
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 
     // =====================================================
@@ -174,10 +189,9 @@ public class User {
                 ", gender='" + gender + '\'' +
                 ", role='" + role + '\'' +
                 ", profileImageUrl='" + profileImageUrl + '\'' +
-                ", verificationStatus='" +
-                verificationStatus + '\'' +
-                ", rejectionReason='" +
-                rejectionReason + '\'' +
+                ", city='" + city + '\'' +
+                ", district='" + district + '\'' +
+                ", state='" + state + '\'' +
                 '}';
     }
 }

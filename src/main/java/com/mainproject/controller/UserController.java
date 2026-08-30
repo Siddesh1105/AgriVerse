@@ -13,6 +13,7 @@ public class UserController {
     private final UserDAO userDAO;
 
     public UserController() {
+
         this.userDAO = new UserDAO();
     }
 
@@ -21,6 +22,7 @@ public class UserController {
     // =====================================================
 
     public boolean saveUser(User user) {
+
         return userDAO.saveUser(user);
     }
 
@@ -28,7 +30,9 @@ public class UserController {
     // GET USER BY EMAIL
     // =====================================================
 
-    public User getUserByEmail(String email) {
+    public User getUserByEmail(
+            String email) {
+
         return userDAO.getUserByEmail(email);
     }
 
@@ -36,7 +40,9 @@ public class UserController {
     // UPDATE PROFILE
     // =====================================================
 
-    public boolean updateProfile(User user) {
+    public boolean updateProfile(
+            User user) {
+
         return userDAO.updateProfile(user);
     }
 
@@ -58,7 +64,9 @@ public class UserController {
     // USER EXISTS
     // =====================================================
 
-    public boolean userExists(String email) {
+    public boolean userExists(
+            String email) {
+
         return userDAO.userExists(email);
     }
 
@@ -67,6 +75,7 @@ public class UserController {
     // =====================================================
 
     public List<User> getAllUsers() {
+
         return userDAO.getAllUsers();
     }
 
@@ -75,22 +84,38 @@ public class UserController {
     // =====================================================
 
     public List<User> getAllFarmers() {
+
         return userDAO.getAllFarmers();
     }
 
     // =====================================================
-    // UPDATE FARMER VERIFICATION
+    // GET ALL BUYERS
     // =====================================================
 
-    public boolean updateFarmerVerification(
-            String email,
-            String status,
-            String rejectionReason) {
+    public List<User> getAllBuyers() {
 
-        return userDAO.updateFarmerVerification(
+        return userDAO.getAllBuyers();
+    }
+
+    public boolean updateFarmerVerification(String email, String verificationStatus, String rejectionReason) {
+        return userDAO.updateFarmerVerification(email, verificationStatus, rejectionReason);
+    }
+
+    // =====================================================
+    // UPDATE FARMER LOCATION
+    // =====================================================
+
+    public boolean updateFarmerLocation(
+            String email,
+            String city,
+            String district,
+            String state) {
+
+        return userDAO.updateLocation(
                 email,
-                status,
-                rejectionReason
+                city,
+                district,
+                state
         );
     }
 }

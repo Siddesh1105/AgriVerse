@@ -2,6 +2,7 @@ package com.mainproject.view.buyer;
 
 import com.mainproject.controller.EquipmentRentalController;
 import com.mainproject.model.EquipmentRental;
+import com.mainproject.view.common.ReviewDialog;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -639,6 +640,22 @@ public class MyRentalRequests {
             card.getChildren().add(
                     completedMessage
             );
+
+            Button reviewOwner = new Button("⭐ Review Equipment Owner");
+            reviewOwner.setStyle(
+                    "-fx-background-color:#117864;" +
+                    "-fx-text-fill:white;" +
+                    "-fx-font-weight:bold;" +
+                    "-fx-padding:9 16;" +
+                    "-fx-background-radius:8;" +
+                    "-fx-cursor:hand;"
+            );
+            reviewOwner.setOnAction(e -> ReviewDialog.show(
+                    dashboard.getBuyerEmail(), dashboard.getBuyerName(), "BUYER",
+                    rental.getEquipmentOwnerEmail(), rental.getEquipmentOwnerName(), "FARMER",
+                    rental.getRentalId(), "EQUIPMENT_RENTAL"
+            ));
+            card.getChildren().add(reviewOwner);
         }
 
 

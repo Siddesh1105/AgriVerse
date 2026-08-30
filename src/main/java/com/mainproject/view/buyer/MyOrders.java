@@ -3,6 +3,7 @@ package com.mainproject.view.buyer;
 import com.mainproject.controller.OrderController;
 import com.mainproject.model.Order;
 import com.mainproject.model.OrderItem;
+import com.mainproject.view.common.ReviewDialog;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -541,6 +542,26 @@ public class MyOrders {
                 itemList.getChildren().add(
                         itemRow
                 );
+
+                // Completed product orders can be reviewed by the buyer.
+                if (safe(item.getStatus()).equalsIgnoreCase("Completed")) {
+                    Button reviewButton = new Button("⭐ Review Farmer");
+                    reviewButton.setStyle(
+                            "-fx-background-color:#117864;" +
+                            "-fx-text-fill:white;" +
+                            "-fx-font-weight:bold;" +
+                            "-fx-padding:7 14;" +
+                            "-fx-background-radius:8;" +
+                            "-fx-cursor:hand;"
+                    );
+                    reviewButton.setOnAction(e -> ReviewDialog.show(
+                            navigator.getBuyerEmail(), navigator.getBuyerName(), "BUYER",
+                            safe(item.getFarmerEmail()), safe(item.getFarmerEmail()), "FARMER",
+                            safe(order.getOrderId()) + "_" + safe(item.getProductId()),
+                            "PRODUCT_ORDER"
+                    ));
+                    itemList.getChildren().add(reviewButton);
+                }
             }
         }
 

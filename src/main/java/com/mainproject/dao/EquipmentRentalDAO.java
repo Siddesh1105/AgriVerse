@@ -8,6 +8,7 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.cloud.FirestoreClient;
 import com.mainproject.model.EquipmentRental;
+import com.mainproject.model.Notification;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +43,27 @@ public class EquipmentRentalDAO {
             }
 
             document.set(rental).get(10, TimeUnit.SECONDS);
+
+            // Notify the equipment owner (farmer) about the new request.
+            if (rental.getEquipmentOwnerEmail() != null
+                    && !rental.getEquipmentOwnerEmail().trim().isEmpty()) {
+
+                String buyer = rental.getBuyerName();
+                if (buyer == null || buyer.trim().isEmpty()) buyer = "A buyer";
+
+                String equipment = rental.getEquipmentName();
+                if (equipment == null || equipment.trim().isEmpty()) equipment = "your equipment";
+
+                new NotificationDAO().addNotification(
+                        new Notification(
+                                rental.getEquipmentOwnerEmail().trim(),
+                                "New Equipment Request",
+                                buyer + " requested to rent " + equipment + ".",
+                                "EQUIPMENT"
+                        )
+                );
+            }
+
             System.out.println("Rental request created successfully!");
             return true;
 
@@ -129,12 +151,61 @@ public class EquipmentRentalDAO {
 
             Firestore db = FirestoreClient.getFirestore();
 
-            db.collection(COLLECTION)
-                    .document(rentalId)
-                    .update("status", status)
+            // Read the rental first so the correct buyer can be notified.
+            DocumentReference rentalRef = db.collection(COLLECTION)
+                    .document(rentalId);
+
+            DocumentSnapshot snapshot = rentalRef
+                    .get()
                     .get(10, TimeUnit.SECONDS);
 
-            System.out.println("Rental status updated: " + status);
+            if (!snapshot.exists()) return false;
+
+            EquipmentRental rental = snapshot.toObject(EquipmentRental.class);
+            if (rental != null) rental.setRentalId(snapshot.getId());
+
+            String normalizedStatus = status.trim().toLowerCase();
+
+            rentalRef
+                    .update("status", normalizedStatus)
+                    .get(10, TimeUnit.SECONDS);
+
+            // Notify the buyer when the farmer accepts or rejects the request.
+            if (rental != null
+                    && rental.getBuyerEmail() != null
+                    && !rental.getBuyerEmail().trim().isEmpty()) {
+
+                String equipment = rental.getEquipmentName();
+                if (equipment == null || equipment.trim().isEmpty()) {
+                    equipment = "your equipment rental request";
+                }
+
+                Notification notification = null;
+
+                if ("accepted".equals(normalizedStatus)) {
+                    notification = new Notification(
+                            rental.getBuyerEmail().trim(),
+                            "Equipment Rental Request Accepted",
+                            "Your rental request for " + equipment
+                                    + " has been accepted by the equipment owner.",
+                            "EQUIPMENT_ACCEPTED"
+                    );
+                } else if ("rejected".equals(normalizedStatus)) {
+                    notification = new Notification(
+                            rental.getBuyerEmail().trim(),
+                            "Equipment Rental Request Rejected",
+                            "Your rental request for " + equipment
+                                    + " has been rejected by the equipment owner.",
+                            "EQUIPMENT_REJECTED"
+                    );
+                }
+
+                if (notification != null) {
+                    new NotificationDAO().addNotification(notification);
+                }
+            }
+
+            System.out.println("Rental status updated: " + normalizedStatus);
             return true;
 
         } catch (Exception e) {
@@ -143,35 +214,41 @@ public class EquipmentRentalDAO {
         }
     }
 
-    // Demo payment: records payment in Firestore.
-    public boolean completePayment(String rentalId, String paymentMethod) {
+    // =====================================================
+    // COMPLETE VERIFIED RAZORPAY PAYMENT
+    // =====================================================
+    public boolean completePayment(String rentalId, String paymentId, String razorpayOrderId, String paymentMethod) {
         try {
-            if (isEmpty(rentalId) || isEmpty(paymentMethod)) return false;
+            if (isEmpty(rentalId) || isEmpty(paymentId)) return false;
+            EquipmentRental rental = getRentalById(rentalId);
+            if (rental == null) return false;
+            if ("paid".equalsIgnoreCase(rental.getPaymentStatus())) return true;
 
             Firestore db = FirestoreClient.getFirestore();
-
-            String paymentId = "AGRI-" + System.currentTimeMillis();
-
             Map<String, Object> updates = new HashMap<>();
             updates.put("paymentStatus", "paid");
-            updates.put("paymentId", paymentId);
-            updates.put("paymentMethod", paymentMethod);
+            updates.put("paymentId", paymentId.trim());
+            updates.put("razorpayOrderId", razorpayOrderId == null ? "" : razorpayOrderId.trim());
+            updates.put("paymentMethod", paymentMethod == null || paymentMethod.trim().isEmpty() ? "RAZORPAY" : paymentMethod.trim());
             updates.put("paymentDate", new Date());
             updates.put("status", "active");
+            db.collection(COLLECTION).document(rentalId).update(updates).get(10, TimeUnit.SECONDS);
 
-            db.collection(COLLECTION)
-                    .document(rentalId)
-                    .update(updates)
-                    .get(10, TimeUnit.SECONDS);
-
-            System.out.println("Payment completed successfully!");
-            System.out.println("Payment ID: " + paymentId);
+            if (!isEmpty(rental.getEquipmentOwnerEmail())) {
+                new NotificationDAO().addNotification(new Notification(
+                        rental.getEquipmentOwnerEmail().trim(),
+                        "Rental Payment Received",
+                        "Payment of ₹" + String.format("%.2f", rental.getTotalAmount())
+                                + " was received for " + (isEmpty(rental.getEquipmentName()) ? "your equipment" : rental.getEquipmentName()) + ".",
+                        "RENTAL_PAYMENT"
+                ));
+            }
             return true;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean completePayment(String rentalId, String paymentId, String paymentMethod) {
+        return completePayment(rentalId, paymentId, null, paymentMethod);
     }
 
     public boolean deleteRental(String rentalId) {
