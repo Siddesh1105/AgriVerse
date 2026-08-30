@@ -231,7 +231,7 @@ public class FarmerProfile {
                 e ->
                         mainController.setView(
                                 new ChatWithFarmer(
-                                        mainController, farmerEmail, farmerName
+                                        mainController, farmerName, farmerEmail
                                 ).getView()
                         )
         );

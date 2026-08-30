@@ -62,6 +62,8 @@ public class Checkout {
     private double deliveryCharge = 0;
     private double totalAmount = 0;
 
+    private Button placeOrderButton;
+
     public Checkout(BuyerDashboard navigator) {
         this.navigator = navigator;
     }
@@ -746,8 +748,10 @@ public class Checkout {
                 "-fx-text-fill:#117864;"
         );
 
-        Button placeOrder =
+        placeOrderButton =
                 new Button("✓ Place Order");
+
+        Button placeOrder = placeOrderButton;
 
         placeOrder.setMaxWidth(
                 Double.MAX_VALUE
@@ -894,6 +898,8 @@ public class Checkout {
                 paymentMethod
         );
 
+        order.setPaymentStatus("pending");
+
         // =================================================
         // CREATE ORDER ITEMS
         // =================================================
@@ -980,79 +986,84 @@ public class Checkout {
         }
 
         // =================================================
-        // CREATE BUYER NOTIFICATION
+        // ONLINE PAYMENT (UPI / CARD)
         // =================================================
 
-        try {
+        if (!"COD".equalsIgnoreCase(paymentMethod)) {
 
-            com.mainproject.model.Notification notification =
+            if (placeOrderButton != null) {
+                placeOrderButton.setDisable(true);
+            }
+
+            OrderPaymentScreen paymentScreen =
+                    new OrderPaymentScreen(order);
+
+            paymentScreen.setOnPaymentSuccess(() ->
+                    completeCheckout(order, cartItems, true)
+            );
+
+            paymentScreen.setOnPaymentFailed(() -> {
+                if (placeOrderButton != null) {
+                    placeOrderButton.setDisable(false);
+                }
+            });
+
+            paymentScreen.show();
+            return;
+        }
+
+        // =================================================
+        // CASH ON DELIVERY
+        // =================================================
+
+        completeCheckout(order, cartItems, false);
+    }
+
+    private void completeCheckout(
+            Order order,
+            List<BuyerCartItem> cartItems,
+            boolean paidOnline) {
+
+        // Create buyer notification.
+        try {
+            String message = paidOnline
+                    ? "Your order has been placed and your online payment was successful."
+                    : "Your order has been placed successfully. Payment will be collected on delivery.";
+
+            notificationController.addNotification(
                     new com.mainproject.model.Notification(
                             navigator.getBuyerEmail(),
                             "🛒 Order Placed Successfully",
-                            "Your order has been placed successfully and is waiting for farmer confirmation.",
+                            message,
                             "ORDER"
-                    );
-
-            boolean notificationAdded =
-                    notificationController.addNotification(
-                            notification
-                    );
-
-            System.out.println(
-                    "Buyer notification created: "
-                            + notificationAdded
+                    )
             );
-
         } catch (Exception ex) {
-
-            // The order is already successfully placed.
-            // Notification failure must not cancel the checkout.
             ex.printStackTrace();
-
-            System.out.println(
-                    "Notification could not be created."
-            );
         }
 
-        // =================================================
-        // REMOVE ITEMS FROM CART
-        // =================================================
-
+        // Remove items only after COD placement or verified online payment.
         for (BuyerCartItem item : cartItems) {
-
-            if (item.getCartItemId() != null) {
-
-                cartController.removeFromCart(
-                        item.getCartItemId()
-                );
+            if (item != null && item.getCartItemId() != null) {
+                cartController.removeFromCart(item.getCartItemId());
             }
         }
 
-        // =================================================
-        // SUCCESS
-        // =================================================
+        String paymentMessage = paidOnline
+                ? "Payment Status: PAID (Razorpay)"
+                : "Payment Status: CASH ON DELIVERY";
 
         showAlert(
                 Alert.AlertType.INFORMATION,
                 "Order Placed Successfully 🎉",
                 "Your order has been placed successfully!\n\n"
-                        + "Order ID: "
-                        + orderId
-                        + "\n\n"
-                        + "Payment Method: "
-                        + paymentMethod
-                        + "\n\n"
-                        + "Total Amount: ₹"
-                        + format(order.getTotalAmount())
+                        + "Order ID: " + order.getOrderId()
+                        + "\n\nPayment Method: " + order.getPaymentMethod()
+                        + "\n" + paymentMessage
+                        + "\n\nTotal Amount: ₹" + format(order.getTotalAmount())
         );
 
-        // =================================================
-        // GO TO MY ORDERS
-        // =================================================
-
-        navigator.setView(
-                new MyOrders(navigator).getView()
-        );
+        navigator.setView(new MyOrders(navigator).getView());
     }
 
     // =====================================================

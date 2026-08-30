@@ -2,10 +2,11 @@ package com.mainproject.dao;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.ListenerRegistration;
 import com.google.firebase.cloud.FirestoreClient;
 import com.mainproject.model.Notification;
 
@@ -19,6 +20,24 @@ public class NotificationDAO {
 
     private static final String COLLECTION =
             "notifications";
+
+
+    public List<Notification> getAllNotifications() {
+        List<Notification> notifications = new ArrayList<>();
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            QuerySnapshot snapshot = db.collection(COLLECTION).get().get();
+            for (QueryDocumentSnapshot document : snapshot.getDocuments()) {
+                Notification notification = document.toObject(Notification.class);
+                if (notification != null) {
+                    notification.setNotificationId(document.getId());
+                    notifications.add(notification);
+                }
+            }
+            notifications.sort(Comparator.comparing(Notification::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())));
+        } catch (Exception e) { e.printStackTrace(); }
+        return notifications;
+    }
 
     // =====================================================
     // ADD NOTIFICATION
@@ -475,27 +494,51 @@ public class NotificationDAO {
                 farmerEmail);
     }
     // =====================================================
-    // GET ALL NOTIFICATIONS (ADMIN)
+    // REAL-TIME NOTIFICATION LISTENER
     // =====================================================
 
-    public List<Notification> getAllNotifications() {
-        List<Notification> list = new ArrayList<>();
-        try {
-            Firestore db = FirestoreClient.getFirestore();
-            QuerySnapshot snapshot = db.collection(COLLECTION).get().get();
-            for (DocumentSnapshot document : snapshot.getDocuments()) {
-                Notification n = document.toObject(Notification.class);
-                if (n != null) {
-                    n.setNotificationId(document.getId());
-                    list.add(n);
-                }
-            }
-            list.sort((a,b) -> {
-                Date ad=a.getCreatedAt(), bd=b.getCreatedAt();
-                if(ad==null&&bd==null)return 0; if(ad==null)return 1; if(bd==null)return -1; return bd.compareTo(ad);
-            });
-        } catch(Exception e){ e.printStackTrace(); }
-        return list;
+    public ListenerRegistration listenForNotifications(
+            String userEmail,
+            NotificationListener listener) {
+
+        if (userEmail == null || userEmail.trim().isEmpty() || listener == null) {
+            return null;
+        }
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        return db.collection(COLLECTION)
+                .whereEqualTo("userEmail", userEmail.trim())
+                .addSnapshotListener((snapshots, error) -> {
+
+                    if (error != null) {
+                        error.printStackTrace();
+                        return;
+                    }
+
+                    List<Notification> list = new ArrayList<>();
+
+                    if (snapshots != null) {
+                        for (DocumentSnapshot document : snapshots.getDocuments()) {
+                            Notification notification = document.toObject(Notification.class);
+                            if (notification != null) {
+                                notification.setNotificationId(document.getId());
+                                list.add(notification);
+                            }
+                        }
+                    }
+
+                    list.sort(Comparator.comparing(
+                            Notification::getCreatedAt,
+                            Comparator.nullsLast(Comparator.reverseOrder())));
+
+                    listener.onNotificationsUpdated(list);
+                });
     }
+
+    public interface NotificationListener {
+        void onNotificationsUpdated(List<Notification> notifications);
+    }
+
 
 }

@@ -1,5 +1,7 @@
 package com.mainproject.view;
 
+import com.mainproject.util.ResponsiveLayout;
+
 import com.mainproject.controller.AuthController;
 import com.mainproject.controller.UserController;
 import com.mainproject.model.User;
@@ -561,7 +563,7 @@ public class RegisterScreen {
                 // SCENE
                 // =================================================
 
-                registerScreenScene = new Scene(main, 1400, 1000);
+                registerScreenScene = ResponsiveLayout.createScene(main);
 
                 registerScreenScene.setFill(
                                 Color.WHITESMOKE);

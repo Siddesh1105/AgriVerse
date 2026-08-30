@@ -1,7 +1,10 @@
 package com.mainproject.view;
 
+import com.mainproject.util.ResponsiveLayout;
+
 import com.mainproject.view.buyer.BuyerDashboard;
 import com.mainproject.view.farmer.FarmerDashboard;
+import com.mainproject.view.admin.AdminDashboard;
 import com.mainproject.controller.AuthController;
 import com.mainproject.controller.UserController;
 import com.mainproject.model.User;
@@ -357,6 +360,27 @@ public class LoginScreen extends Application {
 
                                                 switchScene(
                                                                 dashboard.getScene());
+                                        }
+
+                                        // =====================================
+                                        // ADMIN
+                                        // =====================================
+
+                                        else if (role.equalsIgnoreCase("Admin")) {
+
+                                                System.out.println(
+                                                                "Opening Admin Dashboard...");
+
+                                                try {
+                                                        AdminDashboard adminDashboard = new AdminDashboard();
+                                                        adminDashboard.start(Homestage);
+                                                } catch (Exception ex) {
+                                                        ex.printStackTrace();
+                                                        showAlert(
+                                                                        AlertType.ERROR,
+                                                                        "Admin Dashboard Error",
+                                                                        "Unable to open the Admin Dashboard.");
+                                                }
                                         }
 
                                         // =====================================

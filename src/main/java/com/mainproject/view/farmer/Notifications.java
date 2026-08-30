@@ -3,6 +3,7 @@ package com.mainproject.view.farmer;
 
 import com.mainproject.controller.NotificationController;
 import com.mainproject.model.Notification;
+import com.google.cloud.firestore.ListenerRegistration;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -31,6 +32,8 @@ public class Notifications {
     private final Label unreadLabel = new Label("0 unread");
 
     private List<Notification> notifications = new ArrayList<>();
+
+    private ListenerRegistration notificationListener;
 
     // =====================================================
     // CONSTRUCTOR
@@ -201,7 +204,29 @@ public class Notifications {
         // =================================================
 
         loadNotifications();
+        startRealtimeListener();
         return root;
+    }
+
+    // =====================================================
+    // REAL-TIME FIRESTORE LISTENER
+    // =====================================================
+
+    private void startRealtimeListener() {
+
+        if (notificationListener != null) {
+            notificationListener.remove();
+        }
+
+        notificationListener = notificationController.listenForNotifications(
+                farmerEmail,
+                updatedNotifications -> Platform.runLater(() -> {
+                    notifications = updatedNotifications == null
+                            ? new ArrayList<>()
+                            : new ArrayList<>(updatedNotifications);
+                    refreshNotifications();
+                })
+        );
     }
 
     // =====================================================
@@ -521,7 +546,11 @@ public class Notifications {
         switch (type) {
 
             case "Orders":
+            case "ORDER":
                 return "📦";
+
+            case "EQUIPMENT":
+                return "🚜";
 
             case "Weather":
                 return "🌧";

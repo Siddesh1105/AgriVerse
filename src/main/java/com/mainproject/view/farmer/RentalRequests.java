@@ -1,6 +1,7 @@
 package com.mainproject.view.farmer;
 
 import com.mainproject.controller.EquipmentRentalController;
+import com.mainproject.view.common.ReviewDialog;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -633,6 +634,24 @@ public class RentalRequests {
             actions.getChildren().add(
                     statusMessage
             );
+
+            if (status != null && status.equalsIgnoreCase("completed")) {
+                Button reviewBuyer = new Button("⭐ Review Renter");
+                reviewBuyer.setStyle(
+                        "-fx-background-color: " + PRIMARY_GREEN + ";" +
+                        "-fx-text-fill:white;" +
+                        "-fx-font-weight:bold;" +
+                        "-fx-padding:9 18;" +
+                        "-fx-background-radius:8;" +
+                        "-fx-cursor:hand;"
+                );
+                reviewBuyer.setOnAction(e -> ReviewDialog.show(
+                        farmerEmail, farmerEmail, "FARMER",
+                        safe(rental.getBuyerEmail()), safe(rental.getBuyerName()), "BUYER",
+                        safe(rental.getRentalId()), "EQUIPMENT_RENTAL"
+                ));
+                actions.getChildren().add(reviewBuyer);
+            }
         }
 
         // =====================================================

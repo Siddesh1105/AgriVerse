@@ -28,7 +28,7 @@ final class AdminCommon {
         Label l = new Label("🌿  AgriLink"); l.setTextFill(Color.WHITE); l.setFont(Font.font("Segoe UI", FontWeight.BOLD,20));
         Label s = new Label("Admin Dashboard"); s.setTextFill(Color.web("#c8e6c9"));
         logo.getChildren().addAll(l,s);
-        String[] items={"Dashboard","User Management","Farmer Verification","Product Management","Order Management","Live Marketplace","Equipment Management","Analytics & Reports","Crop Price Management","AI & Smart Tools","Notifications","Content Management","Feedback & Reviews","Reports & Complaints","Payment Management","Audit Logs","SystemDataManage"};
+        String[] items={"Dashboard","User Management","Farmer Verification","Product Management","Order Management","Equipment Management","Analytics & Reports","Crop Price Management","Notifications","Feedback & Reviews","Payment Management"};
         VBox nav = new VBox(1);
         for(String item:items){
             Button b=new Button(item); b.setPrefWidth(228); b.setAlignment(Pos.CENTER_LEFT); b.setPadding(new Insets(11,20,11,20)); b.setFont(Font.font("Segoe UI",13));

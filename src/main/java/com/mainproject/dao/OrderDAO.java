@@ -9,11 +9,17 @@ import com.google.cloud.firestore.QuerySnapshot;
 import com.mainproject.config.FirebaseConfig;
 import com.mainproject.model.Order;
 import com.mainproject.model.OrderItem;
+import com.mainproject.model.Notification;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OrderDAO {
 
@@ -60,6 +66,12 @@ public class OrderDAO {
             // Overall order status
             order.setStatus("Pending");
 
+            // Payment is completed later for Razorpay orders.
+            if (order.getPaymentStatus() == null ||
+                    order.getPaymentStatus().trim().isEmpty()) {
+                order.setPaymentStatus("pending");
+            }
+
             // Date
             order.setOrderDate(
                     new Date()
@@ -78,11 +90,34 @@ public class OrderDAO {
             document.set(order)
                     .get();
 
-            System.out.println(
-                    "Order created successfully: "
-                            + order.getOrderId()
-            );
+            // Create one notification for every farmer included in this order.
+            Set<String> notifiedFarmers = new HashSet<>();
 
+            for (OrderItem item : order.getItems()) {
+                if (item == null || item.getFarmerEmail() == null
+                        || item.getFarmerEmail().trim().isEmpty()) {
+                    continue;
+                }
+
+                String farmerEmail = item.getFarmerEmail().trim().toLowerCase();
+
+                if (notifiedFarmers.add(farmerEmail)) {
+                    String productName = item.getProductName() == null
+                            || item.getProductName().trim().isEmpty()
+                            ? "your product" : item.getProductName().trim();
+
+                    new NotificationDAO().addNotification(
+                            new Notification(
+                                    farmerEmail,
+                                    "New Order Received",
+                                    "You received a new order containing " + productName + ".",
+                                    "ORDER"
+                            )
+                    );
+                }
+            }
+
+            System.out.println("Order created successfully: " + order.getOrderId());
             return order.getOrderId();
 
         } catch (Exception e) {
@@ -95,6 +130,45 @@ public class OrderDAO {
 
             return null;
         }
+    }
+
+    // =====================================================
+    // COMPLETE VERIFIED RAZORPAY PAYMENT
+    // =====================================================
+
+    public boolean completePayment(
+            String orderId,
+            String paymentId,
+            String razorpayOrderId,
+            String paymentMethod) {
+
+        try {
+            if (isEmpty(orderId) || isEmpty(paymentId)) {
+                return false;
+            }
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("paymentStatus", "paid");
+            updates.put("paymentId", paymentId.trim());
+            updates.put("razorpayOrderId", razorpayOrderId == null ? "" : razorpayOrderId.trim());
+            updates.put("paymentMethod", paymentMethod == null ? "RAZORPAY" : paymentMethod.trim());
+            updates.put("paymentDate", new Date());
+
+            db.collection(COLLECTION)
+                    .document(orderId.trim())
+                    .update(updates)
+                    .get();
+
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean isEmpty(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     // =====================================================
@@ -521,6 +595,28 @@ public class OrderDAO {
     }
 
     // =====================================================
+    // GET ALL ORDERS (ADMIN)
+    // =====================================================
+
+    public List<Order> getAllOrders() {
+        List<Order> orders = new ArrayList<>();
+        try {
+            QuerySnapshot snapshot = db.collection(COLLECTION).get().get();
+            for (QueryDocumentSnapshot document : snapshot.getDocuments()) {
+                Order order = document.toObject(Order.class);
+                if (order != null) {
+                    order.setOrderId(document.getId());
+                    orders.add(order);
+                }
+            }
+            sortOrders(orders);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    // =====================================================
     // SORT ORDERS
     // =====================================================
 
@@ -536,26 +632,4 @@ public class OrderDAO {
                 )
         );
     }
-    // =====================================================
-    // GET ALL ORDERS (ADMIN)
-    // =====================================================
-
-    public List<Order> getAllOrders() {
-        List<Order> list = new ArrayList<>();
-        try {
-            QuerySnapshot snapshot = db.collection(COLLECTION).get().get();
-            for (QueryDocumentSnapshot document : snapshot.getDocuments()) {
-                Order order = document.toObject(Order.class);
-                if (order != null) {
-                    order.setOrderId(document.getId());
-                    list.add(order);
-                }
-            }
-            list.sort(Comparator.comparing(Order::getOrderDate, Comparator.nullsLast(Comparator.reverseOrder())));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
 }

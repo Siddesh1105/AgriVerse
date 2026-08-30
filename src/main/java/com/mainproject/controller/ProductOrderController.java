@@ -233,4 +233,13 @@ public class ProductOrderController {
                 "delivered"
         );
     }
+
+
+    public boolean completePayment(String orderId, String paymentId, String razorpayOrderId, String paymentMethod) {
+        return orderDAO.completePayment(orderId, paymentId, razorpayOrderId, paymentMethod);
+    }
+
+    public boolean completePayment(String orderId, String paymentId, String paymentMethod) {
+        return orderDAO.completePayment(orderId, paymentId, paymentMethod);
+    }
 }

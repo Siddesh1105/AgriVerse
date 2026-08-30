@@ -1,5 +1,7 @@
 package com.mainproject.view;
 
+import com.mainproject.util.ResponsiveLayout;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -43,7 +45,7 @@ public class FeaturesScreen {
         ScrollPane scroll = new ScrollPane(root);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background: " + BG_MINT + "; -fx-background-color: transparent;");
-        return new Scene(scroll, 1400, 1000);
+        return ResponsiveLayout.createScene(scroll);
     }
 
     // ─────────────────────────────────────────────

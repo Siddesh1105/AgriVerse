@@ -9,6 +9,7 @@ import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.cloud.FirestoreClient;
 
 import com.mainproject.model.ProductOrder;
+import com.mainproject.model.Notification;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,13 +49,32 @@ public class ProductOrderDAO {
                 order.setStatus("pending");
             }
 
+            if (order.getPaymentStatus() == null || order.getPaymentStatus().trim().isEmpty()) {
+                order.setPaymentStatus("pending");
+            }
+
             document.set(order)
                     .get(10, TimeUnit.SECONDS);
 
-            System.out.println(
-                    "Product order created successfully!"
-            );
+            // Create notification for the product owner (farmer).
+            if (order.getFarmerEmail() != null && !order.getFarmerEmail().trim().isEmpty()) {
+                String buyer = order.getBuyerName();
+                if (buyer == null || buyer.trim().isEmpty()) buyer = "A buyer";
 
+                new NotificationDAO().addNotification(
+                        new Notification(
+                                order.getFarmerEmail().trim(),
+                                "New Order Received",
+                                buyer + " placed an order for "
+                                        + order.getQuantity() + " "
+                                        + safe(order.getUnit()) + " of "
+                                        + safe(order.getProductName()) + ".",
+                                "ORDER"
+                        )
+                );
+            }
+
+            System.out.println("Product order created successfully!");
             return true;
 
         } catch (Exception e) {
@@ -239,6 +259,42 @@ public class ProductOrderDAO {
     }
 
 
+
+    // =====================================================
+    // COMPLETE VERIFIED RAZORPAY PAYMENT
+    // =====================================================
+    public boolean completePayment(String orderId, String paymentId, String razorpayOrderId, String paymentMethod) {
+        try {
+            ProductOrder order = getOrderById(orderId);
+            if (order == null || paymentId == null || paymentId.trim().isEmpty()) return false;
+            if ("paid".equalsIgnoreCase(order.getPaymentStatus())) return true;
+
+            Firestore db = FirestoreClient.getFirestore();
+            java.util.Map<String, Object> updates = new java.util.HashMap<>();
+            updates.put("paymentStatus", "paid");
+            updates.put("paymentId", paymentId.trim());
+            updates.put("razorpayOrderId", razorpayOrderId == null ? "" : razorpayOrderId.trim());
+            updates.put("paymentMethod", paymentMethod == null || paymentMethod.trim().isEmpty() ? "RAZORPAY" : paymentMethod.trim());
+            updates.put("paymentDate", new Date());
+            db.collection(COLLECTION).document(orderId).update(updates).get(10, TimeUnit.SECONDS);
+
+            if (order.getFarmerEmail() != null && !order.getFarmerEmail().trim().isEmpty()) {
+                new NotificationDAO().addNotification(new Notification(
+                        order.getFarmerEmail().trim(),
+                        "Product Payment Received",
+                        "Payment of ₹" + String.format("%.2f", order.getTotalAmount())
+                                + " was received for " + safe(order.getProductName()) + ".",
+                        "ORDER_PAYMENT"
+                ));
+            }
+            return true;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    public boolean completePayment(String orderId, String paymentId, String paymentMethod) {
+        return completePayment(orderId, paymentId, null, paymentMethod);
+    }
+
     // =====================================================
     // DELETE ORDER
     // =====================================================
@@ -264,4 +320,8 @@ public class ProductOrderDAO {
             return false;
         }
     }
+    private String safe(String value) {
+        return value == null || value.trim().isEmpty() ? "product" : value.trim();
+    }
+
 }

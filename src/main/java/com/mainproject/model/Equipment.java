@@ -11,7 +11,6 @@ public class Equipment {
     private String category;
     private String description;
     private boolean available;
-    private String status;
 
     private String ownerEmail;
     private String ownerName;
@@ -54,7 +53,6 @@ public class Equipment {
         this.ownerName = ownerName;
         this.imageUrl = imageUrl;
         this.createdAt = new Date();
-        this.status = "Pending";
     }
 
     // =========================================================
@@ -141,16 +139,10 @@ public class Equipment {
         this.available = available;
     }
 
-    // =========================================================
-    // STATUS
-    // =========================================================
 
-    public String getStatus() {
-        return status;
-    }
-
+    public String getStatus() { return available ? "Approved" : "Unavailable"; }
     public void setStatus(String status) {
-        this.status = status;
+        this.available = status != null && (status.equalsIgnoreCase("Approved") || status.equalsIgnoreCase("Available"));
     }
 
     // =========================================================

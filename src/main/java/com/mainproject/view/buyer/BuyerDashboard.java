@@ -1,6 +1,8 @@
 package com.mainproject.view.buyer;
 
 import com.mainproject.model.User;
+import com.mainproject.util.ResponsiveLayout;
+import com.mainproject.view.LoginScreen;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,6 +14,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class BuyerDashboard {
 
@@ -128,11 +131,7 @@ public String getUserEmail1() {
                     createSidebar()
             );
 
-            scene = new Scene(
-                    mainLayout,
-                    1400,
-                    900
-            );
+            scene = ResponsiveLayout.createScene(mainLayout);
 
             navigateTo("Dashboard");
         }
@@ -158,7 +157,7 @@ public String getUserEmail1() {
             return;
         }
 
-        mainLayout.setCenter(viewNode);
+        mainLayout.setCenter(ResponsiveLayout.scrollPage(viewNode));
     }
 
     // =====================================================
@@ -279,6 +278,18 @@ public String getUserEmail1() {
                     break;
 
                 // =============================================
+                // MY RENTAL REQUESTS
+                // =============================================
+
+                case "My Rental Requests":
+
+                    viewNode =
+                            new MyRentalRequests(this)
+                                    .getView();
+
+                    break;
+
+                // =============================================
                 // CROP PRICES
                 // =============================================
 
@@ -309,7 +320,7 @@ public String getUserEmail1() {
                 case "Messages":
 
                     viewNode =
-                            new ChatWithFarmer(this, buyerEmail, buyerEmail)
+                            new FarmerChatList(this)
                                     .getView();
 
                     break;
@@ -663,6 +674,11 @@ public String getUserEmail1() {
                 ),
 
                 createNavButton(
+                        "📋",
+                        "My Rental Requests"
+                ),
+
+                createNavButton(
                         "📈",
                         "Crop Prices"
                 ),
@@ -770,13 +786,13 @@ public String getUserEmail1() {
                     "Buyer logout clicked."
             );
 
-            /*
-             * Keep your existing logout logic here.
-             *
-             * Example:
-             *
-             * LoginScreen.Homestage.setScene(...);
-             */
+            // Navigate back to the login screen without closing
+            // the JavaFX application window.
+            if (LoginScreen.Homestage != null) {
+                LoginScreen.logoutToLogin();
+            } else if (scene != null && scene.getWindow() instanceof Stage) {
+                new LoginScreen().start((Stage) scene.getWindow());
+            }
         });
 
         // =================================================

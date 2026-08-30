@@ -33,6 +33,12 @@ public class Order {
 
     private String paymentMethod;
 
+    // pending / paid / failed
+    private String paymentStatus;
+    private String paymentId;
+    private String razorpayOrderId;
+    private Date paymentDate;
+
     // =====================================================
     // AMOUNTS
     // =====================================================
@@ -172,6 +178,38 @@ public class Order {
 
         this.paymentMethod =
                 paymentMethod;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getPaymentId() {
+        return paymentId;
+    }
+
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
+    }
+
+    public String getRazorpayOrderId() {
+        return razorpayOrderId;
+    }
+
+    public void setRazorpayOrderId(String razorpayOrderId) {
+        this.razorpayOrderId = razorpayOrderId;
+    }
+
+    public Date getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(Date paymentDate) {
+        this.paymentDate = paymentDate;
     }
 
     // =====================================================

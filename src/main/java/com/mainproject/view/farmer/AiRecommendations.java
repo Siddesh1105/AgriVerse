@@ -2,7 +2,9 @@ package com.mainproject.view.farmer;
 
 import com.mainproject.config.AIConfig;
 import com.mainproject.controller.AIChatController;
+import com.mainproject.controller.WeatherRecommendationController;
 import com.mainproject.model.AIChatMessage;
+import com.mainproject.model.WeatherRecommendation;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -15,7 +17,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+
+import java.util.List;
 
 public class AiRecommendations {
 
@@ -26,42 +31,56 @@ public class AiRecommendations {
     private Button sendButton;
 
     private final AIChatController aiController;
+    private final String userEmail;
 
-    public AiRecommendations() {
+    private Node thinkingRow;
 
-        aiController = new AIChatController();
+    // =====================================================
+    // CONSTRUCTOR
+    // =====================================================
+
+    public AiRecommendations(String userEmail) {
+
+        this.userEmail = userEmail;
+        this.aiController = new AIChatController();
     }
+
+    // =====================================================
+    // MAIN VIEW
+    // =====================================================
 
     public Node getView() {
 
-        BorderPane root =
-                new BorderPane();
+        BorderPane root = new BorderPane();
 
-        root.setPadding(
-                new Insets(18)
-        );
+        root.setPadding(new Insets(20));
 
         root.setStyle(
                 "-fx-background-color: #f1f8f5;"
         );
 
-        VBox recommendations =
-                createRecommendations();
+        // LEFT SIDE
+        VBox weatherSection =
+                createWeatherSection();
 
+        // RIGHT SIDE
         VBox chatbot =
                 createChatbot();
 
-        HBox content =
-                new HBox(20);
+        HBox content = new HBox(20);
 
-        content.getChildren().addAll(
-                recommendations,
-                chatbot
-        );
+        content.setAlignment(Pos.TOP_LEFT);
+
+        weatherSection.setMaxWidth(Double.MAX_VALUE);
 
         HBox.setHgrow(
-                recommendations,
+                weatherSection,
                 Priority.ALWAYS
+        );
+
+        content.getChildren().addAll(
+                weatherSection,
+                chatbot
         );
 
         root.setCenter(content);
@@ -69,274 +88,293 @@ public class AiRecommendations {
         return root;
     }
 
-    private VBox createRecommendations() {
+    // =====================================================
+    // WEATHER SECTION
+    // =====================================================
 
-        VBox root =
-                new VBox(18);
+    private VBox createWeatherSection() {
 
-        root.setPadding(
-                new Insets(10)
+        VBox root = new VBox(18);
+
+        root.setPadding(new Insets(10));
+
+        root.setMaxWidth(Double.MAX_VALUE);
+
+        // =================================================
+        // HEADER
+        // =================================================
+
+        Label title = new Label(
+                "Weather Recommendations"
         );
-
-        Label title =
-                new Label(
-                        "AI Recommendations"
-                );
 
         title.setStyle(
-                "-fx-font-size: 24px;" +
+                "-fx-font-size: 26px;" +
                 "-fx-font-weight: bold;" +
-                "-fx-text-fill: #17202a;"
+                "-fx-text-fill: #1f2937;"
         );
 
-        Label subtitle =
-                new Label(
-                        "Smart insights and suggestions for your farm."
-                );
+        Label subtitle = new Label(
+                "Smart farming suggestions based on the weather in your location."
+        );
+
+        subtitle.setWrapText(true);
 
         subtitle.setStyle(
                 "-fx-font-size: 14px;" +
-                "-fx-text-fill: #607080;"
+                "-fx-text-fill: #64748b;"
         );
 
-        VBox header =
-                new VBox(4);
+        VBox header = new VBox(6);
 
         header.getChildren().addAll(
                 title,
                 subtitle
         );
 
-        VBox irrigationCard =
-                createCard(
-                        "Suggested Action",
-                        "Increase irrigation",
-                        "Soil moisture is low in your farm. "
-                        + "Increase irrigation for better crop yield.",
-                        "View Details"
-                );
+        // =================================================
+        // WEATHER RECOMMENDATIONS CONTAINER
+        // =================================================
 
-        VBox plantingCard =
-                createCard(
-                        "Best Time to Plant",
-                        "Tomato",
-                        "The next few days are suitable "
-                        + "for planting based on current conditions.",
-                        "View Calendar"
-                );
+        VBox weatherBox = new VBox(12);
 
-        HBox cards =
-                new HBox(16);
-
-        cards.getChildren().addAll(
-                irrigationCard,
-                plantingCard
-        );
-
-        HBox.setHgrow(
-                irrigationCard,
-                Priority.ALWAYS
-        );
-
-        HBox.setHgrow(
-                plantingCard,
-                Priority.ALWAYS
-        );
-
-        VBox other =
-                new VBox(12);
-
-        other.setPadding(
+        weatherBox.setPadding(
                 new Insets(20)
         );
 
-        other.setStyle(
-                "-fx-background-color: #d8f1e5;" +
-                "-fx-border-color: #b7e3d5;" +
-                "-fx-border-radius: 8;" +
-                "-fx-background-radius: 8;"
+        weatherBox.setMaxWidth(Double.MAX_VALUE);
+
+        weatherBox.setStyle(
+                "-fx-background-color: white;" +
+                "-fx-border-color: #b7ddd0;" +
+                "-fx-border-radius: 12;" +
+                "-fx-background-radius: 12;"
         );
 
-        Label otherTitle =
-                new Label(
-                        "Other Recommendations"
-                );
-
-        otherTitle.setStyle(
-                "-fx-font-size: 17px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: #087c69;"
+        Label loadingLabel = new Label(
+                "Loading weather recommendations..."
         );
 
-        Label recommendation1 =
-                new Label(
-                        "⚒  Use organic fertilizer for better soil health."
-                );
-
-        Label recommendation2 =
-                new Label(
-                        "☁  Check rainfall before spraying pesticides."
-                );
-
-        Label recommendation3 =
-                new Label(
-                        "▣  Check current market prices before selling."
-                );
-
-        recommendation1.setStyle(
-                "-fx-font-size: 14px;"
+        loadingLabel.setStyle(
+                "-fx-font-size: 14px;" +
+                "-fx-text-fill: #64748b;"
         );
 
-        recommendation2.setStyle(
-                "-fx-font-size: 14px;"
+        weatherBox.getChildren().add(
+                loadingLabel
         );
 
-        recommendation3.setStyle(
-                "-fx-font-size: 14px;"
-        );
+        // =================================================
+        // LOAD WEATHER DATA
+        // =================================================
 
-        other.getChildren().addAll(
-                otherTitle,
-                recommendation1,
-                recommendation2,
-                recommendation3
-        );
+        Thread thread = new Thread(() -> {
+
+            try {
+
+                WeatherRecommendationController
+                        weatherController =
+                        new WeatherRecommendationController(
+                                userEmail
+                        );
+
+                List<WeatherRecommendation>
+                        recommendations =
+                        weatherController.getRecommendations();
+
+                Platform.runLater(() -> {
+
+                    weatherBox.getChildren().clear();
+
+                    if (recommendations == null ||
+                            recommendations.isEmpty()) {
+
+                        Label noData = new Label(
+                                "No weather recommendations are available right now."
+                        );
+
+                        noData.setStyle(
+                                "-fx-font-size: 14px;" +
+                                "-fx-text-fill: #64748b;"
+                        );
+
+                        weatherBox.getChildren().add(
+                                noData
+                        );
+
+                        return;
+                    }
+
+                    // Show maximum 4 recommendations
+                    int count = Math.min(
+                            recommendations.size(),
+                            4
+                    );
+
+                    for (int i = 0; i < count; i++) {
+
+                        WeatherRecommendation recommendation =
+                                recommendations.get(i);
+
+                        VBox card =
+                                createWeatherRecommendationCard(
+                                        recommendation
+                                );
+
+                        weatherBox.getChildren().add(
+                                card
+                        );
+                    }
+                });
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+                Platform.runLater(() -> {
+
+                    weatherBox.getChildren().clear();
+
+                    Label errorLabel = new Label(
+                            "Unable to load weather recommendations."
+                    );
+
+                    errorLabel.setStyle(
+                            "-fx-font-size: 14px;" +
+                            "-fx-text-fill: #dc2626;"
+                    );
+
+                    weatherBox.getChildren().add(
+                            errorLabel
+                    );
+                });
+            }
+        });
+
+        thread.setDaemon(true);
+        thread.start();
 
         root.getChildren().addAll(
                 header,
-                cards,
-                other
+                weatherBox
         );
 
         return root;
     }
 
-    private VBox createCard(
-            String smallTitle,
-            String title,
-            String description,
-            String buttonText
-    ) {
+    // =====================================================
+    // WEATHER RECOMMENDATION CARD
+    // =====================================================
 
-        VBox card =
-                new VBox(12);
+    private VBox createWeatherRecommendationCard(
+            WeatherRecommendation recommendation) {
+
+        VBox card = new VBox(7);
 
         card.setPadding(
-                new Insets(20)
+                new Insets(15)
         );
+
+        card.setMaxWidth(Double.MAX_VALUE);
 
         card.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-border-color: #b7e3d5;" +
-                "-fx-border-radius: 8;" +
-                "-fx-background-radius: 8;"
+                "-fx-background-color: #f6fbf8;" +
+                "-fx-border-color: #d7e9e2;" +
+                "-fx-border-radius: 10;" +
+                "-fx-background-radius: 10;"
         );
 
-        Label small =
-                new Label(
-                        smallTitle
-                );
-
-        small.setStyle(
-                "-fx-font-size: 13px;" +
-                "-fx-text-fill: #607080;"
+        Label title = new Label(
+                recommendation.getTitle()
         );
 
-        Label heading =
-                new Label(
-                        title
-                );
-
-        heading.setStyle(
-                "-fx-font-size: 19px;" +
-                "-fx-font-weight: bold;"
-        );
-
-        Label text =
-                new Label(
-                        description
-                );
-
-        text.setWrapText(true);
-
-        text.setStyle(
-                "-fx-font-size: 14px;" +
-                "-fx-text-fill: #607080;"
-        );
-
-        Button button =
-                new Button(
-                        buttonText
-                );
-
-        button.setStyle(
-                "-fx-background-color: #10866f;" +
-                "-fx-text-fill: white;" +
+        title.setStyle(
+                "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;" +
-                "-fx-background-radius: 6;" +
-                "-fx-padding: 9 18;"
+                "-fx-text-fill: #147a65;"
+        );
+
+       
+
+       
+
+        Label description = new Label(
+                recommendation.getDescription()
+        );
+
+        description.setWrapText(true);
+
+        description.setMaxWidth(Double.MAX_VALUE);
+
+        description.setStyle(
+                "-fx-font-size: 13px;" +
+                "-fx-text-fill: #64748b;"
         );
 
         card.getChildren().addAll(
-                small,
-                heading,
-                text,
-                button
+                title,
+                description
         );
 
         return card;
     }
 
+    // =====================================================
+    // CHATBOT
+    // =====================================================
+
     private VBox createChatbot() {
 
-        VBox chatbot =
-                new VBox();
+        VBox chatbot = new VBox();
 
-        chatbot.setPrefWidth(
-                390
-        );
+        /*
+         * RESPONSIVE CHATBOT SIZE
+         */
 
-        chatbot.setMinWidth(
-                350
-        );
+        chatbot.setPrefWidth(420);
+        chatbot.setMinWidth(360);
+        chatbot.setMaxWidth(450);
 
-        chatbot.setMaxWidth(
-                420
-        );
+        chatbot.setPrefHeight(620);
+
+        chatbot.setMinHeight(500);
+
+        chatbot.setMaxHeight(700);
 
         chatbot.setStyle(
                 "-fx-background-color: white;" +
                 "-fx-border-color: #cfe4dc;" +
-                "-fx-border-radius: 10;" +
-                "-fx-background-radius: 10;"
+                "-fx-border-radius: 14;" +
+                "-fx-background-radius: 14;"
         );
 
-        VBox header =
-                new VBox(5);
+        // =================================================
+        // CHAT HEADER
+        // =================================================
+
+        VBox header = new VBox(5);
 
         header.setPadding(
-                new Insets(18)
+                new Insets(20, 20, 15, 20)
         );
 
-        Label title =
-                new Label(
-                        AIConfig.ASSISTANT_NAME
-                );
+        Label title = new Label(
+                AIConfig.ASSISTANT_NAME
+        );
 
         title.setStyle(
-                "-fx-font-size: 20px;" +
+                "-fx-font-size: 21px;" +
                 "-fx-font-weight: bold;" +
-                "-fx-text-fill: #16866f;"
+                "-fx-text-fill: #147a65;"
         );
 
-        Label subtitle =
-                new Label(
-                        "Ask me anything about your farm."
-                );
+        Label subtitle = new Label(
+                "Ask me anything about your farm."
+        );
 
         subtitle.setStyle(
                 "-fx-font-size: 13px;" +
-                "-fx-text-fill: #607080;"
+                "-fx-text-fill: #64748b;"
         );
 
         header.getChildren().addAll(
@@ -344,29 +382,46 @@ public class AiRecommendations {
                 subtitle
         );
 
-        chatBox =
-                new VBox(12);
+        // =================================================
+        // CHAT MESSAGES AREA
+        // =================================================
+
+        chatBox = new VBox(10);
 
         chatBox.setPadding(
-                new Insets(15)
+                new Insets(12)
         );
 
-        addBotMessage(
-                "Hello! I am your AgriLink AI Assistant. "
-                + "How can I help you today?"
+        chatBox.setFillWidth(true);
+
+        chatScroll = new ScrollPane();
+
+        chatScroll.setContent(chatBox);
+
+        chatScroll.setFitToWidth(true);
+
+        chatScroll.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
         );
 
-        chatScroll =
-                new ScrollPane(
-                        chatBox
-                );
-
-        chatScroll.setFitToWidth(
-                true
+        chatScroll.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.AS_NEEDED
         );
+
+        /*
+         * IMPORTANT:
+         * Only this area scrolls.
+         */
+
+        chatScroll.setPrefHeight(330);
+
+        chatScroll.setMinHeight(250);
+
+        chatScroll.setMaxHeight(380);
 
         chatScroll.setStyle(
-                "-fx-background-color: white;" +
+                "-fx-background-color: transparent;" +
+                "-fx-background: white;" +
                 "-fx-border-color: transparent;"
         );
 
@@ -375,53 +430,60 @@ public class AiRecommendations {
                 Priority.ALWAYS
         );
 
+        // Initial AI message
+
+        addBotMessage(
+                "Hello! I am your AgriLink AI Assistant. "
+                        + "How can I help you today?"
+        );
+
+        // =================================================
+        // QUICK ACTIONS
+        // =================================================
+
         HBox quickActions =
                 createQuickActions();
 
-        messageField =
-                new TextField();
+        // =================================================
+        // INPUT AREA
+        // =================================================
+
+        messageField = new TextField();
 
         messageField.setPromptText(
-                "Ask about crops, soil, weather..."
+                "Ask about crops, soil or farming..."
         );
 
-        messageField.setPrefHeight(
-                42
-        );
+        messageField.setPrefHeight(44);
 
         messageField.setStyle(
                 "-fx-background-color: white;" +
                 "-fx-border-color: #cfe4dc;" +
-                "-fx-border-radius: 7;" +
-                "-fx-background-radius: 7;" +
-                "-fx-padding: 10;"
+                "-fx-border-radius: 8;" +
+                "-fx-background-radius: 8;" +
+                "-fx-padding: 10;" +
+                "-fx-font-size: 13px;" +
+                "-fx-text-fill: #334155;"
         );
 
-        sendButton =
-                new Button(
-                        "➤"
-                );
+        sendButton = new Button("Send");
 
-        sendButton.setPrefHeight(
-                42
-        );
+        sendButton.setPrefHeight(44);
 
-        sendButton.setPrefWidth(
-                50
-        );
+        sendButton.setMinWidth(70);
 
         sendButton.setStyle(
-                "-fx-background-color: #10866f;" +
+                "-fx-background-color: #147a65;" +
                 "-fx-text-fill: white;" +
-                "-fx-font-size: 17px;" +
-                "-fx-background-radius: 7;"
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 8;" +
+                "-fx-cursor: hand;"
         );
 
-        HBox inputArea =
-                new HBox(8);
+        HBox inputArea = new HBox(8);
 
         inputArea.setPadding(
-                new Insets(12)
+                new Insets(12, 15, 10, 15)
         );
 
         HBox.setHgrow(
@@ -434,6 +496,10 @@ public class AiRecommendations {
                 sendButton
         );
 
+        // =================================================
+        // EVENTS
+        // =================================================
+
         sendButton.setOnAction(
                 e -> sendMessage()
         );
@@ -442,23 +508,21 @@ public class AiRecommendations {
                 e -> sendMessage()
         );
 
-        Label disclaimer =
-                new Label(
-                        "AI responses may not always be accurate."
-                );
+        // =================================================
+        // DISCLAIMER
+        // =================================================
+
+        Label disclaimer = new Label(
+                "AI responses may not always be accurate."
+        );
 
         disclaimer.setPadding(
-                new Insets(
-                        0,
-                        15,
-                        12,
-                        15
-                )
+                new Insets(0, 15, 14, 15)
         );
 
         disclaimer.setStyle(
-                "-fx-font-size: 11px;" +
-                "-fx-text-fill: #71808a;"
+                "-fx-font-size: 10px;" +
+                "-fx-text-fill: #94a3b8;"
         );
 
         chatbot.getChildren().addAll(
@@ -472,34 +536,25 @@ public class AiRecommendations {
         return chatbot;
     }
 
+    // =====================================================
+    // QUICK ACTIONS
+    // =====================================================
+
     private HBox createQuickActions() {
 
-        HBox box =
-                new HBox(8);
+        HBox box = new HBox(8);
+
+        box.setAlignment(Pos.CENTER_LEFT);
 
         box.setPadding(
-                new Insets(
-                        5,
-                        12,
-                        5,
-                        12
-                )
+                new Insets(5, 15, 5, 15)
         );
 
-        Button crop =
-                new Button(
-                        "Best Crop"
-                );
+        Button crop = new Button("Best Crop");
 
-        Button weather =
-                new Button(
-                        "Weather"
-                );
+        Button weather = new Button("Weather");
 
-        Button soil =
-                new Button(
-                        "Soil Tips"
-                );
+        Button soil = new Button("Soil Tips");
 
         styleQuickButton(crop);
         styleQuickButton(weather);
@@ -533,32 +588,39 @@ public class AiRecommendations {
     }
 
     private void styleQuickButton(
-            Button button
-    ) {
+            Button button) {
 
         button.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-text-fill: #10866f;" +
-                "-fx-border-color: #a8dcca;" +
-                "-fx-border-radius: 6;" +
-                "-fx-background-radius: 6;" +
-                "-fx-padding: 7 10;" +
-                "-fx-font-size: 11px;"
+                "-fx-background-color: #f3faf7;" +
+                "-fx-text-fill: #147a65;" +
+                "-fx-border-color: #b7ddd0;" +
+                "-fx-border-radius: 7;" +
+                "-fx-background-radius: 7;" +
+                "-fx-padding: 7 12;" +
+                "-fx-font-size: 11px;" +
+                "-fx-cursor: hand;"
         );
     }
+
+    // =====================================================
+    // ASK QUICK QUESTION
+    // =====================================================
 
     private void askQuestion(
-            String question
-    ) {
+            String question) {
 
-        addUserMessage(
-                question
-        );
+        if (messageField.isDisabled()) {
+            return;
+        }
 
-        sendToGemini(
-                question
-        );
+        addUserMessage(question);
+
+        sendToGemini(question);
     }
+
+    // =====================================================
+    // SEND MESSAGE
+    // =====================================================
 
     private void sendMessage() {
 
@@ -569,73 +631,87 @@ public class AiRecommendations {
             return;
         }
 
-        addUserMessage(
-                userMessage
-        );
+        if (messageField.isDisabled()) {
+            return;
+        }
+
+        addUserMessage(userMessage);
 
         messageField.clear();
 
-        sendToGemini(
-                userMessage
-        );
+        sendToGemini(userMessage);
     }
 
+    // =====================================================
+    // SEND TO AI
+    // =====================================================
+
     private void sendToGemini(
-            String userMessage
-    ) {
+            String userMessage) {
 
-        messageField.setDisable(
-                true
-        );
+        messageField.setDisable(true);
+        sendButton.setDisable(true);
 
-        sendButton.setDisable(
-                true
-        );
+        addThinkingMessage();
 
-        addBotMessage(
-                "Thinking..."
-        );
+        Thread thread = new Thread(() -> {
 
-        Thread thread =
-                new Thread(() -> {
+            String answer;
 
-                    String answer =
-                            aiController.getResponse(
-                                    userMessage
-                            );
+            try {
 
-                    Platform.runLater(() -> {
-
-                        removeThinking();
-
-                        addBotMessage(
-                                answer
+                answer =
+                        aiController.getResponse(
+                                userMessage
                         );
 
-                        messageField.setDisable(
-                                false
-                        );
+                if (answer == null ||
+                        answer.trim().isEmpty()) {
 
-                        sendButton.setDisable(
-                                false
-                        );
+                    answer =
+                            "Sorry, I could not generate a response. "
+                                    + "Please try again.";
+                }
 
-                        messageField.requestFocus();
+            } catch (Exception e) {
 
-                        scrollToBottom();
-                    });
-                });
+                e.printStackTrace();
 
-        thread.setDaemon(
-                true
-        );
+                answer =
+                        "Sorry, something went wrong. "
+                                + "Please try again.";
+            }
+
+            final String finalAnswer = answer;
+
+            Platform.runLater(() -> {
+
+                removeThinking();
+
+                addBotMessage(
+                        finalAnswer
+                );
+
+                messageField.setDisable(false);
+                sendButton.setDisable(false);
+
+                messageField.requestFocus();
+
+                scrollToBottom();
+            });
+        });
+
+        thread.setDaemon(true);
 
         thread.start();
     }
 
+    // =====================================================
+    // USER MESSAGE
+    // =====================================================
+
     private void addUserMessage(
-            String message
-    ) {
+            String message) {
 
         addMessage(
                 new AIChatMessage(
@@ -645,9 +721,12 @@ public class AiRecommendations {
         );
     }
 
+    // =====================================================
+    // BOT MESSAGE
+    // =====================================================
+
     private void addBotMessage(
-            String message
-    ) {
+            String message) {
 
         addMessage(
                 new AIChatMessage(
@@ -657,153 +736,213 @@ public class AiRecommendations {
         );
     }
 
+    // =====================================================
+    // DISPLAY MESSAGE
+    // =====================================================
+
     private void addMessage(
-            AIChatMessage message
-    ) {
+            AIChatMessage message) {
 
         if (message.isUserMessage()) {
 
-            HBox row =
-                    new HBox();
-
-            row.setAlignment(
-                    Pos.CENTER_RIGHT
-            );
-
-            Label label =
-                    new Label(
-                            message.getMessage()
-                    );
-
-            label.setWrapText(
-                    true
-            );
-
-            label.setMaxWidth(
-                    280
-            );
-
-            label.setPadding(
-                    new Insets(10)
-            );
-
-            label.setStyle(
-                    "-fx-background-color: #dff3e9;" +
-                    "-fx-background-radius: 10;" +
-                    "-fx-font-size: 13px;"
-            );
-
-            row.getChildren().add(
-                    label
-            );
-
-            chatBox.getChildren().add(
-                    row
+            addUserBubble(
+                    message.getMessage()
             );
 
         } else {
 
-            HBox row =
-                    new HBox(8);
-
-            row.setAlignment(
-                    Pos.CENTER_LEFT
-            );
-
-            Label icon =
-                    new Label(
-                            "AI"
-                    );
-
-            icon.setStyle(
-                    "-fx-background-color: #dff3e9;" +
-                    "-fx-background-radius: 20;" +
-                    "-fx-padding: 7;" +
-                    "-fx-text-fill: #10866f;" +
-                    "-fx-font-weight: bold;"
-            );
-
-            Label label =
-                    new Label(
-                            message.getMessage()
-                    );
-
-            label.setWrapText(
-                    true
-            );
-
-            label.setMaxWidth(
-                    280
-            );
-
-            label.setPadding(
-                    new Insets(10)
-            );
-
-            label.setStyle(
-                    "-fx-background-color: white;" +
-                    "-fx-border-color: #e1e8e5;" +
-                    "-fx-border-radius: 10;" +
-                    "-fx-background-radius: 10;" +
-                    "-fx-font-size: 13px;"
-            );
-
-            row.getChildren().addAll(
-                    icon,
-                    label
-            );
-
-            chatBox.getChildren().add(
-                    row
+            addBotBubble(
+                    message.getMessage()
             );
         }
 
         scrollToBottom();
     }
 
+    // =====================================================
+    // USER CHAT BUBBLE
+    // =====================================================
+
+    private void addUserBubble(
+            String message) {
+
+        HBox row = new HBox();
+
+        row.setAlignment(
+                Pos.CENTER_RIGHT
+        );
+
+        Label label = new Label(message);
+
+        label.setWrapText(true);
+
+        /*
+         * Prevent very wide messages
+         */
+
+        label.setMaxWidth(280);
+
+        label.setPadding(
+                new Insets(10, 14, 10, 14)
+        );
+
+        label.setStyle(
+                "-fx-background-color: #dff3e9;" +
+                "-fx-background-radius: 14;" +
+                "-fx-font-size: 13px;" +
+                "-fx-text-fill: #1f2937;"
+        );
+
+        row.getChildren().add(label);
+
+        chatBox.getChildren().add(row);
+    }
+
+    // =====================================================
+    // BOT CHAT BUBBLE
+    // =====================================================
+
+    private void addBotBubble(
+            String message) {
+
+        HBox row = new HBox(8);
+
+        row.setAlignment(
+                Pos.TOP_LEFT
+        );
+
+        Label icon = new Label("AI");
+
+        icon.setMinSize(38, 38);
+
+        icon.setPrefSize(38, 38);
+
+        icon.setAlignment(Pos.CENTER);
+
+        icon.setStyle(
+                "-fx-background-color: #dff3e9;" +
+                "-fx-background-radius: 20;" +
+                "-fx-text-fill: #147a65;" +
+                "-fx-font-size: 11px;" +
+                "-fx-font-weight: bold;"
+        );
+
+        Label label = new Label(message);
+
+        label.setWrapText(true);
+
+        /*
+         * IMPORTANT:
+         * Limits message width so layout stays neat.
+         */
+
+        label.setMaxWidth(285);
+
+        label.setPadding(
+                new Insets(10, 14, 10, 14)
+        );
+
+        label.setStyle(
+                "-fx-background-color: #ffffff;" +
+                "-fx-border-color: #dce7e2;" +
+                "-fx-border-radius: 14;" +
+                "-fx-background-radius: 14;" +
+                "-fx-font-size: 13px;" +
+                "-fx-text-fill: #334155;"
+        );
+
+        row.getChildren().addAll(
+                icon,
+                label
+        );
+
+        chatBox.getChildren().add(row);
+    }
+
+    // =====================================================
+    // THINKING MESSAGE
+    // =====================================================
+
+    private void addThinkingMessage() {
+
+        HBox row = new HBox(8);
+
+        row.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        Label icon = new Label("AI");
+
+        icon.setMinSize(38, 38);
+
+        icon.setAlignment(Pos.CENTER);
+
+        icon.setStyle(
+                "-fx-background-color: #dff3e9;" +
+                "-fx-background-radius: 20;" +
+                "-fx-text-fill: #147a65;" +
+                "-fx-font-size: 11px;" +
+                "-fx-font-weight: bold;"
+        );
+
+        Label thinking = new Label(
+                "Thinking..."
+        );
+
+        thinking.setPadding(
+                new Insets(10, 14, 10, 14)
+        );
+
+        thinking.setStyle(
+                "-fx-background-color: #f8faf9;" +
+                "-fx-border-color: #dce7e2;" +
+                "-fx-border-radius: 14;" +
+                "-fx-background-radius: 14;" +
+                "-fx-font-size: 13px;" +
+                "-fx-text-fill: #64748b;"
+        );
+
+        row.getChildren().addAll(
+                icon,
+                thinking
+        );
+
+        thinkingRow = row;
+
+        chatBox.getChildren().add(row);
+
+        scrollToBottom();
+    }
+
+    // =====================================================
+    // REMOVE THINKING
+    // =====================================================
+
     private void removeThinking() {
 
-        if (chatBox.getChildren().isEmpty()) {
-            return;
-        }
+        if (thinkingRow != null) {
 
-        Node last =
-                chatBox.getChildren().get(
-                        chatBox.getChildren().size() - 1
-                );
+            chatBox.getChildren().remove(
+                    thinkingRow
+            );
 
-        if (last instanceof HBox) {
-
-            HBox row =
-                    (HBox) last;
-
-            for (Node node :
-                    row.getChildren()) {
-
-                if (node instanceof Label) {
-
-                    Label label =
-                            (Label) node;
-
-                    if ("Thinking..."
-                            .equals(
-                                    label.getText()
-                            )) {
-
-                        chatBox.getChildren()
-                                .remove(last);
-
-                        return;
-                    }
-                }
-            }
+            thinkingRow = null;
         }
     }
 
+    // =====================================================
+    // SCROLL TO BOTTOM
+    // =====================================================
+
     private void scrollToBottom() {
 
-        Platform.runLater(
-                () -> chatScroll.setVvalue(1.0)
-        );
+        Platform.runLater(() -> {
+
+            chatScroll.applyCss();
+
+            chatScroll.layout();
+
+            chatScroll.setVvalue(1.0);
+        });
     }
 }
