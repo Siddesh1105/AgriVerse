@@ -63,4 +63,8 @@ public class NotificationController {
         return notificationDAO.deleteAll(farmerEmail);
     }
 
+    public List<Notification> getAllNotifications() {
+        return notificationDAO.getAllNotifications();
+    }
+
 }

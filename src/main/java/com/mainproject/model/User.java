@@ -10,6 +10,10 @@ public class User {
     private String role;
     private String profileImageUrl;
 
+    // Farmer verification fields
+    private String verificationStatus;
+    private String rejectionReason;
+
     // =====================================================
     // EMPTY CONSTRUCTOR
     // Required by Firestore
@@ -36,6 +40,11 @@ public class User {
         this.mobileNumber = mobileNumber;
         this.gender = gender;
         this.role = role;
+
+        // Every new farmer starts as Pending.
+        if ("Farmer".equalsIgnoreCase(role)) {
+            this.verificationStatus = "Pending";
+        }
     }
 
     // =====================================================
@@ -123,6 +132,34 @@ public class User {
     }
 
     // =====================================================
+    // VERIFICATION STATUS
+    // =====================================================
+
+    public String getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public void setVerificationStatus(
+            String verificationStatus) {
+
+        this.verificationStatus = verificationStatus;
+    }
+
+    // =====================================================
+    // REJECTION REASON
+    // =====================================================
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(
+            String rejectionReason) {
+
+        this.rejectionReason = rejectionReason;
+    }
+
+    // =====================================================
     // TO STRING
     // =====================================================
 
@@ -137,6 +174,10 @@ public class User {
                 ", gender='" + gender + '\'' +
                 ", role='" + role + '\'' +
                 ", profileImageUrl='" + profileImageUrl + '\'' +
+                ", verificationStatus='" +
+                verificationStatus + '\'' +
+                ", rejectionReason='" +
+                rejectionReason + '\'' +
                 '}';
     }
 }
