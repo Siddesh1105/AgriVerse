@@ -139,6 +139,12 @@ public class Equipment {
         this.available = available;
     }
 
+
+    public String getStatus() { return available ? "Approved" : "Unavailable"; }
+    public void setStatus(String status) {
+        this.available = status != null && (status.equalsIgnoreCase("Approved") || status.equalsIgnoreCase("Available"));
+    }
+
     // =========================================================
     // OWNER EMAIL
     // =========================================================

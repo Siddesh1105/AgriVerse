@@ -1,7 +1,9 @@
 package com.mainproject.view.farmer;
 
-import com.mainproject.dao.CartDAO;
+
+import com.mainproject.controller.CartController;
 import com.mainproject.model.CartItem;
+
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -30,8 +32,8 @@ public class Cart {
     private final Runnable continueShopping;
     private final Runnable checkoutAction;
 
-    private final CartDAO cartDAO =
-            new CartDAO();
+    private final CartController cartController =
+            new CartController();
 
     private final List<CartItem> cartItems =
             new ArrayList<>();
@@ -272,7 +274,6 @@ public class Cart {
                         bottom);
 
         refreshView();
-
         return root;
     }
 
@@ -296,7 +297,7 @@ public class Cart {
         }
 
         List<CartItem> loaded =
-                cartDAO.getCartItems(
+                cartController.getCartItems(
                         farmerEmail);
 
         if (loaded != null) {
@@ -699,7 +700,7 @@ public class Cart {
                 e -> {
 
                     boolean success =
-                            cartDAO.removeFromCart(
+                            cartController.removeFromCart(
                                     item.getCartItemId());
 
                     if (success) {
@@ -752,7 +753,7 @@ public class Cart {
         }
 
         boolean success =
-                cartDAO.updateRentalDays(
+                cartController.updateRentalDays(
                         item.getCartItemId(),
                         newDays);
 

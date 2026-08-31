@@ -31,31 +31,137 @@ public class ProductDAO {
         try {
 
             if (product == null) {
-                System.out.println("Product is null.");
+
+                System.out.println(
+                        "Product is null."
+                );
+
+                return false;
+            }
+
+            /*
+             * Make sure farmerEmail is already present
+             * in Product before saving.
+             */
+            if (product.getFarmerEmail() == null
+                    || product.getFarmerEmail().trim().isEmpty()) {
+
+                System.out.println(
+                        "Farmer email is missing."
+                );
+
                 return false;
             }
 
             DocumentReference document =
                     db.collection("products")
-                      .document();
+                            .document();
 
             // Generate Firestore document ID
-            String productId =document.getId();
+            String productId =
+                    document.getId();
 
-            product.setProductId(productId);
+            product.setProductId(
+                    productId
+            );
 
             // Save complete Product object
-            document.set(product).get();
+            document.set(product)
+                    .get();
+
+            System.out.println(
+                    "===================================="
+            );
 
             System.out.println(
                     "Product saved successfully!"
             );
 
-            System.out.println("Product ID: "+ productId);
+            System.out.println(
+                    "Product ID: "
+                            + productId
+            );
+
+            System.out.println(
+                    "Product Name: "
+                            + product.getName()
+            );
+
+            System.out.println(
+                    "Farmer Email: "
+                            + product.getFarmerEmail()
+            );
+
+            System.out.println(
+                    "Status: "
+                            + product.getStatus()
+            );
+
+            System.out.println(
+                    "===================================="
+            );
 
             return true;
 
         } catch (Exception e) {
+
+            System.out.println(
+                    "Error saving product:"
+            );
+
+            e.printStackTrace();
+
+            return false;
+        }
+    }
+
+    // =====================================================
+    // ADD PRODUCT WITH FARMER EMAIL
+    // =====================================================
+    /*
+     * This method is used by AddProduct.java
+     *
+     * It guarantees that the farmerEmail is stored
+     * inside the Firestore product document.
+     */
+
+    public boolean addProduct(
+            Product product,
+            String farmerEmail) {
+
+        try {
+
+            if (product == null) {
+
+                System.out.println(
+                        "Product is null."
+                );
+
+                return false;
+            }
+
+            if (farmerEmail == null
+                    || farmerEmail.trim().isEmpty()) {
+
+                System.out.println(
+                        "Farmer email is missing."
+                );
+
+                return false;
+            }
+
+            // IMPORTANT
+            product.setFarmerEmail(
+                    farmerEmail.trim()
+            );
+
+            return addProduct(product);
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error adding product with farmer email:"
+            );
 
             e.printStackTrace();
 
@@ -67,27 +173,59 @@ public class ProductDAO {
     // GET SINGLE PRODUCT
     // =====================================================
 
-    public Product getProductById(String productId) {
+    public Product getProductById(
+            String productId) {
 
         try {
-            if (productId == null||productId.trim().isEmpty()) {
+
+            if (productId == null
+                    || productId.trim().isEmpty()) {
+
                 return null;
             }
+
             DocumentSnapshot document =
                     db.collection("products")
-                      .document(productId)
-                      .get()
-                      .get();
+                            .document(productId)
+                            .get()
+                            .get();
 
             if (!document.exists()) {
-                System.out.println("Product not found: "+ productId);
+
+                System.out.println(
+                        "Product not found: "
+                                + productId
+                );
+
                 return null;
             }
 
-            Product product =document.toObject(Product.class);
+            Product product =
+                    document.toObject(
+                            Product.class
+                    );
+
+            if (product != null) {
+
+                if (product.getProductId() == null
+                        || product.getProductId().isEmpty()) {
+
+                    product.setProductId(
+                            document.getId()
+                    );
+                }
+            }
+
             return product;
+
         } catch (Exception e) {
+
+            System.out.println(
+                    "Error getting product:"
+            );
+
             e.printStackTrace();
+
             return null;
         }
     }
@@ -104,23 +242,33 @@ public class ProductDAO {
 
         try {
 
-            if (
-                    farmerEmail == null
-                            ||
-                    farmerEmail.trim().isEmpty()
-            ) {
+            if (farmerEmail == null
+                    || farmerEmail.trim().isEmpty()) {
+
+                System.out.println(
+                        "Farmer email is empty."
+                );
 
                 return products;
             }
 
+            String email =
+                    farmerEmail.trim();
+
+            System.out.println(
+                    "Loading products for farmer: "
+                            + email
+            );
+
+            // First use the normal Firestore query.
             QuerySnapshot snapshot =
                     db.collection("products")
-                      .whereEqualTo(
-                              "farmerEmail",
-                              farmerEmail
-                      )
-                      .get()
-                      .get();
+                            .whereEqualTo(
+                                    "farmerEmail",
+                                    email
+                            )
+                            .get()
+                            .get();
 
             for (
                     DocumentSnapshot document
@@ -134,28 +282,65 @@ public class ProductDAO {
 
                 if (product != null) {
 
-                    /*
-                     * Safety:
-                     * If productId was not stored inside
-                     * the document, get it from Firestore.
-                     */
-
-                    if (
-                            product.getProductId()
-                                    == null
-                                    ||
-                            product.getProductId()
-                                    .isEmpty()
-                    ) {
+                    if (product.getProductId() == null
+                            || product.getProductId().isEmpty()) {
 
                         product.setProductId(
                                 document.getId()
                         );
                     }
 
-                    products.add(
-                            product
-                    );
+                    products.add(product);
+                }
+            }
+
+            /*
+             * Compatibility fallback for older Firestore
+             * documents whose farmerEmail has different
+             * capitalization or accidental spaces.
+             * No other project file needs to be changed.
+             */
+            if (products.isEmpty()) {
+
+                System.out.println(
+                        "Exact farmerEmail query returned 0 products. "
+                                + "Running compatibility fallback."
+                );
+
+                QuerySnapshot allProducts =
+                        db.collection("products")
+                                .get()
+                                .get();
+
+                for (
+                        DocumentSnapshot document
+                        : allProducts.getDocuments()
+                ) {
+
+                    Product product =
+                            document.toObject(
+                                    Product.class
+                            );
+
+                    if (product == null
+                            || product.getFarmerEmail() == null) {
+                        continue;
+                    }
+
+                    if (product.getFarmerEmail()
+                            .trim()
+                            .equalsIgnoreCase(email)) {
+
+                        if (product.getProductId() == null
+                                || product.getProductId().isEmpty()) {
+
+                            product.setProductId(
+                                    document.getId()
+                            );
+                        }
+
+                        products.add(product);
+                    }
                 }
             }
 
@@ -165,6 +350,10 @@ public class ProductDAO {
             );
 
         } catch (Exception e) {
+
+            System.out.println(
+                    "Error loading farmer products:"
+            );
 
             e.printStackTrace();
         }
@@ -185,8 +374,8 @@ public class ProductDAO {
 
             QuerySnapshot snapshot =
                     db.collection("products")
-                      .get()
-                      .get();
+                            .get()
+                            .get();
 
             for (
                     DocumentSnapshot document
@@ -200,16 +389,210 @@ public class ProductDAO {
 
                 if (product != null) {
 
-                    if (product.getProductId()== null||product.getProductId().isEmpty()){
-                        product.setProductId(document.getId());
+                    if (product.getProductId() == null
+                            || product.getProductId().isEmpty()) {
+
+                        product.setProductId(
+                                document.getId()
+                        );
                     }
-                    products.add(product);
+
+                    products.add(
+                            product
+                    );
                 }
             }
+
+            System.out.println(
+                    "All products loaded: "
+                            + products.size()
+            );
+
         } catch (Exception e) {
+
+            System.out.println(
+                    "Error loading all products:"
+            );
+
             e.printStackTrace();
         }
+
         return products;
+    }
+
+    // =====================================================
+    // GET PRODUCT COUNT BY OWNER
+    // =====================================================
+
+    public int getProductCountByOwner(
+            String farmerEmail) {
+
+        try {
+
+            if (farmerEmail == null
+                    || farmerEmail.trim().isEmpty()) {
+
+                System.out.println(
+                        "Farmer email is empty."
+                );
+
+                return 0;
+            }
+
+            String email =
+                    farmerEmail.trim();
+
+            QuerySnapshot snapshot =
+                    db.collection("products")
+                            .whereEqualTo(
+                                    "farmerEmail",
+                                    email
+                            )
+                            .get()
+                            .get();
+
+            int count =
+                    snapshot.getDocuments().size();
+
+            // Compatibility fallback for older documents.
+            if (count == 0) {
+
+                QuerySnapshot allProducts =
+                        db.collection("products")
+                                .get()
+                                .get();
+
+                for (
+                        DocumentSnapshot document
+                        : allProducts.getDocuments()
+                ) {
+
+                    Product product =
+                            document.toObject(
+                                    Product.class
+                            );
+
+                    if (product == null
+                            || product.getFarmerEmail() == null) {
+                        continue;
+                    }
+
+                    if (product.getFarmerEmail()
+                            .trim()
+                            .equalsIgnoreCase(email)) {
+                        count++;
+                    }
+                }
+            }
+
+            System.out.println(
+                    "===================================="
+            );
+
+            System.out.println(
+                    "Product Count"
+            );
+
+            System.out.println(
+                    "Farmer Email: "
+                            + email
+            );
+
+            System.out.println(
+                    "Total Products: "
+                            + count
+            );
+
+            System.out.println(
+                    "===================================="
+            );
+
+            return count;
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error getting product count by owner:"
+            );
+
+            e.printStackTrace();
+
+            return 0;
+        }
+    }
+
+    // =====================================================
+    // GET ACTIVE PRODUCT COUNT BY OWNER
+    // =====================================================
+
+    public int getActiveProductCountByOwner(
+            String farmerEmail) {
+
+        try {
+
+            if (farmerEmail == null
+                    || farmerEmail.trim().isEmpty()) {
+
+                System.out.println(
+                        "Farmer email is empty."
+                );
+
+                return 0;
+            }
+
+            String email =
+                    farmerEmail.trim();
+
+            QuerySnapshot snapshot =
+                    db.collection("products")
+                            .whereEqualTo(
+                                    "farmerEmail",
+                                    email
+                            )
+                            .whereEqualTo(
+                                    "status",
+                                    "Active"
+                            )
+                            .get()
+                            .get();
+
+            int count =
+                    snapshot.getDocuments().size();
+
+            System.out.println(
+                    "===================================="
+            );
+
+            System.out.println(
+                    "Active Product Count"
+            );
+
+            System.out.println(
+                    "Farmer Email: "
+                            + email
+            );
+
+            System.out.println(
+                    "Active Products: "
+                            + count
+            );
+
+            System.out.println(
+                    "===================================="
+            );
+
+            return count;
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Error getting active product count:"
+            );
+
+            e.printStackTrace();
+
+            return 0;
+        }
     }
 
     // =====================================================
@@ -233,21 +616,37 @@ public class ProductDAO {
             String productId =
                     product.getProductId();
 
-            if (productId == null||productId.trim().isEmpty()) {
-                System.out.println("Product ID is missing.");
+            if (productId == null
+                    || productId.trim().isEmpty()) {
+
+                System.out.println(
+                        "Product ID is missing."
+                );
+
                 return false;
             }
 
             db.collection("products")
-              .document(productId)
-              .set(product)
-              .get();
+                    .document(productId)
+                    .set(product)
+                    .get();
 
-            System.out.println("Product updated successfully!");
-            System.out.println("Product ID: "+ productId);
+            System.out.println(
+                    "Product updated successfully!"
+            );
+
+            System.out.println(
+                    "Product ID: "
+                            + productId
+            );
+
             return true;
 
         } catch (Exception e) {
+
+            System.out.println(
+                    "Error updating product:"
+            );
 
             e.printStackTrace();
 
@@ -255,28 +654,29 @@ public class ProductDAO {
         }
     }
 
+    // =====================================================
+    // UPDATE ONLY IMAGE URL
+    // =====================================================
+
     public boolean updateProductImage(
             String productId,
             String imageUrl) {
 
         try {
 
-            if (
-                    productId == null
-                            ||
-                    productId.trim().isEmpty()
-            ) {
+            if (productId == null
+                    || productId.trim().isEmpty()) {
 
                 return false;
             }
 
             db.collection("products")
-              .document(productId)
-              .update(
-                      "imageUrl",
-                      imageUrl
-              )
-              .get();
+                    .document(productId)
+                    .update(
+                            "imageUrl",
+                            imageUrl
+                    )
+                    .get();
 
             System.out.println(
                     "Product image updated successfully!"
@@ -286,64 +686,82 @@ public class ProductDAO {
 
         } catch (Exception e) {
 
+            System.out.println(
+                    "Error updating product image:"
+            );
+
             e.printStackTrace();
 
             return false;
         }
     }
+
+    // =====================================================
+    // UPDATE PRODUCT STATUS
+    // =====================================================
+
     public boolean updateProductStatus(
             String productId,
             String status) {
 
         try {
 
-            if (
-                    productId == null
-                            ||
-                    productId.trim().isEmpty()
-            ) {
+            if (productId == null
+                    || productId.trim().isEmpty()) {
 
                 return false;
             }
 
             db.collection("products")
-              .document(productId)
-              .update(
-                      "status",
-                      status
-              )
-              .get();
-            System.out.println("Product status updated: "+ status);
+                    .document(productId)
+                    .update(
+                            "status",
+                            status
+                    )
+                    .get();
+
+            System.out.println(
+                    "Product status updated: "
+                            + status
+            );
+
             return true;
+
         } catch (Exception e) {
+
+            System.out.println(
+                    "Error updating product status:"
+            );
 
             e.printStackTrace();
 
             return false;
         }
     }
+
+    // =====================================================
+    // UPDATE STOCK
+    // =====================================================
+
     public boolean updateStock(
             String productId,
             double stock) {
 
         try {
 
-            if (
-                    productId == null
-                            ||
-                    productId.trim().isEmpty()
-            ) {
+            if (productId == null
+                    || productId.trim().isEmpty()) {
 
                 return false;
             }
 
             db.collection("products")
-              .document(productId)
-              .update(
-                      "stock",
-                      stock
-              )
-              .get();
+                    .document(productId)
+                    .update(
+                            "stock",
+                            stock
+                    )
+                    .get();
 
             System.out.println(
                     "Product stock updated: "
@@ -354,30 +772,35 @@ public class ProductDAO {
 
         } catch (Exception e) {
 
+            System.out.println(
+                    "Error updating stock:"
+            );
+
             e.printStackTrace();
 
             return false;
         }
     }
 
+    // =====================================================
+    // DELETE PRODUCT
+    // =====================================================
+
     public boolean deleteProduct(
             String productId) {
 
         try {
 
-            if (
-                    productId == null
-                            ||
-                    productId.trim().isEmpty()
-            ) {
+            if (productId == null
+                    || productId.trim().isEmpty()) {
 
                 return false;
             }
 
             db.collection("products")
-              .document(productId)
-              .delete()
-              .get();
+                    .document(productId)
+                    .delete()
+                    .get();
 
             System.out.println(
                     "Product deleted successfully!"
@@ -391,6 +814,10 @@ public class ProductDAO {
             return true;
 
         } catch (Exception e) {
+
+            System.out.println(
+                    "Error deleting product:"
+            );
 
             e.printStackTrace();
 
@@ -407,24 +834,25 @@ public class ProductDAO {
 
         try {
 
-            if (
-                    productId == null
-                            ||
-                    productId.trim().isEmpty()
-            ) {
+            if (productId == null
+                    || productId.trim().isEmpty()) {
 
                 return false;
             }
 
             DocumentSnapshot document =
                     db.collection("products")
-                      .document(productId)
-                      .get()
-                      .get();
+                            .document(productId)
+                            .get()
+                            .get();
 
             return document.exists();
 
         } catch (Exception e) {
+
+            System.out.println(
+                    "Error checking product:"
+            );
 
             e.printStackTrace();
 

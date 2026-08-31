@@ -1,12 +1,21 @@
 package com.mainproject.view;
 
+
+
 import com.mainproject.view.buyer.BuyerDashboard;
 import com.mainproject.view.farmer.FarmerDashboard;
+import com.mainproject.view.admin.AdminDashboard;
+import com.mainproject.view.admin.AdminLogin;
 import com.mainproject.controller.AuthController;
-import com.mainproject.dao.UserDAO;
+import com.mainproject.controller.UserController;
 import com.mainproject.model.User;
+
+
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -15,13 +24,17 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class LoginScreen extends Application {
@@ -31,7 +44,7 @@ public class LoginScreen extends Application {
         private Scene HomePageScene;
 
         private AuthController authController;
-        private UserDAO userDAO;
+        private UserController userController;
 
         @Override
         public void start(Stage myStage) {
@@ -40,7 +53,7 @@ public class LoginScreen extends Application {
 
                 authController = new AuthController();
 
-                userDAO = new UserDAO();
+                userController = new UserController();
 
                 // =================================================
                 // LEFT IMAGE
@@ -71,6 +84,21 @@ public class LoginScreen extends Application {
                 leftPanel.getChildren()
                                 .add(
                                                 loginImage);
+
+                // =================================================
+                // AGRILINK BADGE (click -> Admin Login)
+                // =================================================
+                // This is the small pill above "Welcome Back!". It is
+                // a hidden shortcut into the Admin Login screen so an
+                // admin can get there without a separate launcher.
+
+                HBox agriLinkBadge = buildAgriLinkBadge();
+
+                HBox badgeRow = new HBox(
+                                agriLinkBadge);
+
+                badgeRow.setAlignment(
+                                Pos.CENTER_LEFT);
 
                 // =================================================
                 // TITLE
@@ -274,7 +302,7 @@ public class LoginScreen extends Application {
                                         // GET USER FROM FIRESTORE
                                         // =====================================
 
-                                        User user = userDAO.getUserByEmail(
+                                        User user = userController.getUserByEmail(
                                                         email);
 
                                         if (user == null) {
@@ -353,6 +381,27 @@ public class LoginScreen extends Application {
 
                                                 switchScene(
                                                                 dashboard.getScene());
+                                        }
+
+                                        // =====================================
+                                        // ADMIN
+                                        // =====================================
+
+                                        else if (role.equalsIgnoreCase("Admin")) {
+
+                                                System.out.println(
+                                                                "Opening Admin Dashboard...");
+
+                                                try {
+                                                        AdminDashboard adminDashboard = new AdminDashboard();
+                                                        adminDashboard.start(Homestage);
+                                                } catch (Exception ex) {
+                                                        ex.printStackTrace();
+                                                        showAlert(
+                                                                        AlertType.ERROR,
+                                                                        "Admin Dashboard Error",
+                                                                        "Unable to open the Admin Dashboard.");
+                                                }
                                         }
 
                                         // =====================================
@@ -443,6 +492,8 @@ public class LoginScreen extends Application {
                                 700);
 
                 vb2.getChildren().addAll(
+                                badgeRow,
+
                                 hb1,
                                 hb2,
 
@@ -468,6 +519,9 @@ public class LoginScreen extends Application {
                 rightPanel.setStyle(
                                 "-fx-background-color: #f1efef;");
 
+                // =================================================
+                // MAIN
+                // =================================================
 
                 HBox main = new HBox(
                                 leftPanel,
@@ -477,24 +531,134 @@ public class LoginScreen extends Application {
                                 rightPanel,
                                 Priority.ALWAYS);
 
-                rightPanel.prefWidthProperty().bind(main.widthProperty().multiply(0.8));
+                rightPanel.prefWidthProperty()
+                                .bind(
+                                                main.widthProperty()
+                                                                .multiply(0.8));
 
-                HomePageScene = new Scene(main,1400,1000);
+                // =================================================
+                // SCENE
+                // =================================================
 
-                HomePageScene.setFill(Color.WHITE);
-                Homestage.setScene(HomePageScene);
+                HomePageScene = new Scene(
+                                main);
+                Rectangle2D screen = Screen.getPrimary()
+                                .getVisualBounds();
+
+                HomePageScene.setFill(
+                                Color.WHITE);
+
+                Homestage.setScene(
+                                HomePageScene);
+
                 Homestage.show();
         }
 
+        // =====================================================
+        // AGRILINK BADGE
+        // =====================================================
+        //
+        // Small "🌱 AgriLink" pill shown above "Welcome Back!".
+        // Clicking it opens the Admin Login screen - a quiet shortcut
+        // for admins instead of a separate launcher/menu item.
+        // =====================================================
 
-        public static void switchScene(Scene scene) {
+        private HBox buildAgriLinkBadge() {
 
-                if (Homestage != null) {
-                        Homestage.setScene(scene);
+                Label leafIcon = new Label(
+                                "\uD83C\uDF31");
+
+                leafIcon.setFont(
+                                Font.font(14));
+
+                Label brandLabel = new Label(
+                                "AgriLink");
+
+                brandLabel.setFont(
+                                Font.font(
+                                                "Segoe UI",
+                                                FontWeight.BOLD,
+                                                15));
+
+                brandLabel.setTextFill(
+                                Color.web("#2E7D32"));
+
+                HBox badge = new HBox(
+                                6,
+                                leafIcon,
+                                brandLabel);
+
+                badge.setAlignment(
+                                Pos.CENTER_LEFT);
+
+                badge.setPadding(
+                                new Insets(
+                                                6,
+                                                14,
+                                                6,
+                                                14));
+
+                badge.setStyle(
+                                "-fx-background-color: #eaf3ea;" +
+                                                "-fx-background-radius: 20;");
+
+                badge.setCursor(
+                                Cursor.HAND);
+
+                Tooltip.install(
+                                badge,
+                                new Tooltip(
+                                                "Admin Login"));
+
+                badge.setOnMouseClicked(
+                                event ->
+                                                openAdminLogin());
+
+                return badge;
+        }
+
+        // =====================================================
+        // OPEN ADMIN LOGIN
+        // =====================================================
+
+        private void openAdminLogin() {
+
+                System.out.println(
+                                "Opening Admin Login...");
+
+                try {
+
+                        new AdminLogin().start(
+                                        Homestage);
+
+                } catch (Exception ex) {
+
+                        ex.printStackTrace();
+
+                        showAlert(
+                                        AlertType.ERROR,
+                                        "Admin Login Error",
+                                        "Unable to open the Admin Login screen.");
                 }
         }
 
-       
+        // =====================================================
+        // SWITCH SCENE
+        // =====================================================
+
+        public static void switchScene(
+                        Scene scene) {
+
+                if (Homestage != null) {
+
+                        Homestage.setScene(
+                                        scene);
+                }
+        }
+
+        // =====================================================
+        // LOGOUT
+        // =====================================================
 
         public static void logoutToLogin() {
 
@@ -506,7 +670,10 @@ public class LoginScreen extends Application {
                 }
         }
 
-       
+        // =====================================================
+        // BACK TO LOGIN
+        // =====================================================
+
         public void backtoLoginScreen() {
 
                 Homestage.setScene(

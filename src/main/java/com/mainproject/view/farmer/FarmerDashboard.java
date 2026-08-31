@@ -1,12 +1,26 @@
 package com.mainproject.view.farmer;
 
+import com.mainproject.util.ResponsiveLayout;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Date;
+import java.util.Calendar;
 
 import com.mainproject.model.Product;
 import com.mainproject.model.User;
+import com.mainproject.model.CartItem;
+import com.mainproject.model.EquipmentRental;
+import com.mainproject.controller.CartController;
+import com.mainproject.controller.EquipmentRentalController;
+import com.mainproject.view.LoginScreen;
+import com.mainproject.controller.NotificationController;
+import com.google.cloud.firestore.ListenerRegistration;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -22,385 +36,1541 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 
+/**
+ * ============================================================
+ * FARMER DASHBOARD
+ * ============================================================
+ */
 public class FarmerDashboard {
 
+    // =========================================================
+    // VARIABLES
+    // =========================================================
+
     private Scene scene;
+
     private StackPane contentArea;
+
+    private String currentPage = "Dashboard";
+
     private final Map<String, ToggleButton> navMap = new HashMap<>();
+
     private ToggleGroup navGroup;
+
     private final User user;
 
+    private BorderPane root;
+
+    // Notification badge references (notification functionality only)
+    private Label notificationBadge;
+    private ListenerRegistration notificationListener;
+    private final NotificationController notificationController = new NotificationController();
+
+    /**
+     * Logged-in farmer email.
+     */
+    private final String farmerEmail;
+
+    // =========================================================
+    // COLORS
+    // =========================================================
+
     private static final String MAIN_BG = "#E9F7EF";
+
     private static final String PANEL_BG = "#D4EFDF";
+
     private static final String PRIMARY_GREEN = "#117864";
+
     private static final String PRIMARY_TEXT = "#1B2631";
+
     private static final String BORDER_COLOR = "#A2D9CE";
+
     private static final String ACCENT_YELLOW = "#F1C40F";
 
+    // =========================================================
+    // CONSTRUCTOR
+    // =========================================================
+
     public FarmerDashboard(User user) {
+
+        if (user == null) {
+
+            throw new IllegalArgumentException(
+                    "User cannot be null.");
+        }
+
         this.user = user;
-        System.out.println("Opening Farmer Dashboard...");
-        System.out.println("Farmer Dashboard opened for: " + user.getEmail());
-        System.out.println("Farmer Name: " + user.getFullName());
-        System.out.println("Farmer Role: " + user.getRole());
+
+        /*
+         * Store logged-in user's email.
+         */
+        this.farmerEmail = user.getEmail();
+
+        System.out.println(
+                "====================================");
+
+        System.out.println(
+                "Opening Farmer Dashboard...");
+
+        System.out.println(
+                "Farmer Name: "
+                        + user.getFullName());
+
+        System.out.println(
+                "Farmer Email: "
+                        + farmerEmail);
+
+        System.out.println(
+                "Farmer Role: "
+                        + user.getRole());
+
+        System.out.println(
+                "====================================");
     }
+
+    // =========================================================
+    // GET SCENE
+    // =========================================================
 
     public Scene getScene() {
-        if (scene == null)
+
+        if (scene == null) {
+
             scene = getFarmerDashboardScene();
+        }
+
         return scene;
     }
+
+    // =========================================================
+    // CREATE DASHBOARD SCENE
+    // =========================================================
 
     public Scene getFarmerDashboardScene() {
-        BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: " + MAIN_BG + ";");
-        root.setTop(createTopBar());
-        root.setLeft(createSidebar());
+
+        Rectangle2D screen = Screen.getPrimary()
+                .getVisualBounds();
+
+        root = new BorderPane();
+
+        root.setStyle(
+                "-fx-background-color: "
+                        + MAIN_BG
+                        + ";");
+
+        // =====================================================
+        // TOP BAR
+        // =====================================================
+
+        root.setTop(
+                createTopBar());
+
+        // =====================================================
+        // SIDEBAR
+        // =====================================================
+
+        root.setLeft(
+                createSidebar());
+
+        // =====================================================
+        // CONTENT AREA
+        // =====================================================
 
         contentArea = new StackPane();
-        contentArea.setPadding(new Insets(18, 22, 20, 22));
-        root.setCenter(contentArea);
 
-        navigateTo("Dashboard");
-        scene = new Scene(root, 1400, 1000);
+        contentArea.setPadding(
+                new Insets(
+                        18,
+                        22,
+                        20,
+                        22));
+
+        root.setCenter(
+                contentArea);
+
+        // =====================================================
+        // DEFAULT PAGE
+        // =====================================================
+
+        navigateTo(
+                "Dashboard");
+
+        // =====================================================
+        // SCENE
+        // =====================================================
+
+        scene = ResponsiveLayout.createScene(root);
+
         return scene;
     }
 
-
-    private Node loadIcon(String resourcePath, double size) {
-        try {
-            var stream = getClass().getResourceAsStream(resourcePath);
-            if (stream != null) {
-                Image img = new Image(stream);
-                ImageView iv = new ImageView(img);
-                iv.setFitWidth(size);
-                iv.setFitHeight(size);
-                iv.setPreserveRatio(true);
-                iv.setSmooth(true);
-                return iv;
-            }
-        } catch (Exception ignored) {
-        }
-
-        Label fallback = new Label("?");
-        fallback.setPrefSize(size, size);
-        fallback.setAlignment(Pos.CENTER);
-        fallback.setStyle(
-                "-fx-font-size: " + (size * 0.55) + "px;" +
-                        "-fx-text-fill: " + PRIMARY_TEXT + ";" +
-                        "-fx-background-color: " + PANEL_BG + ";" +
-                        "-fx-background-radius: 4px;");
-        System.out.println("[FarmerDashboard] Icon not found: " + resourcePath);
-        return fallback;
-    }
+    // =========================================================
+    // TOP BAR
+    // =========================================================
 
     private HBox createTopBar() {
+
         HBox topBar = new HBox(15);
-        topBar.setAlignment(Pos.CENTER_LEFT);
-        topBar.setPadding(new Insets(10, 25, 10, 20));
-        topBar.setPrefHeight(80);
+
+        topBar.setAlignment(
+                Pos.CENTER_LEFT);
+
+        topBar.setPadding(
+                new Insets(
+                        10,
+                        25,
+                        10,
+                        20));
+
+        topBar.setPrefHeight(
+                80);
+
         topBar.setStyle(
-                "-fx-background-color: #FFFFFF;" +
-                        "-fx-border-color: " + BORDER_COLOR + ";" +
-                        "-fx-border-width: 0 0 1.5px 0;");
+                "-fx-background-color: #FFFFFF;"
+                        + "-fx-border-color: "
+                        + BORDER_COLOR
+                        + ";"
+                        + "-fx-border-width: "
+                        + "0 0 1.5px 0;");
+
+        // =====================================================
+        // LOGO
+        // =====================================================
 
         ImageView logo = new ImageView();
+
         try {
+
             Image image = new Image(
-                    getClass().getResourceAsStream("/assets/icons/AgriLinklogo.png"));
-            logo.setImage(image);
-            logo.setFitWidth(260);
-            logo.setFitHeight(65);
-            logo.setPreserveRatio(true);
+                    getClass()
+                            .getResourceAsStream(
+                                    "/assets/icons/AgriLinklogo.png"));
+
+            if (!image.isError()) {
+
+                logo.setImage(
+                        image);
+
+                logo.setFitWidth(
+                        260);
+
+                logo.setFitHeight(
+                        65);
+
+                logo.setPreserveRatio(
+                        true);
+            }
+
         } catch (Exception e) {
-            System.out.println("Logo not found.");
+
+            System.out.println(
+                    "AgriLink logo not found.");
         }
 
+        // =====================================================
+        // SPACER
+        // =====================================================
+
         Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Node bellIcon = loadIcon("/assets/icons/notification2.png", 24);
+        HBox.setHgrow(
+                spacer,
+                Priority.ALWAYS);
 
-        Circle notificationDot = new Circle(5, Color.web(ACCENT_YELLOW));
-        notificationDot.setTranslateX(8);
-        notificationDot.setTranslateY(-8);
+        // =====================================================
+        // NOTIFICATION
+        // =====================================================
 
-        StackPane notification = new StackPane(bellIcon, notificationDot);
-        notification.setPrefSize(40, 40);
-        notification.setStyle("-fx-cursor: hand;");
-        notification.setOnMouseClicked(e -> navigateTo("Notifications"));
+        StackPane notification = new StackPane();
+
+        notification.setPrefSize(
+                40,
+                40);
+
+        notification.setStyle(
+                "-fx-cursor: hand;");
+
+        Label bell = new Label("🔔");
+
+        bell.setStyle(
+                "-fx-font-size: 20px;");
+
+        notificationBadge = new Label("0");
+
+        notificationBadge.setMinSize(18, 18);
+        notificationBadge.setAlignment(Pos.CENTER);
+        notificationBadge.setTranslateX(10);
+        notificationBadge.setTranslateY(-10);
+        notificationBadge.setStyle(
+                "-fx-background-color: " + ACCENT_YELLOW + ";" +
+                "-fx-text-fill: #1B2631;" +
+                "-fx-font-size: 10px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 10px;");
+
+        notificationBadge.setVisible(false);
+        notificationBadge.setManaged(false);
+
+        notification.getChildren()
+                .addAll(
+                        bell,
+                        notificationBadge);
+
+        startNotificationListener();
+
+        notification.setOnMouseClicked(
+                e -> navigateTo(
+                        "Notifications"));
+
+        // =====================================================
+        // USER PROFILE
+        // =====================================================
 
         HBox userBox = new HBox(10);
-        userBox.setAlignment(Pos.CENTER);
-        userBox.setStyle("-fx-cursor: hand;");
 
-        Circle avatarCircle = new Circle(20, Color.web(PANEL_BG));
-        Node farmerAvatarIcon = loadIcon("/assets/icons/farmer_avatar.png", 28);
+        userBox.setAlignment(
+                Pos.CENTER);
 
-        StackPane avatar = new StackPane(avatarCircle, farmerAvatarIcon);
-        avatar.setPrefSize(40, 40);
+        userBox.setStyle(
+                "-fx-cursor: hand;");
 
-        Label farmerName = new Label(user.getFullName() + " ▼");
+        StackPane avatar = createProfileAvatar(
+                20);
+
+        String displayName = safe(
+                user.getFullName());
+
+        if (displayName.isEmpty()) {
+
+            displayName = "Farmer";
+        }
+
+        Label farmerName = new Label(
+                displayName
+                        + " ▼");
+
         farmerName.setStyle(
-                "-fx-font-size: 14px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: " + PRIMARY_TEXT + ";");
+                "-fx-font-size: 14px;"
+                        + "-fx-font-weight: bold;"
+                        + "-fx-text-fill: "
+                        + PRIMARY_TEXT
+                        + ";");
 
-        userBox.getChildren().addAll(avatar, farmerName);
-        userBox.setOnMouseClicked(e -> navigateTo("Profile"));
+        userBox.getChildren()
+                .addAll(
+                        avatar,
+                        farmerName);
 
-        topBar.getChildren().addAll(logo, spacer, notification, userBox);
+        userBox.setOnMouseClicked(
+                e -> navigateTo(
+                        "Profile"));
+
+        // =====================================================
+        // ADD TO TOP BAR
+        // =====================================================
+
+        topBar.getChildren()
+                .addAll(
+                        logo,
+                        spacer,
+                        notification,
+                        userBox);
+
         return topBar;
     }
 
+    // =========================================================
+    // SIDEBAR
+    // =========================================================
+
     private VBox createSidebar() {
+
         VBox sidebar = new VBox(5);
-        sidebar.setPrefWidth(235);
-        sidebar.setPadding(new Insets(15, 10, 15, 10));
+
+        sidebar.setPrefWidth(
+                235);
+
+        sidebar.setPadding(
+                new Insets(
+                        15,
+                        10,
+                        15,
+                        10));
+
         sidebar.setStyle(
-                "-fx-background-color: #FFFFFF;" +
-                        "-fx-border-color: " + BORDER_COLOR + ";" +
-                        "-fx-border-width: 0 1.5px 0 0;");
+                "-fx-background-color: #FFFFFF;"
+                        + "-fx-border-color: "
+                        + BORDER_COLOR
+                        + ";"
+                        + "-fx-border-width: "
+                        + "0 1.5px 0 0;");
+
+        // =====================================================
+        // FARMER INFORMATION
+        // =====================================================
 
         HBox farmerInfo = new HBox(10);
-        farmerInfo.setAlignment(Pos.CENTER_LEFT);
-        farmerInfo.setPadding(new Insets(5, 10, 18, 10));
 
-        Circle farmerCircle = new Circle(22, Color.web(PANEL_BG));
-        Node sidebarAvatarIcon = loadIcon("/assets/icons/avatar.png", 32);
-        StackPane farmerAvatar = new StackPane(farmerCircle, sidebarAvatarIcon);
-        farmerAvatar.setPrefSize(44, 44);
+        farmerInfo.setAlignment(
+                Pos.CENTER_LEFT);
+
+        farmerInfo.setPadding(
+                new Insets(
+                        5,
+                        10,
+                        18,
+                        10));
+
+        StackPane farmerAvatar = createProfileAvatar(
+                22);
 
         VBox farmerDetails = new VBox(2);
 
-        Label name = new Label(user.getFullName());
+        String nameValue = safe(
+                user.getFullName());
+
+        if (nameValue.isEmpty()) {
+
+            nameValue = "Farmer";
+        }
+
+        Label name = new Label(
+                nameValue);
+
         name.setStyle(
-                "-fx-font-size: 14px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: " + PRIMARY_TEXT + ";");
+                "-fx-font-size: 14px;"
+                        + "-fx-font-weight: bold;"
+                        + "-fx-text-fill: "
+                        + PRIMARY_TEXT
+                        + ";");
 
-        Label role = new Label(user.getRole());
-        role.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748B;");
+        String roleValue = safe(
+                user.getRole());
 
-        farmerDetails.getChildren().addAll(name, role);
-        farmerInfo.getChildren().addAll(farmerAvatar, farmerDetails);
-        sidebar.getChildren().add(farmerInfo);
+        if (roleValue.isEmpty()) {
+
+            roleValue = "Farmer";
+        }
+
+        Label role = new Label(
+                roleValue);
+
+        role.setStyle(
+                "-fx-font-size: 12px;"
+                        + "-fx-text-fill: #64748B;");
+
+        farmerDetails.getChildren()
+                .addAll(
+                        name,
+                        role);
+
+        farmerInfo.getChildren()
+                .addAll(
+                        farmerAvatar,
+                        farmerDetails);
+
+        sidebar.getChildren()
+                .add(
+                        farmerInfo);
+
+        // =====================================================
+        // NAVIGATION GROUP
+        // =====================================================
 
         navGroup = new ToggleGroup();
 
-        addNavigation(sidebar, "Dashboard", "/assets/icons/homeicon2.png");
+        // =====================================================
+        // DASHBOARD
+        // =====================================================
 
-        addNavigation(sidebar, "Products", "/assets/icons/producticon.png");
+        addNavigation(
+                sidebar,
+                "Dashboard",
+                "🏠");
 
-        addNavigation(sidebar, "Orders", "/assets/icons/ordericon.png");
+        // =====================================================
+        // PRODUCTS
+        // =====================================================
 
-        addNavigation(sidebar, "Marketplace", "/assets/icons/marketplaceicon2.png");
+        addNavigation(
+                sidebar,
+                "Products",
+                "🎁");
 
-        addNavigation(sidebar, "Equipment Rental", "/assets/icons/rentalicon.png");
+        // =====================================================
+        // ORDERS
+        // =====================================================
 
-        addNavigation(sidebar, "Crop Prices", "/assets/icons/cropicon.png");
+        addNavigation(
+                sidebar,
+                "Orders",
+                "📦");
 
-        addNavigation(sidebar, "Weather", "/assets/icons/weathericon.png");
+        // =====================================================
+        // EQUIPMENT RENTAL
+        // =====================================================
 
-        addNavigation(sidebar, "AI Recommendations", "/assets/icons/aifeatureicon.png");
+        addNavigation(
+                sidebar,
+                "Equipment Rental",
+                "🚜");
 
-        addNavigation(sidebar, "Notifications", "/assets/icons/notificationicon.png");
+        // =====================================================
+        // RENTAL REQUESTS - NEW
+        // =====================================================
 
-        addNavigation(sidebar, "Profile", "/assets/icons/profileicon.png");
+        addNavigation(
+                sidebar,
+                "Rental Requests",
+                "📩");
 
-        addNavigation(sidebar, "Settings", "/assets/icons/settingicon.png");
+        // Requests made by this farmer; payment becomes available after acceptance.
+        addNavigation(
+                sidebar,
+                "My Rental Requests",
+                "💳");
 
-        addNavigation(sidebar, "Logout", "/assets/icons/logouticon.png");
+        // =====================================================
+        // EARNINGS
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "Earnings",
+                "💰");
+
+        // =====================================================
+        // MY CART
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "My Cart",
+                "🛒");
+
+        // =====================================================
+        // MY EQUIPMENT
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "My Equipment",
+                "⚙");
+
+        // =====================================================
+        // MARKETPLACE
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "Marketplace",
+                "🏪");
+
+        // =====================================================
+        // WEATHER
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "Weather",
+                "🌤");
+
+        // =====================================================
+        // AI RECOMMENDATIONS
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "AI Recommendations",
+                "✨");
+
+        // =====================================================
+        // MESSAGES
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "Messages",
+                "💬");
+
+        // =====================================================
+        // NOTIFICATIONS
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "Notifications",
+                "🔔");
+
+        // =====================================================
+        // PROFILE
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "Profile",
+                "👤");
+
+        // =====================================================
+        // SETTINGS
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "Settings",
+                "⚙");
+
+        // =====================================================
+        // LOGOUT
+        // =====================================================
+
+        addNavigation(
+                sidebar,
+                "Logout",
+                "🚪");
 
         return sidebar;
     }
 
-    private void addNavigation(VBox sidebar, String title, String iconPath) {
-        ToggleButton button = createNavigationButton(title, iconPath);
-        navMap.put(title, button);
-        sidebar.getChildren().add(button);
+    // =========================================================
+    // ADD NAVIGATION BUTTON
+    // =========================================================
+
+    private void addNavigation(
+            VBox sidebar,
+            String title,
+            String emoji) {
+
+        ToggleButton button = createNavigationButton(
+                title,
+                emoji);
+
+        navMap.put(
+                title,
+                button);
+
+        sidebar.getChildren()
+                .add(
+                        button);
     }
 
-    private ToggleButton createNavigationButton(String title, String iconPath) {
+    // =========================================================
+    // CREATE NAVIGATION BUTTON
+    // =========================================================
 
-        Node icon = loadIcon(iconPath, 20);
+    private ToggleButton createNavigationButton(
+            String title,
+            String emoji) {
 
-        Label text = new Label(title);
-        text.setStyle("-fx-font-size: 13px; -fx-text-fill: " + PRIMARY_TEXT + ";");
+        Label icon = new Label(
+                emoji);
 
-        HBox content = new HBox(12, icon, text);
-        content.setAlignment(Pos.CENTER_LEFT);
+        icon.setStyle(
+                "-fx-font-size: 18px;");
+
+        Label text = new Label(
+                title);
+
+        text.setStyle(
+                "-fx-font-size: 13px;"
+                        + "-fx-text-fill: "
+                        + PRIMARY_TEXT
+                        + ";");
+
+        HBox content = new HBox(
+                12,
+                icon,
+                text);
+
+        content.setAlignment(
+                Pos.CENTER_LEFT);
 
         ToggleButton button = new ToggleButton();
-        button.setGraphic(content);
-        button.setToggleGroup(navGroup);
-        button.setMaxWidth(Double.MAX_VALUE);
-        button.setPrefHeight(42);
-        button.setPadding(new Insets(0, 10, 0, 14));
-        button.setFocusTraversable(false);
+
+        button.setGraphic(
+                content);
+
+        button.setToggleGroup(
+                navGroup);
+
+        button.setMaxWidth(
+                Double.MAX_VALUE);
+
+        button.setPrefHeight(
+                42);
+
+        button.setPadding(
+                new Insets(
+                        0,
+                        10,
+                        0,
+                        14));
+
+        button.setFocusTraversable(
+                false);
 
         Runnable updateStyle = () -> {
+
             if (button.isSelected()) {
-                button.setStyle(
-                        "-fx-background-color: " + PRIMARY_GREEN + ";" +
-                                "-fx-background-radius: 9px;" +
-                                "-fx-cursor: hand;");
-                text.setStyle(
-                        "-fx-font-size: 13px;" +
-                                "-fx-font-weight: bold;" +
-                                "-fx-text-fill: white;");
 
-                if (icon instanceof ImageView iv) {
-                    javafx.scene.effect.ColorAdjust whiten = new javafx.scene.effect.ColorAdjust();
-                    whiten.setBrightness(1.0);
-                    iv.setEffect(whiten);
-                }
+                button.setStyle(
+                        "-fx-background-color: "
+                                + PRIMARY_GREEN
+                                + ";"
+                                + "-fx-background-radius: 9px;"
+                                + "-fx-cursor: hand;");
+
+                text.setStyle(
+                        "-fx-font-size: 13px;"
+                                + "-fx-font-weight: bold;"
+                                + "-fx-text-fill: white;");
+
             } else {
-                button.setStyle(
-                        "-fx-background-color: transparent;" +
-                                "-fx-background-radius: 9px;" +
-                                "-fx-cursor: hand;");
-                text.setStyle(
-                        "-fx-font-size: 13px;" +
-                                "-fx-text-fill: " + PRIMARY_TEXT + ";");
 
-                if (icon instanceof ImageView iv) {
-                    iv.setEffect(null);
-                }
+                button.setStyle(
+                        "-fx-background-color: transparent;"
+                                + "-fx-background-radius: 9px;"
+                                + "-fx-cursor: hand;");
+
+                text.setStyle(
+                        "-fx-font-size: 13px;"
+                                + "-fx-text-fill: "
+                                + PRIMARY_TEXT
+                                + ";");
             }
         };
 
-        button.selectedProperty().addListener((obs, oldVal, newVal) -> updateStyle.run());
+        button.selectedProperty()
+                .addListener(
+                        (obs,
+                         oldValue,
+                         newValue) -> updateStyle.run());
+
         updateStyle.run();
 
-        button.setOnMouseEntered(e -> {
-            if (!button.isSelected()) {
-                button.setStyle(
-                        "-fx-background-color: " + PANEL_BG + ";" +
-                                "-fx-background-radius: 9px;" +
-                                "-fx-cursor: hand;");
-            }
-        });
+        // =====================================================
+        // HOVER
+        // =====================================================
 
-        button.setOnMouseExited(e -> {
-            if (!button.isSelected()) {
-                button.setStyle(
-                        "-fx-background-color: transparent;" +
-                                "-fx-background-radius: 9px;" +
-                                "-fx-cursor: hand;");
-            }
-        });
+        button.setOnMouseEntered(
+                e -> {
 
-        button.setOnAction(e -> navigateTo(title));
+                    if (!button.isSelected()) {
+
+                        button.setStyle(
+                                "-fx-background-color: "
+                                        + PANEL_BG
+                                        + ";"
+                                        + "-fx-background-radius: 9px;"
+                                        + "-fx-cursor: hand;");
+                    }
+                });
+
+        button.setOnMouseExited(
+                e -> {
+
+                    if (!button.isSelected()) {
+
+                        button.setStyle(
+                                "-fx-background-color: transparent;"
+                                        + "-fx-background-radius: 9px;"
+                                        + "-fx-cursor: hand;");
+                    }
+                });
+
+        // =====================================================
+        // NAVIGATION
+        // =====================================================
+
+        button.setOnAction(
+                e -> navigateTo(
+                        title));
+
         return button;
     }
 
-    public void navigateTo(String page) {
-        if (navMap.containsKey(page))
-            navMap.get(page).setSelected(true);
+    // =========================================================
+    // NAVIGATION
+    // =========================================================
+
+    public void navigateTo(
+            String page) {
+
+        currentPage = page;
+
+        System.out.println(
+                "Navigating to: "
+                        + page);
+
+        // =====================================================
+        // UPDATE SELECTED SIDEBAR BUTTON
+        // =====================================================
+
+        if (navMap.containsKey(page)) {
+
+            navMap.get(page)
+                    .setSelected(
+                            true);
+        }
 
         Node viewNode;
 
+        // =====================================================
+        // SWITCH
+        // =====================================================
+
         switch (page) {
 
+            // =================================================
+            // DASHBOARD
+            // =================================================
+
             case "Dashboard":
-                viewNode = new DashboardOverview(this).getView();
+
+                viewNode = new DashboardOverview(
+                        this)
+                        .getView();
+
                 break;
+
+            // =================================================
+            // PRODUCTS
+            // =================================================
 
             case "Products":
-                viewNode = new Products(this, user.getEmail()).getView();
+
+                viewNode = new Products(
+                        this,
+                        farmerEmail)
+                        .getView();
+
                 break;
+
+            // =================================================
+            // ADD PRODUCT
+            // =================================================
 
             case "AddProduct":
-                viewNode = new AddProduct(this, user.getEmail()).getView();
+
+                viewNode = new AddProduct(
+                        this,
+                        farmerEmail)
+                        .getView();
+
                 break;
+
+            // =================================================
+            // ORDERS
+            // =================================================
 
             case "Orders":
-                viewNode = new Orders().getView();
+
+                viewNode = new Orders(farmerEmail)
+                        .getView();
+
                 break;
+
+            // =================================================
+            // MARKETPLACE
+            // =================================================
 
             case "Marketplace":
-                viewNode = new MarketPlace(this).getView();
+
+                viewNode = new CropPrices(
+                        this)
+                        .getView();
+
                 break;
+
+            // =================================================
+            // EQUIPMENT RENTAL
+            // =================================================
 
             case "Equipment Rental":
-                viewNode = new EquipmentRental().getView();
+
+                viewNode = new com.mainproject.view.farmer.EquipmentRental(
+                        farmerEmail,
+                        safe(
+                                user.getFullName()),
+                        () -> navigateTo(
+                                "AddEquipment"))
+                        .getView();
+
                 break;
 
-            case "Crop Prices":
-                viewNode = new CropPrices(this).getView();
+            // =================================================
+            // RENTAL REQUESTS - NEW
+            // =================================================
+
+            case "Rental Requests":
+
+                viewNode = new RentalRequests(
+                        farmerEmail)
+                        .getView();
+
                 break;
+
+            // =================================================
+            // MY RENTAL REQUESTS / PAYMENT
+            // =================================================
+
+            case "My Rental Requests":
+
+                viewNode = new MyRentalRequests(
+                        farmerEmail)
+                        .getView();
+
+                break;
+
+            // =================================================
+            // EARNINGS
+            // =================================================
+
+            case "Earnings":
+
+                viewNode = new Earnings(farmerEmail).getView();
+
+                break;
+
+            // =================================================
+            // MY CART
+            // =================================================
+
+            case "My Cart":
+
+                viewNode = new Cart(
+                        farmerEmail,
+                        safe(
+                                user.getFullName()),
+
+                        () -> navigateTo(
+                                "Equipment Rental"),
+
+                        () -> processEquipmentCheckout())
+                        .getView();
+
+                break;
+
+            // =================================================
+            // MY EQUIPMENT
+            // =================================================
+
+            case "My Equipment":
+
+                viewNode = new MyEquipment(
+                        farmerEmail,
+                        safe(
+                                user.getFullName()),
+
+                        () -> navigateTo(
+                                "AddEquipment"),
+
+                        () -> navigateTo(
+                                "Equipment Rental"))
+                        .getView();
+
+                break;
+
+            // =================================================
+            // ADD EQUIPMENT
+            // =================================================
+
+            case "AddEquipment":
+
+                viewNode = new AddEquipment(
+                        farmerEmail,
+                        safe(
+                                user.getFullName()),
+
+                        () -> navigateTo(
+                                "Equipment Rental"))
+                        .getView();
+
+                break;
+
+            // =================================================
+            // WEATHER
+            // =================================================
 
             case "Weather":
-                viewNode = new Weather().getView();
+
+                viewNode = new Weather(farmerEmail)
+                        .getView();
+
                 break;
+
+            // =================================================
+            // AI RECOMMENDATIONS
+            // =================================================
 
             case "AI Recommendations":
-                viewNode = new AiRecommendations().getView();
+
+                viewNode = new AiRecommendations(farmerEmail)
+                        .getView();
+
                 break;
+
+            // =================================================
+            // MESSAGES
+            // =================================================
+
+            case "Messages":
+
+                viewNode = new BuyerChatList(
+                        this)
+                        .getView();
+
+                break;
+
+            // =================================================
+            // NOTIFICATIONS
+            // =================================================
 
             case "Notifications":
-                viewNode = new Notifications(this).getView();
+
+                viewNode = new Notifications(
+                        this,
+                        farmerEmail)
+                        .getView();
+
                 break;
+
+            // =================================================
+            // PROFILE
+            // =================================================
 
             case "Profile":
-                viewNode = new Profile().getView();
+
+                System.out.println(
+                        "Opening Profile for: "
+                                + farmerEmail);
+
+                viewNode = new Profile(
+                        farmerEmail)
+                        .getView();
+
                 break;
+
+            // =================================================
+            // SETTINGS
+            // =================================================
 
             case "Settings":
-                viewNode = new Settings().getView();
+
+                viewNode = new Settings(
+                        farmerEmail,
+                        new Runnable() {
+
+                            @Override
+                            public void run() {
+
+                                refreshLanguage();
+                            }
+                        })
+                        .getView();
+
                 break;
+
+            // =================================================
+            // LOGOUT
+            // =================================================
 
             case "Logout":
+
                 handleLogout();
+
                 return;
 
+            // =================================================
+            // DEFAULT
+            // =================================================
+
             default:
-                viewNode = new DashboardOverview(this).getView();
+
+                System.out.println(
+                        "Unknown page: "
+                                + page);
+
+                viewNode = new DashboardOverview(
+                        this)
+                        .getView();
+
                 break;
         }
 
-        if (contentArea != null)
-            contentArea.getChildren().setAll(viewNode);
+        // =====================================================
+        // DISPLAY VIEW
+        // =====================================================
+
+        if (contentArea != null) {
+
+            contentArea
+                    .getChildren()
+                    .setAll(
+                            ResponsiveLayout.scrollPage(viewNode));
+        }
     }
 
-    public void navigateToEditProduct(Product product) {
+    // =========================================================
+    // REFRESH AFTER LANGUAGE CHANGE
+    // =========================================================
+
+    public void refreshLanguage() {
+
+        if (root != null) {
+
+            root.setLeft(
+                    createSidebar());
+        }
+
+        String page = currentPage == null
+                ? "Dashboard"
+                : currentPage;
+
+        navigateTo(page);
+    }
+
+    // =========================================================
+    // EQUIPMENT RENTAL NAVIGATION
+    // =========================================================
+
+    public void navigateToEquipmentRental() {
+
+        navigateTo(
+                "Equipment Rental");
+    }
+
+    // =========================================================
+    // RENTAL REQUESTS NAVIGATION - NEW
+    // =========================================================
+
+    public void navigateToRentalRequests() {
+
+        navigateTo(
+                "Rental Requests");
+    }
+
+    // =========================================================
+    // ADD EQUIPMENT NAVIGATION
+    // =========================================================
+
+    public void navigateToAddEquipment() {
+
+        navigateTo(
+                "AddEquipment");
+    }
+
+    // =========================================================
+    // PRODUCTS NAVIGATION
+    // =========================================================
+
+    public void navigateToProducts() {
+
+        navigateTo(
+                "Products");
+    }
+
+    // =========================================================
+    // MARKETPLACE NAVIGATION
+    // =========================================================
+
+    public void navigateToMarketplace() {
+
+        navigateTo(
+                "Marketplace");
+    }
+
+    // =========================================================
+    // CROP PRICES NAVIGATION
+    // =========================================================
+
+    public void navigateToCropPrices() {
+
+        navigateTo(
+                "Crop Prices");
+    }
+
+    // =========================================================
+    // EDIT PRODUCT NAVIGATION
+    // =========================================================
+
+    public void navigateToEditProduct(
+            Product product) {
+
         if (product == null) {
-            System.out.println("Cannot edit product.");
+
+            System.out.println(
+                    "Cannot edit product.");
+
             return;
         }
-        System.out.println("Opening Edit Product...");
-        System.out.println("Product ID: " + product.getProductId());
-        System.out.println("Product Name: " + product.getName());
 
-        EditProduct editProduct = new EditProduct(this, product);
-        contentArea.getChildren().setAll(editProduct.getView());
+        System.out.println(
+                "====================================");
+
+        System.out.println(
+                "Opening Edit Product...");
+
+        System.out.println(
+                "Product ID: "
+                        + product.getProductId());
+
+        System.out.println(
+                "Product Name: "
+                        + product.getName());
+
+        System.out.println(
+                "====================================");
+
+        EditProduct editProduct = new EditProduct(
+                this,
+                product);
+
+        Node editView = editProduct.getView();
+
+        if (contentArea != null) {
+
+            contentArea
+                    .getChildren()
+                    .setAll(
+                            editView);
+        }
     }
+
+    // =========================================================
+    // EQUIPMENT CART CHECKOUT
+    // =========================================================
+
+    private void processEquipmentCheckout() {
+
+        List<CartItem> items = new CartController()
+                .getCartItems(farmerEmail);
+
+        if (items == null || items.isEmpty()) {
+            showDashboardAlert(
+                    javafx.scene.control.Alert.AlertType.WARNING,
+                    "Empty Cart",
+                    "Your equipment rental cart is empty.");
+            return;
+        }
+
+        EquipmentRentalController rentalController =
+                new EquipmentRentalController();
+        CartController cartController = new CartController();
+
+        int successful = 0;
+        int failed = 0;
+
+        for (CartItem item : items) {
+
+            EquipmentRental rental = new EquipmentRental();
+
+            rental.setEquipmentId(item.getEquipmentId());
+            rental.setEquipmentName(item.getEquipmentName());
+            rental.setEquipmentOwnerEmail(item.getOwnerEmail());
+            rental.setEquipmentOwnerName(item.getOwnerName());
+
+            // The logged-in farmer is the person requesting this rental.
+            rental.setBuyerEmail(farmerEmail);
+            rental.setBuyerName(safe(user.getFullName()).isEmpty()
+                    ? "Farmer"
+                    : safe(user.getFullName()));
+
+            int days = Math.max(1, item.getRentalDays());
+            rental.setNumberOfDays(days);
+            rental.setPricePerDay(item.getPricePerDay());
+            rental.setTotalAmount(item.getTotalPrice());
+
+            Date startDate = new Date();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(startDate);
+            calendar.add(Calendar.DAY_OF_YEAR, days);
+
+            rental.setStartDate(startDate);
+            rental.setEndDate(calendar.getTime());
+            rental.setStatus("pending");
+            rental.setPaymentStatus("pending");
+            rental.setCreatedAt(new Date());
+
+            boolean created = rentalController.createRental(rental);
+
+            if (created) {
+                successful++;
+                cartController.removeFromCart(item.getCartItemId());
+            } else {
+                failed++;
+            }
+        }
+
+        if (successful > 0) {
+            String message = successful
+                    + " equipment rental request(s) submitted successfully.";
+
+            if (failed > 0) {
+                message += " " + failed
+                        + " request(s) could not be submitted and remain in your cart.";
+            }
+
+            showDashboardAlert(
+                    javafx.scene.control.Alert.AlertType.INFORMATION,
+                    "Rental Requests Submitted",
+                    message);
+
+            navigateTo("Equipment Rental");
+
+        } else {
+            showDashboardAlert(
+                    javafx.scene.control.Alert.AlertType.ERROR,
+                    "Checkout Failed",
+                    "Unable to submit the equipment rental request(s). Please try again.");
+        }
+    }
+
+    private void showDashboardAlert(
+            javafx.scene.control.Alert.AlertType type,
+            String title,
+            String message) {
+
+        javafx.scene.control.Alert alert =
+                new javafx.scene.control.Alert(type);
+
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    // =========================================================
+    // LOGOUT
+    // =========================================================
 
     private void handleLogout() {
-        System.out.println("Farmer logged out: " + user.getEmail());
-        if (scene != null && scene.getWindow() != null)
-            scene.getWindow().hide();
+
+        System.out.println(
+                "====================================");
+
+        System.out.println(
+                "Farmer logged out: "
+                        + farmerEmail);
+
+        System.out.println(
+                "====================================");
+
+        // Return to the login screen instead of closing the application.
+        if (LoginScreen.Homestage != null) {
+            LoginScreen.logoutToLogin();
+        } else if (scene != null && scene.getWindow() instanceof Stage) {
+            new LoginScreen().start((Stage) scene.getWindow());
+        }
     }
 
+
+    // =========================================================
+    // OPEN CHAT WITH BUYER
+    // =========================================================
+
+    public void navigateToChat(
+            String buyerName,
+            String buyerEmail) {
+
+        currentPage = "Messages";
+
+        Node chatView = new ChatWithBuyer(
+                this,
+                buyerName,
+                buyerEmail)
+                .getView();
+
+        if (contentArea != null) {
+            contentArea.getChildren().setAll(chatView);
+        }
+    }
+
+    // =========================================================
+    // GET USER
+    // =========================================================
+
     public User getUser() {
+
         return user;
     }
 
+    // =========================================================
+    // GET FARMER EMAIL
+    // =========================================================
+
     public String getFarmerEmail() {
-        return user.getEmail();
+
+        return farmerEmail;
     }
 
+    // =========================================================
+    // GET FARMER NAME
+    // =========================================================
+
     public String getFarmerName() {
+
         return user.getFullName();
     }
 
+    // =========================================================
+    // GET FARMER ROLE
+    // =========================================================
+
     public String getFarmerRole() {
+
         return user.getRole();
     }
 
+    // =========================================================
+    // GET CONTENT AREA
+    // =========================================================
+
     public StackPane getContentArea() {
+
         return contentArea;
     }
+
+    // =========================================================
+    // PROFILE AVATAR
+    // =========================================================
+
+    private StackPane createProfileAvatar(
+            double radius) {
+
+        Circle background = new Circle(
+                radius,
+                Color.web(PANEL_BG));
+
+        StackPane avatar = new StackPane(
+                background);
+
+        String imageUrl = null;
+
+        try {
+
+            imageUrl = user.getProfileImageUrl();
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Profile image URL not available.");
+        }
+
+        if (imageUrl != null
+                && !imageUrl.trim().isEmpty()) {
+
+            try {
+
+                Image image = new Image(
+                        imageUrl.trim(),
+                        radius * 2,
+                        radius * 2,
+                        true,
+                        true,
+                        true);
+
+                if (!image.isError()) {
+
+                    ImageView profileImage = new ImageView(
+                            image);
+
+                    profileImage.setFitWidth(
+                            radius * 2);
+
+                    profileImage.setFitHeight(
+                            radius * 2);
+
+                    profileImage.setPreserveRatio(
+                            true);
+
+                    Circle clip = new Circle(
+                            radius,
+                            radius,
+                            radius);
+
+                    profileImage.setClip(
+                            clip);
+
+                    avatar.getChildren()
+                            .add(
+                                    profileImage);
+
+                    return avatar;
+                }
+
+            } catch (Exception e) {
+
+                System.out.println(
+                        "Unable to load profile image.");
+            }
+        }
+
+        Label farmerIcon = new Label(
+                "👨‍🌾");
+
+        avatar.getChildren()
+                .add(
+                        farmerIcon);
+
+        return avatar;
+    }
+
+    // =========================================================
+    // SAFE STRING
+    // =========================================================
+
+    private String safe(
+            String value) {
+
+        if (value == null) {
+
+            return "";
+        }
+
+        return value.trim();
+    }
+    // =========================================================
+    // REAL-TIME NOTIFICATION BADGE
+    // =========================================================
+
+    private void startNotificationListener() {
+
+        if (farmerEmail == null || farmerEmail.trim().isEmpty()) {
+            return;
+        }
+
+        if (notificationListener != null) {
+            notificationListener.remove();
+        }
+
+        notificationListener = notificationController.listenForNotifications(
+                farmerEmail,
+                notifications -> {
+                    int unread = 0;
+
+                    if (notifications != null) {
+                        for (com.mainproject.model.Notification notification : notifications) {
+                            if (notification != null && !notification.isRead()) {
+                                unread++;
+                            }
+                        }
+                    }
+
+                    final int unreadCount = unread;
+
+                    javafx.application.Platform.runLater(() -> {
+                        if (notificationBadge != null) {
+                            notificationBadge.setText(
+                                    unreadCount > 99 ? "99+" : String.valueOf(unreadCount));
+                            notificationBadge.setVisible(unreadCount > 0);
+                        }
+                    });
+                }
+        );
+    }
+
 }

@@ -1,17 +1,22 @@
 package com.mainproject.view;
 
+import com.mainproject.util.ResponsiveLayout;
+
 import com.mainproject.controller.AuthController;
-import com.mainproject.dao.UserDAO;
+import com.mainproject.controller.UserController;
 import com.mainproject.model.User;
+
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
@@ -23,668 +28,602 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 
 public class RegisterScreen {
 
-    private Scene registerScreenScene;
+        private Scene registerScreenScene;
 
-    private final AuthController authController;
-    private final UserDAO userDAO;
+        private final AuthController authController;
+        private final UserController userController;
 
-    // =====================================================
-    // CONSTRUCTOR
-    // =====================================================
+        // =====================================================
+        // CONSTRUCTOR
+        // =====================================================
 
-    public RegisterScreen() {
+        public RegisterScreen() {
 
-        authController = new AuthController();
+                authController = new AuthController();
 
-        userDAO = new UserDAO();
-    }
+                userController = new UserController();
+        }
 
-    // =====================================================
-    // GET REGISTER SCREEN
-    // =====================================================
+        // =====================================================
+        // GET REGISTER SCREEN
+        // =====================================================
 
-    public Scene getRegisterScreenScene(
-            Runnable callbackAction) {
+        public Scene getRegisterScreenScene(Runnable callbackAction) {
+                Rectangle2D screen = Screen.getPrimary().getVisualBounds();
 
-        // =================================================
-        // LEFT IMAGE
-        // =================================================
+                // =================================================
+                // LEFT IMAGE
+                // =================================================
 
-        ImageView farmerImage = new ImageView(
-                "file:src/main/resources/assets/icons/registerscreen.png");
+                ImageView farmerImage = new ImageView(
+                                "file:src/main/resources/assets/icons/registerscreen.png");
 
-        farmerImage.setFitWidth(800);
-        farmerImage.setFitHeight(1000);
+                farmerImage.setFitWidth(800);
+                farmerImage.setFitHeight(1000);
 
-        VBox leftPanel = new VBox(
-                farmerImage);
+                VBox leftPanel = new VBox(
+                                farmerImage);
 
-        leftPanel.setStyle(
-                "-fx-background-color: white;");
+                leftPanel.setStyle(
+                                "-fx-background-color: white;");
 
-        leftPanel.setAlignment(
-                Pos.CENTER);
+                leftPanel.setAlignment(
+                                Pos.CENTER);
 
-        // =================================================
-        // HEADER
-        // =================================================
+                // =================================================
+                // HEADER
+                // =================================================
 
-        Text title = new Text(
-                "Create Your Account");
+                Text title = new Text(
+                                "Create Your Account");
 
-        title.setStyle(
-                "-fx-font-size: 32px;" +
-                "-fx-font-weight: bold;");
+                title.setStyle(
+                                "-fx-font-size: 32px;" +
+                                                "-fx-font-weight: bold;");
 
-        Text subtitle = new Text(
-                "Join AgriLink by AgriVerse");
+                Text subtitle = new Text(
+                                "Join AgriLink by AgriVerse");
 
-        subtitle.setStyle(
-                "-fx-font-size: 15px;" +
-                "-fx-fill: #777777;");
+                subtitle.setStyle(
+                                "-fx-font-size: 15px;" +
+                                                "-fx-fill: #777777;");
 
-        VBox headerBox = new VBox(
-                6,
-                title,
-                subtitle);
+                VBox headerBox = new VBox(
+                                6,
+                                title,
+                                subtitle);
 
-        // =================================================
-        // FULL NAME
-        // =================================================
+                // =================================================
+                // FULL NAME
+                // =================================================
 
-        Label fullNameLabel = new Label(
-                "Full Name");
+                Label fullNameLabel = new Label(
+                                "Full Name");
 
-        fullNameLabel.setStyle(
-                "-fx-font-weight: bold;");
+                fullNameLabel.setStyle(
+                                "-fx-font-weight: bold;");
 
-        TextField fullNameField = new TextField();
+                TextField fullNameField = new TextField();
 
-        fullNameField.setPromptText(
-                "Enter your full name");
+                fullNameField.setPromptText(
+                                "Enter your full name");
 
-        fullNameField.setPrefHeight(
-                42);
+                fullNameField.setPrefHeight(
+                                42);
 
-        // =================================================
-        // EMAIL
-        // =================================================
+                // =================================================
+                // EMAIL
+                // =================================================
 
-        Label emailLabel = new Label(
-                "Email");
+                Label emailLabel = new Label(
+                                "Email");
 
-        emailLabel.setStyle(
-                "-fx-font-weight: bold;");
+                emailLabel.setStyle(
+                                "-fx-font-weight: bold;");
 
-        TextField emailField = new TextField();
+                TextField emailField = new TextField();
 
-        emailField.setPromptText(
-                "Enter your email");
+                emailField.setPromptText(
+                                "Enter your email");
 
-        emailField.setPrefHeight(
-                42);
+                emailField.setPrefHeight(
+                                42);
 
-        // =================================================
-        // MOBILE NUMBER
-        // =================================================
+                // =================================================
+                // MOBILE NUMBER
+                // =================================================
 
-        Label mobileLabel = new Label(
-                "Mobile Number");
+                Label mobileLabel = new Label(
+                                "Mobile Number");
 
-        mobileLabel.setStyle(
-                "-fx-font-weight: bold;");
+                mobileLabel.setStyle(
+                                "-fx-font-weight: bold;");
 
-        TextField mobileField = new TextField();
+                TextField mobileField = new TextField();
 
-        mobileField.setPromptText(
-                "Enter your mobile number");
+                mobileField.setPromptText(
+                                "Enter your mobile number");
 
-        mobileField.setPrefHeight(
-                42);
+                mobileField.setPrefHeight(
+                                42);
 
-        // =================================================
-        // GENDER
-        // =================================================
+                // =================================================
+                // GENDER
+                // =================================================
 
-        Label genderLabel = new Label(
-                "Gender");
+                Label genderLabel = new Label(
+                                "Gender");
 
-        genderLabel.setStyle(
-                "-fx-font-weight: bold;");
+                genderLabel.setStyle(
+                                "-fx-font-weight: bold;");
 
-        // Gender Toggle Group
-        ToggleGroup genderGroup = new ToggleGroup();
+                ComboBox<String> genderBox = new ComboBox<>();
 
-        // Radio Buttons
-        RadioButton maleRadio = new RadioButton(
-                "Male");
+                genderBox.getItems().addAll(
+                                "Male",
+                                "Female",
+                                "Other");
 
-        RadioButton femaleRadio = new RadioButton(
-                "Female");
+                genderBox.setPromptText(
+                                "Select your gender");
 
-        RadioButton otherRadio = new RadioButton(
-                "Other");
+                genderBox.setPrefHeight(
+                                42);
 
-        // Add all radio buttons to same group
-        maleRadio.setToggleGroup(
-                genderGroup);
+                genderBox.setMaxWidth(
+                                Double.MAX_VALUE);
 
-        femaleRadio.setToggleGroup(
-                genderGroup);
+                // =================================================
+                // PASSWORD
+                // =================================================
 
-        otherRadio.setToggleGroup(
-                genderGroup);
+                Label passLabel = new Label(
+                                "Password");
 
-        // Male selected by default
-        maleRadio.setSelected(
-                true);
+                passLabel.setStyle(
+                                "-fx-font-weight: bold;");
 
-        // Radio button styling
-        maleRadio.setStyle(
-                "-fx-font-size: 14px;");
+                PasswordField passField = new PasswordField();
 
-        femaleRadio.setStyle(
-                "-fx-font-size: 14px;");
+                passField.setPromptText(
+                                "Create a password");
 
-        otherRadio.setStyle(
-                "-fx-font-size: 14px;");
+                passField.setPrefHeight(
+                                42);
 
-        // Gender container
-        HBox genderBox = new HBox(
-                25,
-                maleRadio,
-                femaleRadio,
-                otherRadio);
+                // =================================================
+                // CONFIRM PASSWORD
+                // =================================================
 
-        genderBox.setAlignment(
-                Pos.CENTER_LEFT);
+                Label confirmPassLabel = new Label(
+                                "Confirm Password");
 
-        // =================================================
-        // PASSWORD
-        // =================================================
+                confirmPassLabel.setStyle(
+                                "-fx-font-weight: bold;");
 
-        Label passLabel = new Label(
-                "Password");
+                PasswordField confirmPassField = new PasswordField();
 
-        passLabel.setStyle(
-                "-fx-font-weight: bold;");
+                confirmPassField.setPromptText(
+                                "Confirm your password");
 
-        PasswordField passField = new PasswordField();
+                confirmPassField.setPrefHeight(
+                                42);
 
-        passField.setPromptText(
-                "Create a password");
+                // =================================================
+                // ROLE
+                // =================================================
 
-        passField.setPrefHeight(
-                42);
+                Label roleLabel = new Label(
+                                "Select Role");
 
-        // =================================================
-        // CONFIRM PASSWORD
-        // =================================================
+                roleLabel.setStyle(
+                                "-fx-font-weight: bold;");
 
-        Label confirmPassLabel = new Label(
-                "Confirm Password");
+                ToggleGroup roleGroup = new ToggleGroup();
 
-        confirmPassLabel.setStyle(
-                "-fx-font-weight: bold;");
+                ToggleButton farmerBtn = createRoleButton(
+                                "Farmer",
+                                roleGroup);
 
-        PasswordField confirmPassField = new PasswordField();
+                ToggleButton buyerBtn = createRoleButton(
+                                "Buyer",
+                                roleGroup);
 
-        confirmPassField.setPromptText(
-                "Confirm your password");
+                // Farmer selected by default
+                farmerBtn.setSelected(
+                                true);
 
-        confirmPassField.setPrefHeight(
-                42);
+                HBox roleBox = new HBox(
+                                15,
+                                farmerBtn,
+                                buyerBtn);
 
-        // =================================================
-        // ROLE
-        // =================================================
+                HBox.setHgrow(
+                                farmerBtn,
+                                Priority.ALWAYS);
 
-        Label roleLabel = new Label(
-                "Select Role");
+                HBox.setHgrow(
+                                buyerBtn,
+                                Priority.ALWAYS);
 
-        roleLabel.setStyle(
-                "-fx-font-weight: bold;");
+                farmerBtn.setMaxWidth(
+                                Double.MAX_VALUE);
 
-        ToggleGroup roleGroup = new ToggleGroup();
+                buyerBtn.setMaxWidth(
+                                Double.MAX_VALUE);
 
-        ToggleButton farmerBtn = createRoleButton(
-                "Farmer",
-                roleGroup);
+                // =================================================
+                // REGISTER BUTTON
+                // =================================================
 
-        ToggleButton buyerBtn = createRoleButton(
-                "Buyer",
-                roleGroup);
+                Button registerBtn = new Button(
+                                "Register");
 
-        // Farmer selected by default
-        farmerBtn.setSelected(
-                true);
+                registerBtn.setPrefHeight(
+                                48);
 
-        HBox roleBox = new HBox(
-                15,
-                farmerBtn,
-                buyerBtn);
+                registerBtn.setMaxWidth(
+                                Double.MAX_VALUE);
 
-        HBox.setHgrow(
-                farmerBtn,
-                Priority.ALWAYS);
+                registerBtn.setStyle(
+                                "-fx-background-color: #2E7D32;" +
+                                                "-fx-text-fill: white;" +
+                                                "-fx-font-size: 16px;" +
+                                                "-fx-font-weight: bold;" +
+                                                "-fx-background-radius: 8px;");
 
-        HBox.setHgrow(
-                buyerBtn,
-                Priority.ALWAYS);
+                // =================================================
+                // REGISTER ACTION
+                // =================================================
 
-        farmerBtn.setMaxWidth(
-                Double.MAX_VALUE);
+                registerBtn.setOnAction(
+                                event -> {
 
-        buyerBtn.setMaxWidth(
-                Double.MAX_VALUE);
+                                        String fullName = fullNameField
+                                                        .getText()
+                                                        .trim();
 
-        // =================================================
-        // REGISTER BUTTON
-        // =================================================
+                                        String email = emailField
+                                                        .getText()
+                                                        .trim();
 
-        Button registerBtn = new Button(
-                "Register");
+                                        String mobileNumber = mobileField
+                                                        .getText()
+                                                        .trim();
 
-        registerBtn.setPrefHeight(
-                48);
+                                        String gender = genderBox
+                                                        .getValue();
 
-        registerBtn.setMaxWidth(
-                Double.MAX_VALUE);
+                                        String password = passField.getText();
 
-        registerBtn.setStyle(
-                "-fx-background-color: #2E7D32;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 16px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-background-radius: 8px;");
+                                        String confirmPassword = confirmPassField
+                                                        .getText();
 
-        // =================================================
-        // REGISTER ACTION
-        // =================================================
+                                        // =====================================
+                                        // VALIDATION
+                                        // =====================================
 
-        registerBtn.setOnAction(
-                event -> {
+                                        if (fullName.isEmpty()
+                                                        ||
+                                                        email.isEmpty()
+                                                        ||
+                                                        mobileNumber.isEmpty()
+                                                        ||
+                                                        gender == null
+                                                        ||
+                                                        password.isEmpty()
+                                                        ||
+                                                        confirmPassword.isEmpty()) {
 
-                    String fullName = fullNameField
-                            .getText()
-                            .trim();
+                                                LoginScreen.showAlert(
+                                                                AlertType.WARNING,
+                                                                "Missing Information",
+                                                                "Please fill in all fields before registering.");
 
-                    String email = emailField
-                            .getText()
-                            .trim();
+                                                return;
+                                        }
 
-                    String mobileNumber = mobileField
-                            .getText()
-                            .trim();
+                                        // =====================================
+                                        // PASSWORD MATCH
+                                        // =====================================
 
-                    // =====================================
-                    // GET SELECTED GENDER
-                    // =====================================
+                                        if (!password.equals(
+                                                        confirmPassword)) {
 
-                    Toggle selectedGender = genderGroup
-                            .getSelectedToggle();
+                                                LoginScreen.showAlert(
+                                                                AlertType.WARNING,
+                                                                "Password Mismatch",
+                                                                "Password and Confirm Password do not match.");
 
-                    String gender = null;
+                                                return;
+                                        }
 
-                    if (selectedGender != null) {
+                                        // =====================================
+                                        // ROLE
+                                        // =====================================
 
-                        gender = ((RadioButton) selectedGender)
-                                .getText();
-                    }
+                                        Toggle selected = roleGroup
+                                                        .getSelectedToggle();
 
-                    String password = passField
-                            .getText();
+                                        if (selected == null) {
 
-                    String confirmPassword = confirmPassField
-                            .getText();
+                                                LoginScreen.showAlert(
+                                                                AlertType.WARNING,
+                                                                "Role Required",
+                                                                "Please select Farmer or Buyer.");
 
-                    // =====================================
-                    // VALIDATION
-                    // =====================================
+                                                return;
+                                        }
 
-                    if (fullName.isEmpty()
-                            ||
-                            email.isEmpty()
-                            ||
-                            mobileNumber.isEmpty()
-                            ||
-                            gender == null
-                            ||
-                            password.isEmpty()
-                            ||
-                            confirmPassword.isEmpty()) {
+                                        String role = ((ToggleButton) selected)
+                                                        .getText();
 
-                        LoginScreen.showAlert(
-                                AlertType.WARNING,
-                                "Missing Information",
-                                "Please fill in all fields before registering.");
+                                        System.out.println(
+                                                        "Registering User:");
 
-                        return;
-                    }
+                                        System.out.println(
+                                                        "Name: " + fullName);
 
-                    // =====================================
-                    // PASSWORD MATCH
-                    // =====================================
+                                        System.out.println(
+                                                        "Email: " + email);
 
-                    if (!password.equals(
-                            confirmPassword)) {
+                                        System.out.println(
+                                                        "Mobile: " + mobileNumber);
 
-                        LoginScreen.showAlert(
-                                AlertType.WARNING,
-                                "Password Mismatch",
-                                "Password and Confirm Password do not match.");
+                                        System.out.println(
+                                                        "Gender: " + gender);
 
-                        return;
-                    }
+                                        System.out.println(
+                                                        "Role: " + role);
 
-                    // =====================================
-                    // ROLE
-                    // =====================================
+                                        // =====================================
+                                        // FIREBASE AUTHENTICATION
+                                        // =====================================
 
-                    Toggle selected = roleGroup
-                            .getSelectedToggle();
+                                        String uid = authController
+                                                        .signUpAndGetUid(
+                                                                        email,
+                                                                        password);
 
-                    if (selected == null) {
+                                        if (uid == null) {
 
-                        LoginScreen.showAlert(
-                                AlertType.WARNING,
-                                "Role Required",
-                                "Please select Farmer or Buyer.");
+                                                LoginScreen.showAlert(
+                                                                AlertType.ERROR,
+                                                                "Registration Failed",
+                                                                "Unable to create Firebase account.\n"
+                                                                                + "The email may already exist.");
 
-                        return;
-                    }
+                                                return;
+                                        }
 
-                    String role = ((ToggleButton) selected)
-                            .getText();
+                                        System.out.println(
+                                                        "Firebase UID: " + uid);
 
-                    // =====================================
-                    // PRINT USER INFORMATION
-                    // =====================================
+                                        // =====================================
+                                        // CREATE USER MODEL
+                                        // =====================================
 
-                    System.out.println(
-                            "Registering User:");
+                                        // Note: Ensure your User model constructor is updated to accept mobileNumber
+                                        // and gender
+                                        User user = new User(
+                                                        uid,
+                                                        fullName,
+                                                        email,
+                                                        mobileNumber,
+                                                        gender,
+                                                        role);
 
-                    System.out.println(
-                            "Name: " + fullName);
+                                        // =====================================
+                                        // SAVE USER TO FIRESTORE
+                                        // =====================================
 
-                    System.out.println(
-                            "Email: " + email);
+                                        boolean saved = userController.saveUser(
+                                                        user);
 
-                    System.out.println(
-                            "Mobile: " + mobileNumber);
+                                        if (!saved) {
 
-                    System.out.println(
-                            "Gender: " + gender);
+                                                LoginScreen.showAlert(
+                                                                AlertType.ERROR,
+                                                                "Firestore Error",
+                                                                "Firebase account was created, "
+                                                                                + "but user information could not "
+                                                                                + "be saved.");
 
-                    System.out.println(
-                            "Role: " + role);
+                                                return;
+                                        }
 
-                    // =====================================
-                    // FIREBASE AUTHENTICATION
-                    // =====================================
+                                        System.out.println(
+                                                        "User information saved in Firestore!");
 
-                    String uid = authController
-                            .signUpAndGetUid(
-                                    email,
-                                    password);
+                                        // =====================================
+                                        // SUCCESS
+                                        // =====================================
 
-                    if (uid == null) {
+                                        LoginScreen.showAlert(
+                                                        AlertType.INFORMATION,
+                                                        "Registration Successful",
+                                                        "Your account has been created successfully.\n"
+                                                                        + "Please login to continue.");
 
-                        LoginScreen.showAlert(
-                                AlertType.ERROR,
-                                "Registration Failed",
-                                "Unable to create Firebase account.\n"
-                                        + "The email may already exist.");
+                                        // =====================================
+                                        // RUN CALLBACK
+                                        // =====================================
 
-                        return;
-                    }
+                                        if (callbackAction != null) {
 
-                    System.out.println(
-                            "Firebase UID: " + uid);
+                                                callbackAction.run();
+                                        }
+                                });
 
-                    // =====================================
-                    // CREATE USER MODEL
-                    // =====================================
+                // =================================================
+                // LOGIN LINK
+                // =================================================
 
-                    User user = new User(
-                            uid,
-                            fullName,
-                            email,
-                            mobileNumber,
-                            gender,
-                            role);
+                Text alreadyText = new Text(
+                                "Already have an account?");
 
-                    // =====================================
-                    // SAVE USER TO FIRESTORE
-                    // =====================================
+                alreadyText.setStyle(
+                                "-fx-fill: #555555;");
 
-                    boolean saved = userDAO.saveUser(
-                            user);
+                Hyperlink backToLogin = new Hyperlink(
+                                "Login here");
 
-                    if (!saved) {
+                backToLogin.setStyle(
+                                "-fx-text-fill: #2E7D32;" +
+                                                "-fx-font-weight: bold;");
 
-                        LoginScreen.showAlert(
-                                AlertType.ERROR,
-                                "Firestore Error",
-                                "Firebase account was created, "
-                                        + "but user information could not "
-                                        + "be saved.");
+                backToLogin.setOnAction(
+                                event -> {
 
-                        return;
-                    }
+                                        if (callbackAction != null) {
 
-                    System.out.println(
-                            "User information saved in Firestore!");
+                                                callbackAction.run();
+                                        }
+                                });
 
-                    // =====================================
-                    // SUCCESS
-                    // =====================================
+                HBox loginBox = new HBox(
+                                5,
+                                alreadyText,
+                                backToLogin);
 
-                    LoginScreen.showAlert(
-                            AlertType.INFORMATION,
-                            "Registration Successful",
-                            "Your account has been created successfully.\n"
-                                    + "Please login to continue.");
+                loginBox.setAlignment(
+                                Pos.CENTER);
 
-                    // =====================================
-                    // RUN CALLBACK
-                    // =====================================
+                // =================================================
+                // FORM CARD
+                // =================================================
 
-                    if (callbackAction != null) {
+                VBox formCard = new VBox(
+                                10,
+                                headerBox,
 
-                        callbackAction.run();
-                    }
-                });
+                                fullNameLabel,
+                                fullNameField,
 
-        // =================================================
-        // LOGIN LINK
-        // =================================================
+                                emailLabel,
+                                emailField,
 
-        Text alreadyText = new Text(
-                "Already have an account?");
+                                mobileLabel,
+                                mobileField,
 
-        alreadyText.setStyle(
-                "-fx-fill: #555555;");
+                                genderLabel,
+                                genderBox,
 
-        Hyperlink backToLogin = new Hyperlink(
-                "Login here");
+                                passLabel,
+                                passField,
 
-        backToLogin.setStyle(
-                "-fx-text-fill: #2E7D32;" +
-                "-fx-font-weight: bold;");
+                                confirmPassLabel,
+                                confirmPassField,
 
-        backToLogin.setOnAction(
-                event -> {
+                                roleLabel,
+                                roleBox,
 
-                    if (callbackAction != null) {
+                                registerBtn,
 
-                        callbackAction.run();
-                    }
-                });
+                                loginBox);
 
-        HBox loginBox = new HBox(
-                5,
-                alreadyText,
-                backToLogin);
+                formCard.setPadding(
+                                new Insets(20));
 
-        loginBox.setAlignment(
-                Pos.CENTER);
+                formCard.setStyle(
+                                "-fx-background-color: #ffffff;" +
+                                                "-fx-background-radius: 15px;" +
+                                                "-fx-border-color: #dcdcdc;" +
+                                                "-fx-border-radius: 15px;" +
+                                                "-fx-border-width: 1px;");
 
-        // =================================================
-        // FORM CARD
-        // =================================================
+                formCard.setMaxWidth(560);
 
-        VBox formCard = new VBox(
-                18,
+                // =================================================
+                // RIGHT PANEL
+                // =================================================
 
-                headerBox,
+                StackPane rightPanel = new StackPane(formCard);
+                rightPanel.setStyle("-fx-background-color: #f1efef;");
 
-                fullNameLabel,
-                fullNameField,
+                rightPanel.setPadding(new Insets(30));
 
-                emailLabel,
-                emailField,
+                // =================================================
+                // MAIN
+                // =================================================
 
-                mobileLabel,
-                mobileField,
+                HBox main = new HBox(leftPanel, rightPanel);
 
-                genderLabel,
-                genderBox,
+                HBox.setHgrow(rightPanel, Priority.ALWAYS);
+                rightPanel.prefWidthProperty().bind(main.widthProperty().multiply(0.55));
+                leftPanel.prefWidthProperty().bind(main.widthProperty().multiply(0.45));
+                main.setStyle(
+                                "-fx-background-color: #9e9d98;");
 
-                passLabel,
-                passField,
+                // =================================================
+                // SCENE
+                // =================================================
 
-                confirmPassLabel,
-                confirmPassField,
+                registerScreenScene = ResponsiveLayout.createScene(main);
 
-                roleLabel,
-                roleBox,
+                registerScreenScene.setFill(
+                                Color.WHITESMOKE);
 
-                registerBtn,
+                return registerScreenScene;
+        }
 
-                loginBox);
+        // =====================================================
+        // CREATE ROLE BUTTON
+        // =====================================================
 
-        formCard.setPadding(
-                new Insets(40));
+        private ToggleButton createRoleButton(
+                        String text,
+                        ToggleGroup group) {
 
-        formCard.setStyle(
-                "-fx-background-color: #ffffff;" +
-                "-fx-background-radius: 15px;" +
-                "-fx-border-color: #dcdcdc;" +
-                "-fx-border-radius: 15px;" +
-                "-fx-border-width: 1px;");
+                ToggleButton btn = new ToggleButton(
+                                text);
 
-        formCard.setMaxWidth(
-                560);
+                btn.setToggleGroup(
+                                group);
 
-        // =================================================
-        // RIGHT PANEL
-        // =================================================
+                btn.setPrefHeight(
+                                50);
 
-        StackPane rightPanel = new StackPane(
-                formCard);
+                btn.setStyle(
+                                "-fx-background-color: white;" +
+                                                "-fx-border-color: #dcdcdc;" +
+                                                "-fx-border-radius: 10px;" +
+                                                "-fx-background-radius: 10px;" +
+                                                "-fx-font-weight: bold;");
 
-        rightPanel.setStyle(
-                "-fx-background-color: #f1efef;");
+                btn.selectedProperty()
+                                .addListener((obs,wasSelected,isSelected) -> {
+                                                        if (isSelected) {
+                                                                btn.setStyle(
+                                                                                "-fx-background-color: #eaf4ea;" +
+                                                                                                "-fx-border-color: #2E7D32;"
+                                                                                                +
+                                                                                                "-fx-border-radius: 10px;"
+                                                                                                +
+                                                                                                "-fx-background-radius: 10px;"
+                                                                                                +
+                                                                                                "-fx-text-fill: #2E7D32;"
+                                                                                                +
+                                                                                                "-fx-font-weight: bold;");
 
-        rightPanel.setPadding(
-                new Insets(40));
+                                                        } else {
 
-        // =================================================
-        // MAIN
-        // =================================================
+                                                                btn.setStyle(
+                                                                                "-fx-background-color: white;" +
+                                                                                                "-fx-border-color: #dcdcdc;"
+                                                                                                +
+                                                                                                "-fx-border-radius: 10px;"
+                                                                                                +
+                                                                                                "-fx-background-radius: 10px;"
+                                                                                                +
+                                                                                                "-fx-font-weight: bold;");
+                                                        }
+                                                });
 
-        HBox main = new HBox(
-                leftPanel,
-                rightPanel);
-
-        HBox.setHgrow(
-                rightPanel,
-                Priority.ALWAYS);
-
-        rightPanel.prefWidthProperty()
-                .bind(
-                        main.widthProperty()
-                                .multiply(0.55));
-
-        leftPanel.prefWidthProperty()
-                .bind(
-                        main.widthProperty()
-                                .multiply(0.45));
-
-        main.setStyle(
-                "-fx-background-color: #9e9d98;");
-
-        // =================================================
-        // SCENE
-        // =================================================
-
-        registerScreenScene = new Scene(
-                main,
-                1400,
-                1000);
-
-        registerScreenScene.setFill(
-                Color.WHITESMOKE);
-
-        return registerScreenScene;
-    }
-
-    // =====================================================
-    // CREATE ROLE BUTTON
-    // =====================================================
-
-    private ToggleButton createRoleButton(
-            String text,
-            ToggleGroup group) {
-
-        ToggleButton btn = new ToggleButton(
-                text);
-
-        btn.setToggleGroup(
-                group);
-
-        btn.setPrefHeight(
-                50);
-
-        btn.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-border-color: #dcdcdc;" +
-                "-fx-border-radius: 10px;" +
-                "-fx-background-radius: 10px;" +
-                "-fx-font-weight: bold;");
-
-        btn.selectedProperty()
-                .addListener(
-                        (
-                                obs,
-                                wasSelected,
-                                isSelected) -> {
-
-                            if (isSelected) {
-
-                                btn.setStyle(
-                                        "-fx-background-color: #eaf4ea;" +
-                                        "-fx-border-color: #2E7D32;" +
-                                        "-fx-border-radius: 10px;" +
-                                        "-fx-background-radius: 10px;" +
-                                        "-fx-text-fill: #2E7D32;" +
-                                        "-fx-font-weight: bold;");
-
-                            } else {
-
-                                btn.setStyle(
-                                        "-fx-background-color: white;" +
-                                        "-fx-border-color: #dcdcdc;" +
-                                        "-fx-border-radius: 10px;" +
-                                        "-fx-background-radius: 10px;" +
-                                        "-fx-font-weight: bold;");
-                            }
-                        });
-
-        return btn;
-    }
+                return btn;
+        }
 }

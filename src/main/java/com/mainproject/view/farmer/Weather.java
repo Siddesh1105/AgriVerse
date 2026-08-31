@@ -1,482 +1,850 @@
 package com.mainproject.view.farmer;
 
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import com.mainproject.config.WeatherConfig;
+import com.mainproject.controller.UserController;
+import com.mainproject.model.User;
 
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.Node;
+
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 public class Weather {
 
-        private Label temperature;
-        private Label condition;
-        private Label humidity;
-        private Label wind;
+    private final String userEmail;
 
-        public Node getView() {
+    private String userCity = "";
+    private String userState = "";
 
-                VBox root = new VBox(20);
+    private Label temperature;
+    private Label condition;
+    private Label humidity;
+    private Label wind;
 
-                root.setPadding(
-                                new Insets(20));
+    private Label subtitle;
+    private Label cityLabel;
 
-                root.setStyle(
-                                "-fx-background-color: #F1FAF6;");
+    // =====================================================
+    // CONSTRUCTOR
+    // =====================================================
 
-                Label title = new Label("Weather");
+    public Weather(String userEmail) {
 
-                title.setStyle(
-                                "-fx-font-size: 25px;" +
-                                                "-fx-font-weight: bold;" +
-                                                "-fx-text-fill: #17202A;");
+        this.userEmail = userEmail;
+    }
 
-                Label subtitle = new Label(
-                                "Live weather conditions and forecast for Pune");
+    // =====================================================
+    // LOAD FARMER LOCATION FROM FIRESTORE
+    // =====================================================
 
-                subtitle.setStyle(
-                                "-fx-font-size: 13px;" +
-                                                "-fx-text-fill: #607D8B;");
+    private void loadUserLocation() {
 
-                VBox weatherCard = new VBox(18);
+        try {
 
-                weatherCard.setPadding(
-                                new Insets(25));
+            if (userEmail == null ||
+                    userEmail.trim().isEmpty()) {
 
-                weatherCard.setStyle(
-                                "-fx-background-color: linear-gradient(to right, #4285E5, #48D8BD);" +
-                                                "-fx-background-radius: 20px;");
+                System.out.println(
+                        "Weather: User email is missing."
+                );
 
-                Label city = new Label(
-                                "📍 Pune, Maharashtra");
+                return;
+            }
 
-                city.setStyle(
-                                "-fx-font-size: 17px;" +
-                                                "-fx-font-weight: bold;" +
-                                                "-fx-text-fill: white;");
+            UserController userController =
+                    new UserController();
 
-                HBox weatherInfo = new HBox(25);
+            User user =
+                    userController.getUserByEmail(
+                            userEmail.trim()
+                    );
 
-                weatherInfo.setAlignment(
-                                Pos.CENTER_LEFT);
+            if (user == null) {
 
-                Label weatherIcon = new Label("☁");
+                System.out.println(
+                        "Weather: User not found."
+                );
 
-                weatherIcon.setStyle(
-                                "-fx-font-size: 55px;");
+                return;
+            }
 
-                temperature = new Label("--°C");
+            userCity = "";
+            userState = "";
 
-                temperature.setStyle(
-                                "-fx-font-size: 52px;" +
-                                                "-fx-font-weight: bold;" +
-                                                "-fx-text-fill: white;");
+            if (user.getCity() != null &&
+                    !user.getCity().trim().isEmpty()) {
 
-                VBox conditionBox = new VBox(7);
+                userCity =
+                        user.getCity().trim();
+            }
 
-                condition = new Label(
-                                "Loading...");
+            if (user.getState() != null &&
+                    !user.getState().trim().isEmpty()) {
 
-                condition.setStyle(
-                                "-fx-font-size: 19px;" +
-                                                "-fx-text-fill: white;");
+                userState =
+                        user.getState().trim();
+            }
 
-                Label feels = new Label(
-                                "Live weather");
+            System.out.println(
+                    "===================================="
+            );
 
-                feels.setStyle(
-                                "-fx-font-size: 13px;" +
-                                                "-fx-text-fill: rgba(255,255,255,0.85);");
+            System.out.println(
+                    "LATEST WEATHER LOCATION LOADED"
+            );
 
-                conditionBox.getChildren().addAll(
-                                condition,
-                                feels);
+            System.out.println(
+                    "Email: " + userEmail
+            );
 
-                weatherInfo.getChildren().addAll(
-                                weatherIcon,
-                                temperature,
-                                conditionBox);
+            System.out.println(
+                    "City: " + userCity
+            );
 
-                HBox stats = new HBox(35);
+            System.out.println(
+                    "State: " + userState
+            );
 
-                humidity = createStat(
-                                "Humidity",
-                                "--");
+            System.out.println(
+                    "===================================="
+            );
 
-                wind = createStat(
-                                "Wind",
-                                "--");
+        } catch (Exception e) {
 
-                stats.getChildren().addAll(
-                                humidity,
-                                wind);
+            System.out.println(
+                    "Error loading weather location:"
+            );
 
-                weatherCard.getChildren().addAll(
-                                city,
-                                weatherInfo,
-                                stats);
+            e.printStackTrace();
+        }
+    }
 
-                Label forecastTitle = new Label(
-                                "5-Day Forecast");
+    // =====================================================
+    // MAIN VIEW
+    // =====================================================
 
-                forecastTitle.setStyle(
-                                "-fx-font-size: 20px;" +
-                                                "-fx-font-weight: bold;" +
-                                                "-fx-text-fill: #17202A;");
+    public Node getView() {
 
-                HBox forecastRow = new HBox(15);
+        // Always load the latest location from Firestore
+        loadUserLocation();
 
-                forecastRow.setAlignment(
-                                Pos.CENTER_LEFT);
+        VBox root = new VBox(20);
 
-                for (int i = 0; i < 5; i++) {
+        root.setPadding(
+                new Insets(20)
+        );
 
-                        forecastRow.getChildren().add(
-                                        createForecastCard(
-                                                        "--",
-                                                        "☁",
-                                                        "-- / --",
-                                                        "Loading..."));
-                }
+        root.setStyle(
+                "-fx-background-color: #F1FAF6;"
+        );
 
-                root.getChildren().addAll(
-                                title,
-                                subtitle,
-                                weatherCard,
-                                forecastTitle,
-                                forecastRow);
+        // =================================================
+        // TITLE
+        // =================================================
 
-                loadWeather(
-                                forecastRow,
-                                weatherIcon);
+        Label title =
+                new Label("Weather");
 
-                ScrollPane scrollPane = new ScrollPane(root);
+        title.setStyle(
+                "-fx-font-size: 25px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #17202A;"
+        );
 
-                scrollPane.setFitToWidth(
-                                true);
+        // =================================================
+        // SUBTITLE
+        // =================================================
 
-                scrollPane.setStyle(
-                                "-fx-background-color: transparent;");
+        subtitle =
+                new Label(
+                        userCity.isEmpty()
+                                ? "Update your profile location to view weather."
+                                : "Live weather conditions and forecast for "
+                                + userCity
+                );
 
-                return scrollPane;
+        subtitle.setStyle(
+                "-fx-font-size: 13px;" +
+                        "-fx-text-fill: #607D8B;"
+        );
+
+        // =================================================
+        // WEATHER CARD
+        // =================================================
+
+        VBox weatherCard =
+                new VBox(18);
+
+        weatherCard.setPadding(
+                new Insets(25)
+        );
+
+        weatherCard.setStyle(
+                "-fx-background-color: linear-gradient(to right, #4285E5, #48D8BD);" +
+                        "-fx-background-radius: 20px;"
+        );
+
+        // =================================================
+        // CITY LABEL
+        // =================================================
+
+        String locationText;
+
+        if (userCity.isEmpty()) {
+
+            locationText =
+                    "📍 Location not set";
+
+        } else if (userState.isEmpty()) {
+
+            locationText =
+                    "📍 " + userCity;
+
+        } else {
+
+            locationText =
+                    "📍 " + userCity
+                            + ", " + userState;
         }
 
-        private Label createStat(
-                        String name,
-                        String value) {
+        cityLabel =
+                new Label(locationText);
 
-                Label label = new Label(
-                                name + "\n" + value);
+        cityLabel.setStyle(
+                "-fx-font-size: 17px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: white;"
+        );
 
-                label.setStyle(
-                                "-fx-font-size: 12px;" +
-                                                "-fx-text-fill: white;");
+        // =================================================
+        // WEATHER INFORMATION
+        // =================================================
 
-                return label;
+        HBox weatherInfo =
+                new HBox(25);
+
+        weatherInfo.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        Label weatherIcon =
+                new Label("☁");
+
+        weatherIcon.setStyle(
+                "-fx-font-size: 55px;"
+        );
+
+        temperature =
+                new Label("--°C");
+
+        temperature.setStyle(
+                "-fx-font-size: 52px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: white;"
+        );
+
+        VBox conditionBox =
+                new VBox(7);
+
+        condition =
+                new Label(
+                        userCity.isEmpty()
+                                ? "Location required"
+                                : "Loading..."
+                );
+
+        condition.setStyle(
+                "-fx-font-size: 19px;" +
+                        "-fx-text-fill: white;"
+        );
+
+        Label feels =
+                new Label("Live weather");
+
+        feels.setStyle(
+                "-fx-font-size: 13px;" +
+                        "-fx-text-fill: rgba(255,255,255,0.85);"
+        );
+
+        conditionBox.getChildren().addAll(
+                condition,
+                feels
+        );
+
+        weatherInfo.getChildren().addAll(
+                weatherIcon,
+                temperature,
+                conditionBox
+        );
+
+        // =================================================
+        // STATS
+        // =================================================
+
+        HBox stats =
+                new HBox(35);
+
+        humidity =
+                createStat(
+                        "Humidity",
+                        "--"
+                );
+
+        wind =
+                createStat(
+                        "Wind",
+                        "--"
+                );
+
+        stats.getChildren().addAll(
+                humidity,
+                wind
+        );
+
+        weatherCard.getChildren().addAll(
+                cityLabel,
+                weatherInfo,
+                stats
+        );
+
+        // =================================================
+        // FORECAST TITLE
+        // =================================================
+
+        Label forecastTitle =
+                new Label("5-Day Forecast");
+
+        forecastTitle.setStyle(
+                "-fx-font-size: 20px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #17202A;"
+        );
+
+        // =================================================
+        // FORECAST ROW
+        // =================================================
+
+        HBox forecastRow =
+                new HBox(15);
+
+        forecastRow.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        for (int i = 0; i < 5; i++) {
+
+            forecastRow.getChildren().add(
+                    createForecastCard(
+                            "--",
+                            "☁",
+                            "-- / --",
+                            "Loading..."
+                    )
+            );
         }
 
-        private void loadWeather(
-                        HBox forecastRow,
-                        Label weatherIcon) {
+        root.getChildren().addAll(
+                title,
+                subtitle,
+                weatherCard,
+                forecastTitle,
+                forecastRow
+        );
 
-                Task<JsonObject> task = new Task<>() {
+        // =================================================
+        // LOAD WEATHER ONLY IF LOCATION EXISTS
+        // =================================================
 
-                        @Override
-                        protected JsonObject call()
-                                        throws Exception {
+        if (userCity != null &&
+                !userCity.trim().isEmpty()) {
 
-                                return WeatherConfig
-                                                .getCurrentWeather();
-                        }
+            loadWeather(
+                    forecastRow,
+                    weatherIcon
+            );
+
+        } else {
+
+            condition.setText(
+                    "Please update your city"
+            );
+
+            forecastRow.getChildren().clear();
+
+            forecastRow.getChildren().add(
+                    createForecastCard(
+                            "Location",
+                            "📍",
+                            "--",
+                            "Update profile"
+                    )
+            );
+        }
+
+        ScrollPane scrollPane =
+                new ScrollPane(root);
+
+        scrollPane.setFitToWidth(true);
+
+        scrollPane.setStyle(
+                "-fx-background-color: transparent;"
+        );
+
+        return scrollPane;
+    }
+
+    // =====================================================
+    // CREATE STAT
+    // =====================================================
+
+    private Label createStat(
+            String name,
+            String value) {
+
+        Label label =
+                new Label(
+                        name + "\n" + value
+                );
+
+        label.setStyle(
+                "-fx-font-size: 12px;" +
+                        "-fx-text-fill: white;"
+        );
+
+        return label;
+    }
+
+    // =====================================================
+    // LOAD CURRENT WEATHER
+    // =====================================================
+
+    private void loadWeather(
+            HBox forecastRow,
+            Label weatherIcon) {
+
+        Task<JsonObject> task =
+                new Task<>() {
+
+                    @Override
+                    protected JsonObject call()
+                            throws Exception {
+
+                        return WeatherConfig.getCurrentWeather(
+                                userCity,
+                                userState
+                        );
+                    }
                 };
 
-                task.setOnSucceeded(
-                                event -> {
+        task.setOnSucceeded(event -> {
 
-                                        JsonObject data = task.getValue();
+            JsonObject data =
+                    task.getValue();
 
-                                        JsonObject main = data.getAsJsonObject(
-                                                        "main");
+            JsonObject main =
+                    data.getAsJsonObject("main");
 
-                                        JsonObject windData = data.getAsJsonObject(
-                                                        "wind");
+            JsonObject windData =
+                    data.getAsJsonObject("wind");
 
-                                        JsonObject weatherData = data.getAsJsonArray(
-                                                        "weather")
-                                                        .get(0)
-                                                        .getAsJsonObject();
+            JsonObject weatherData =
+                    data.getAsJsonArray("weather")
+                            .get(0)
+                            .getAsJsonObject();
 
-                                        double temp = main.get("temp")
-                                                        .getAsDouble();
+            double temp =
+                    main.get("temp")
+                            .getAsDouble();
 
-                                        int humidityValue = main.get("humidity")
-                                                        .getAsInt();
+            int humidityValue =
+                    main.get("humidity")
+                            .getAsInt();
 
-                                        double windValue = windData.get("speed")
-                                                        .getAsDouble();
+            double windValue =
+                    windData != null &&
+                            windData.has("speed")
+                            ? windData.get("speed")
+                            .getAsDouble()
+                            : 0;
 
-                                        String description = weatherData
-                                                        .get("description")
-                                                        .getAsString();
+            String description =
+                    weatherData.get("description")
+                            .getAsString();
 
-                                        String icon = weatherData
-                                                        .get("icon")
-                                                        .getAsString();
+            String icon =
+                    weatherData.get("icon")
+                            .getAsString();
 
-                                        temperature.setText(
-                                                        String.format(
-                                                                        "%.0f°C",
-                                                                        temp));
+            String actualCity =
+                    data.has("name")
+                            ? data.get("name").getAsString()
+                            : userCity;
 
-                                        condition.setText(
-                                                        capitalize(
-                                                                        description));
+            subtitle.setText(
+                    "Live weather conditions and forecast for "
+                            + actualCity
+            );
 
-                                        weatherIcon.setText(
-                                                        getIcon(icon));
+            if (userState == null ||
+                    userState.isEmpty()) {
 
-                                        humidity.setText(
-                                                        "Humidity\n"
-                                                                        + humidityValue
-                                                                        + "%");
+                cityLabel.setText(
+                        "📍 " + actualCity
+                );
 
-                                        wind.setText(
-                                                        String.format(
-                                                                        "Wind\n%.1f m/s",
-                                                                        windValue));
+            } else {
 
-                                        loadForecast(
-                                                        forecastRow);
-                                });
+                cityLabel.setText(
+                        "📍 " + actualCity
+                                + ", " + userState
+                );
+            }
 
-                task.setOnFailed(
-                                event -> {
+            temperature.setText(
+                    String.format(
+                            "%.0f°C",
+                            temp
+                    )
+            );
 
-                                        temperature.setText(
-                                                        "--°C");
+            condition.setText(
+                    capitalize(description)
+            );
 
-                                        condition.setText(
-                                                        "Weather unavailable");
+            weatherIcon.setText(
+                    getIcon(icon)
+            );
 
-                                        task.getException()
-                                                        .printStackTrace();
-                                });
+            humidity.setText(
+                    "Humidity\n"
+                            + humidityValue
+                            + "%"
+            );
 
-                Thread thread = new Thread(task);
+            wind.setText(
+                    String.format(
+                            "Wind\n%.1f m/s",
+                            windValue
+                    )
+            );
 
-                thread.setDaemon(true);
+            loadForecast(forecastRow);
+        });
 
-                thread.start();
-        }
+        task.setOnFailed(event -> {
 
-        private void loadForecast(
-                        HBox forecastRow) {
+            temperature.setText("--°C");
 
-                Task<JsonObject> task = new Task<>() {
+            condition.setText(
+                    "Weather unavailable"
+            );
 
-                        @Override
-                        protected JsonObject call()
-                                        throws Exception {
+            System.out.println(
+                    "Weather loading failed:"
+            );
 
-                                return WeatherConfig
-                                                .getForecast();
-                        }
+            if (task.getException() != null) {
+
+                task.getException()
+                        .printStackTrace();
+            }
+        });
+
+        Thread thread =
+                new Thread(task);
+
+        thread.setDaemon(true);
+
+        thread.start();
+    }
+
+    // =====================================================
+    // LOAD FORECAST
+    // =====================================================
+
+    private void loadForecast(
+            HBox forecastRow) {
+
+        Task<JsonObject> task =
+                new Task<>() {
+
+                    @Override
+                    protected JsonObject call()
+                            throws Exception {
+
+                        return WeatherConfig.getForecast(
+                                userCity,
+                                userState
+                        );
+                    }
                 };
 
-                task.setOnSucceeded(
-                                event -> {
+        task.setOnSucceeded(event -> {
 
-                                        JsonObject data = task.getValue();
+            JsonObject data =
+                    task.getValue();
 
-                                        JsonArray list = data.getAsJsonArray(
-                                                        "list");
+            JsonArray list =
+                    data.getAsJsonArray("list");
 
-                                        forecastRow
-                                                        .getChildren()
-                                                        .clear();
+            forecastRow.getChildren().clear();
 
-                                        for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 5; i++) {
 
-                                                JsonObject item = list.get(
-                                                                i * 8)
-                                                                .getAsJsonObject();
+                int index = i * 8;
 
-                                                JsonObject main = item.getAsJsonObject(
-                                                                "main");
+                if (index >= list.size()) {
+                    break;
+                }
 
-                                                JsonObject weather = item.getAsJsonArray(
-                                                                "weather")
-                                                                .get(0)
-                                                                .getAsJsonObject();
+                JsonObject item =
+                        list.get(index)
+                                .getAsJsonObject();
 
-                                                double maxTemp = main.get("temp_max")
-                                                                .getAsDouble();
+                JsonObject main =
+                        item.getAsJsonObject("main");
 
-                                                double minTemp = main.get("temp_min")
-                                                                .getAsDouble();
+                JsonObject weather =
+                        item.getAsJsonArray("weather")
+                                .get(0)
+                                .getAsJsonObject();
 
-                                                String icon = weather.get("icon")
-                                                                .getAsString();
+                double maxTemp =
+                        main.get("temp_max")
+                                .getAsDouble();
 
-                                                String description = weather.get(
-                                                                "description")
-                                                                .getAsString();
+                double minTemp =
+                        main.get("temp_min")
+                                .getAsDouble();
 
-                                                String day;
+                String icon =
+                        weather.get("icon")
+                                .getAsString();
 
-                                                if (i == 0) {
-                                                        day = "Today";
-                                                } else if (i == 1) {
-                                                        day = "Tomorrow";
-                                                } else {
-                                                        day = item.get("dt_txt")
-                                                                        .getAsString()
-                                                                        .substring(
-                                                                                        5,
-                                                                                        10);
-                                                }
+                String description =
+                        weather.get("description")
+                                .getAsString();
 
-                                                forecastRow
-                                                                .getChildren()
-                                                                .add(
-                                                                                createForecastCard(
-                                                                                                day,
-                                                                                                getIcon(icon),
-                                                                                                String.format(
-                                                                                                                "%.0f° / %.0f°",
-                                                                                                                maxTemp,
-                                                                                                                minTemp),
-                                                                                                capitalize(
-                                                                                                                description)));
-                                        }
-                                });
+                String day;
 
-                Thread thread = new Thread(task);
+                if (i == 0) {
 
-                thread.setDaemon(true);
+                    day = "Today";
 
-                thread.start();
+                } else if (i == 1) {
+
+                    day = "Tomorrow";
+
+                } else {
+
+                    String dateTime =
+                            item.get("dt_txt")
+                                    .getAsString();
+
+                    day =
+                            dateTime.length() >= 10
+                                    ? dateTime.substring(5, 10)
+                                    : "Day " + (i + 1);
+                }
+
+                forecastRow.getChildren().add(
+                        createForecastCard(
+                                day,
+                                getIcon(icon),
+                                String.format(
+                                        "%.0f° / %.0f°",
+                                        maxTemp,
+                                        minTemp
+                                ),
+                                capitalize(description)
+                        )
+                );
+            }
+        });
+
+        task.setOnFailed(event -> {
+
+            System.out.println(
+                    "Forecast loading failed:"
+            );
+
+            if (task.getException() != null) {
+
+                task.getException()
+                        .printStackTrace();
+            }
+        });
+
+        Thread thread =
+                new Thread(task);
+
+        thread.setDaemon(true);
+
+        thread.start();
+    }
+
+    // =====================================================
+    // FORECAST CARD
+    // =====================================================
+
+    private VBox createForecastCard(
+            String day,
+            String icon,
+            String temp,
+            String description) {
+
+        VBox card =
+                new VBox(12);
+
+        card.setAlignment(
+                Pos.CENTER
+        );
+
+        card.setPadding(
+                new Insets(18)
+        );
+
+        card.setPrefWidth(180);
+
+        card.setPrefHeight(175);
+
+        HBox.setHgrow(
+                card,
+                Priority.ALWAYS
+        );
+
+        card.setStyle(
+                "-fx-background-color: white;" +
+                        "-fx-background-radius: 15px;" +
+                        "-fx-border-color: #D5E8E0;" +
+                        "-fx-border-radius: 15px;"
+        );
+
+        Label dayLabel =
+                new Label(day);
+
+        dayLabel.setStyle(
+                "-fx-font-size: 15px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #17202A;"
+        );
+
+        Label iconLabel =
+                new Label(icon);
+
+        iconLabel.setStyle(
+                "-fx-font-size: 38px;"
+        );
+
+        Label tempLabel =
+                new Label(temp);
+
+        tempLabel.setStyle(
+                "-fx-font-size: 17px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #263238;"
+        );
+
+        Label descriptionLabel =
+                new Label(description);
+
+        descriptionLabel.setWrapText(true);
+
+        descriptionLabel.setMaxWidth(150);
+
+        descriptionLabel.setStyle(
+                "-fx-font-size: 12px;" +
+                        "-fx-text-fill: #117864;"
+        );
+
+        card.getChildren().addAll(
+                dayLabel,
+                iconLabel,
+                tempLabel,
+                descriptionLabel
+        );
+
+        return card;
+    }
+
+    // =====================================================
+    // WEATHER ICON
+    // =====================================================
+
+    private String getIcon(
+            String code) {
+
+        if (code == null) {
+            return "☁";
         }
 
-        private VBox createForecastCard(
-                        String day,
-                        String icon,
-                        String temp,
-                        String description) {
+        if (code.equals("01d") ||
+                code.equals("01n")) {
 
-                VBox card = new VBox(12);
-
-                card.setAlignment(
-                                Pos.CENTER);
-
-                card.setPadding(
-                                new Insets(18));
-
-                card.setPrefWidth(
-                                180);
-
-                card.setPrefHeight(
-                                175);
-
-                card.setStyle(
-                                "-fx-background-color: white;" +
-                                                "-fx-background-radius: 15px;" +
-                                                "-fx-border-color: #D5E8E0;" +
-                                                "-fx-border-radius: 15px;");
-
-                Label dayLabel = new Label(day);
-
-                dayLabel.setStyle(
-                                "-fx-font-size: 15px;" +
-                                                "-fx-font-weight: bold;" +
-                                                "-fx-text-fill: #17202A;");
-
-                Label iconLabel = new Label(icon);
-
-                iconLabel.setStyle(
-                                "-fx-font-size: 38px;");
-
-                Label tempLabel = new Label(temp);
-
-                tempLabel.setStyle(
-                                "-fx-font-size: 17px;" +
-                                                "-fx-font-weight: bold;" +
-                                                "-fx-text-fill: #263238;");
-
-                Label descriptionLabel = new Label(description);
-
-                descriptionLabel.setStyle(
-                                "-fx-font-size: 12px;" +
-                                                "-fx-text-fill: #117864;");
-
-                card.getChildren().addAll(
-                                dayLabel,
-                                iconLabel,
-                                tempLabel,
-                                descriptionLabel);
-
-                return card;
+            return "☀";
         }
 
-        private String getIcon(
-                        String code) {
+        if (code.equals("02d") ||
+                code.equals("02n")) {
 
-                if (code.equals("01d") ||
-                                code.equals("01n")) {
-                        return "☀";
-                }
-
-                if (code.equals("02d") ||
-                                code.equals("02n")) {
-                        return "⛅";
-                }
-
-                if (code.equals("03d") ||
-                                code.equals("03n")) {
-                        return "☁";
-                }
-
-                if (code.equals("04d") ||
-                                code.equals("04n")) {
-                        return "☁";
-                }
-
-                if (code.equals("09d") ||
-                                code.equals("09n")) {
-                        return "🌧";
-                }
-
-                if (code.equals("10d") ||
-                                code.equals("10n")) {
-                        return "🌦";
-                }
-
-                if (code.equals("11d") ||
-                                code.equals("11n")) {
-                        return "⛈";
-                }
-
-                return "☁";
+            return "⛅";
         }
 
-        private String capitalize(
-                        String text) {
+        if (code.equals("03d") ||
+                code.equals("03n") ||
+                code.equals("04d") ||
+                code.equals("04n")) {
 
-                if (text == null ||
-                                text.isEmpty()) {
-
-                        return "";
-                }
-
-                return text.substring(0, 1)
-                                .toUpperCase()
-                                + text.substring(1);
+            return "☁";
         }
+
+        if (code.equals("09d") ||
+                code.equals("09n")) {
+
+            return "🌧";
+        }
+
+        if (code.equals("10d") ||
+                code.equals("10n")) {
+
+            return "🌦";
+        }
+
+        if (code.equals("11d") ||
+                code.equals("11n")) {
+
+            return "⛈";
+        }
+
+        return "☁";
+    }
+
+    // =====================================================
+    // CAPITALIZE
+    // =====================================================
+
+    private String capitalize(
+            String text) {
+
+        if (text == null ||
+                text.isEmpty()) {
+
+            return "";
+        }
+
+        return text.substring(0, 1)
+                .toUpperCase()
+                + text.substring(1);
+    }
 }

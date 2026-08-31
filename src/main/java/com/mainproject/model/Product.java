@@ -17,7 +17,6 @@ public class Product {
 
     private String status;
 
-    // Cloudinary image URL
     private String imageUrl;
 
     // =====================================================
@@ -29,7 +28,7 @@ public class Product {
     }
 
     // =====================================================
-    // FULL CONSTRUCTOR
+    // CONSTRUCTOR
     // =====================================================
 
     public Product(
@@ -61,99 +60,131 @@ public class Product {
     }
 
     // =====================================================
-    // GETTERS
+    // PRODUCT ID
     // =====================================================
 
     public String getProductId() {
         return productId;
     }
 
-    public String getFarmerEmail() {
-        return farmerEmail;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public String getVariety() {
-        return variety;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getHarvestDate() {
-        return harvestDate;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public double getStock() {
-        return stock;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    // =====================================================
-    // SETTERS
-    // =====================================================
-
     public void setProductId(String productId) {
         this.productId = productId;
+    }
+
+    // =====================================================
+    // FARMER EMAIL
+    // =====================================================
+
+    public String getFarmerEmail() {
+        return farmerEmail;
     }
 
     public void setFarmerEmail(String farmerEmail) {
         this.farmerEmail = farmerEmail;
     }
 
+    // =====================================================
+    // NAME
+    // =====================================================
+
+    public String getName() {
+        return name;
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    // =====================================================
+    // UNIT
+    // =====================================================
+
+    public String getUnit() {
+        return unit;
     }
 
     public void setUnit(String unit) {
         this.unit = unit;
     }
 
+    // =====================================================
+    // CATEGORY
+    // =====================================================
+
+    public String getCategory() {
+        return category;
+    }
+
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    // =====================================================
+    // VARIETY
+    // =====================================================
+
+    public String getVariety() {
+        return variety;
     }
 
     public void setVariety(String variety) {
         this.variety = variety;
     }
 
+    // =====================================================
+    // DESCRIPTION
+    // =====================================================
+
+    public String getDescription() {
+        return description;
+    }
+
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    // =====================================================
+    // HARVEST DATE
+    // =====================================================
+
+    public String getHarvestDate() {
+        return harvestDate;
     }
 
     public void setHarvestDate(String harvestDate) {
         this.harvestDate = harvestDate;
     }
 
+    // =====================================================
+    // PRICE
+    // =====================================================
+
+    public double getPrice() {
+        return price;
+    }
+
     public void setPrice(double price) {
         this.price = price;
     }
 
+    // =====================================================
+    // STOCK
+    // =====================================================
+
+    public double getStock() {
+        return stock;
+    }
+
     public void setStock(double stock) {
         this.stock = stock;
+    }
+
+    // =====================================================
+    // STATUS
+    // =====================================================
+
+    public String getStatus() {
+        return status;
     }
 
     public void setStatus(String status) {
@@ -161,8 +192,12 @@ public class Product {
     }
 
     // =====================================================
-    // IMAGE URL SETTER
+    // IMAGE URL
     // =====================================================
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
