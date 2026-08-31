@@ -63,7 +63,7 @@ public class VoiceAssistantConfig {
     }
 
     // ---------- API KEY ----------
-
+    // TODO: paste your real Groq key here (starts with "gsk_...")
     private static final String GROQ_API_KEY = "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";
 
     private static final String GROQ_TRANSCRIBE_URL = "https://api.groq.com/openai/v1/audio/transcriptions";

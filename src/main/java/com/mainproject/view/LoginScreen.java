@@ -1,21 +1,18 @@
 package com.mainproject.view;
 
-
+import com.mainproject.util.ResponsiveLayout;
 
 import com.mainproject.view.buyer.BuyerDashboard;
 import com.mainproject.view.farmer.FarmerDashboard;
 import com.mainproject.view.admin.AdminDashboard;
-import com.mainproject.view.admin.AdminLogin;
 import com.mainproject.controller.AuthController;
 import com.mainproject.controller.UserController;
 import com.mainproject.model.User;
 
 
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -24,15 +21,12 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -84,21 +78,6 @@ public class LoginScreen extends Application {
                 leftPanel.getChildren()
                                 .add(
                                                 loginImage);
-
-                // =================================================
-                // AGRILINK BADGE (click -> Admin Login)
-                // =================================================
-                // This is the small pill above "Welcome Back!". It is
-                // a hidden shortcut into the Admin Login screen so an
-                // admin can get there without a separate launcher.
-
-                HBox agriLinkBadge = buildAgriLinkBadge();
-
-                HBox badgeRow = new HBox(
-                                agriLinkBadge);
-
-                badgeRow.setAlignment(
-                                Pos.CENTER_LEFT);
 
                 // =================================================
                 // TITLE
@@ -492,8 +471,6 @@ public class LoginScreen extends Application {
                                 700);
 
                 vb2.getChildren().addAll(
-                                badgeRow,
-
                                 hb1,
                                 hb2,
 
@@ -552,94 +529,6 @@ public class LoginScreen extends Application {
                                 HomePageScene);
 
                 Homestage.show();
-        }
-
-        // =====================================================
-        // AGRILINK BADGE
-        // =====================================================
-        //
-        // Small "🌱 AgriLink" pill shown above "Welcome Back!".
-        // Clicking it opens the Admin Login screen - a quiet shortcut
-        // for admins instead of a separate launcher/menu item.
-        // =====================================================
-
-        private HBox buildAgriLinkBadge() {
-
-                Label leafIcon = new Label(
-                                "\uD83C\uDF31");
-
-                leafIcon.setFont(
-                                Font.font(14));
-
-                Label brandLabel = new Label(
-                                "AgriLink");
-
-                brandLabel.setFont(
-                                Font.font(
-                                                "Segoe UI",
-                                                FontWeight.BOLD,
-                                                15));
-
-                brandLabel.setTextFill(
-                                Color.web("#2E7D32"));
-
-                HBox badge = new HBox(
-                                6,
-                                leafIcon,
-                                brandLabel);
-
-                badge.setAlignment(
-                                Pos.CENTER_LEFT);
-
-                badge.setPadding(
-                                new Insets(
-                                                6,
-                                                14,
-                                                6,
-                                                14));
-
-                badge.setStyle(
-                                "-fx-background-color: #eaf3ea;" +
-                                                "-fx-background-radius: 20;");
-
-                badge.setCursor(
-                                Cursor.HAND);
-
-                Tooltip.install(
-                                badge,
-                                new Tooltip(
-                                                "Admin Login"));
-
-                badge.setOnMouseClicked(
-                                event ->
-                                                openAdminLogin());
-
-                return badge;
-        }
-
-        // =====================================================
-        // OPEN ADMIN LOGIN
-        // =====================================================
-
-        private void openAdminLogin() {
-
-                System.out.println(
-                                "Opening Admin Login...");
-
-                try {
-
-                        new AdminLogin().start(
-                                        Homestage);
-
-                } catch (Exception ex) {
-
-                        ex.printStackTrace();
-
-                        showAlert(
-                                        AlertType.ERROR,
-                                        "Admin Login Error",
-                                        "Unable to open the Admin Login screen.");
-                }
         }
 
         // =====================================================
